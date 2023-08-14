@@ -1,7 +1,5 @@
 import dash_bootstrap_components as dbc
 
-
-
 # bootstrap navigation bar imported into pages it can be used multiple times
 navbar = dbc.NavbarSimple(
     children=[

@@ -1,8 +1,9 @@
 import dash
-from dash import html, dcc
-from pages import navigation
+from dash import html
+from apps import navigation
 
-dash.register_page(__name__, path='/survey_data')
-layout = html.Div(children=[navigation.navbar,
-                                  html.H1(children= "Data Page")
-                                  ])
+dash.register_page(__name__, path= '/survey_data')
+
+layout = html.Div(children=[
+                            html.H1(children= "Data Page")
+                            ])

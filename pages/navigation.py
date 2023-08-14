@@ -1,9 +1,12 @@
 import dash_bootstrap_components as dbc
 
+
+
+# bootstrap navigation bar imported into pages it can be used multiple times
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/home")),
-        dbc.NavItem(dbc.NavLink("Survey Data", href="/survey_data")),
+        dbc.NavItem(dbc.NavLink("Survey Data", href="/survey_data")),  # add additional pages here
         dbc.DropdownMenu(
             children=[
                 dbc.DropdownMenuItem("More pages", header=True),
@@ -13,10 +16,13 @@ navbar = dbc.NavbarSimple(
             nav=True,
             in_navbar=True,
             label="More",
+
         ),
     ],
-    brand="NavbarSimple",
-    brand_href="/",
+    brand="SWCM Topo Dash",
+    brand_href="https://southwest.coastalmonitoring.org/",
     color="primary",
     dark=True,
+    fluid=True,
+    links_left=True
 )

@@ -4,7 +4,9 @@ import dash_bootstrap_components as dbc
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/home")),
-        dbc.NavItem(dbc.NavLink("Survey Data", href="/survey_data")),  # add additional pages here
+
+        dbc.NavItem(dbc.NavLink("Survey Unit Navigation", href="/survey_unit_navigation")),
+        dbc.NavItem(dbc.NavLink("Survey Log", href="/survey_data")),# add additional pages here
         dbc.DropdownMenu(
             children=[
                 dbc.DropdownMenuItem("More pages", header=True),

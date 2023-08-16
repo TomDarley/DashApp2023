@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 
 
 # register the page with dash giving url path
-dash.register_page(__name__)
+dash.register_page(__name__, path='/home')
 
 layout = html.Div([
 

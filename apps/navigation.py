@@ -26,3 +26,4 @@ navbar = dbc.NavbarSimple(
     fluid=True,
     links_left=True
 )
+

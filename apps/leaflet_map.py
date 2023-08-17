@@ -54,7 +54,7 @@ layout = html.Div([
 
     dl.Map(children=[
         dl.TileLayer(),
-        dl.GeoJSON(data=restructured_geojson, id="sur_unit",  zoomToBoundsOnClick=True)
+        dl.GeoJSON(data=restructured_geojson, id="survey_units",  zoomToBoundsOnClick=True)
     ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}, id="map"),
         dbc.Input(id="input", placeholder="Type something...", type="text"),
         html.Br(),
@@ -62,8 +62,7 @@ layout = html.Div([
 ])
 
 
-
-@callback(Output("capital", "children"), [Input("sur_unit", "click_feature")])
+@callback(Output("capital", "children"), [Input("survey_units", "click_feature")])
 def map_click(click_feature):
     #print(click_feature)  # Check if the click event is being triggered
     if click_feature is not None:

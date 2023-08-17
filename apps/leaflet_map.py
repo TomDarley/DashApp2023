@@ -7,7 +7,7 @@ import dash
 import plotly.express as px
 from flask import jsonify
 import dash_bootstrap_components as dbc
-
+from dash_extensions.javascript import Namespace
 
 # Establish database connection
 conn = psycopg2.connect(
@@ -29,6 +29,7 @@ conn.close()
 geojson = gdf.to_json()
 geojson = json.loads(geojson)
 
+
 # Restructured GeoJSON data
 restructured_geojson = {
     "type": "FeatureCollection",
@@ -46,6 +47,10 @@ for original_feature in geojson["features"]:
     }
     restructured_geojson["features"].append(restructured_feature)
 
+ns = Namespace("myNamespace", "mySubNamespace")
+
+
+
 # Define the layout
 layout = html.Div([
 
@@ -54,7 +59,15 @@ layout = html.Div([
 
     dl.Map(children=[
         dl.TileLayer(),
-        dl.GeoJSON(data=restructured_geojson, id="survey_units",  zoomToBoundsOnClick=True)
+        dl.GeoJSON(
+            data=restructured_geojson,
+            id="survey_units",
+            zoomToBoundsOnClick=True,
+            options={
+                'pointToLayer': ns("pointToLayer")
+            }
+        ),
+
     ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}, id="map"),
         dbc.Input(id="input", placeholder="Type something...", type="text"),
         html.Br(),

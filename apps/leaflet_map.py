@@ -62,13 +62,6 @@ layout = html.Div([
 ])
 
 
-@callback(Output("capital", "children"), [Input("survey_units", "click_feature")])
-def map_click(click_feature):
-    #print(click_feature)  # Check if the click event is being triggered
-    if click_feature is not None:
-        print('click')
-        print(f"You clicked {click_feature['properties']['sur_unit']}")
-        return f"You clicked {click_feature['properties']['sur_unit']}"
 
 
 

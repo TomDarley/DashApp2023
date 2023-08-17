@@ -1,12 +1,11 @@
 import dash
 from apps import leaflet_map
-from dash import html
+from dash import html, callback, Input, Output
 from apps import survey_unit_dropdown
 import dash_bootstrap_components as dbc
 
-
 # register the page with dash giving url path
-dash.register_page(__name__,  path= '/survey_unit_navigation')
+dash.register_page(__name__, path='/survey_unit_navigation')
 
 layout = html.Div([
     dbc.Container(
@@ -28,10 +27,8 @@ layout = html.Div([
 
                         # Place the dropdown layout here
 
-
-
                     ]),
-                    width={'size': 11, 'offset': 1} # width number of cols out of 12 it takes up
+                    width={'size': 11, 'offset': 1}  # width number of cols out of 12 it takes up
                 ),
                 survey_unit_dropdown.layout,
                 # Place the map layout here
@@ -43,8 +40,15 @@ layout = html.Div([
         style={'text-align': 'center'}
     ),
 
-
-
 ])
 
 
+# Call back controls the selection of survey units from either the map or the dropdown
+@callback(Output("survey-unit-dropdown", "value"), [Input("survey_units", "click_feature")])
+def map_click(click_feature):
+    if click_feature is not None:
+        selected_value = click_feature['properties']['sur_unit']
+        print(f"You clicked {click_feature['properties']['sur_unit']}")
+    else:
+        selected_value = '6aSU10'
+    return selected_value

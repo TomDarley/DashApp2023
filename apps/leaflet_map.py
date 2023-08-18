@@ -106,22 +106,25 @@ def update_dropdown(selected_value):
 )
 def update_map(selected_value, click_feature):
     # You can update the GeoJSON data here based on the selected_value
-    if selected_value != click_feature['properties']['sur_unit']:
-        return [
-            dl.TileLayer(),
-            dl.GeoJSON(
-                data=restructured_geojson,
-                id="survey_units",
-                zoomToBoundsOnClick=True,
-                options={
-                    'pointToLayer': ns("pointToLayer")
-                }
-            ),
-        ]
+    if click_feature:
+
+        if selected_value != click_feature['properties']['sur_unit']:
+            return [
+                dl.TileLayer(),
+                dl.GeoJSON(
+                    data=restructured_geojson,
+                    id="survey_units",
+                    zoomToBoundsOnClick=True,
+                    options={
+                        'pointToLayer': ns("pointToLayer")
+                    }
+                ),
+            ]
+        else:
+
+            return dash.no_update
     else:
-
         return dash.no_update
-
 
 
 

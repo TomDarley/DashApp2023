@@ -2,12 +2,13 @@ import dash
 from apps import leaflet_map
 from dash import html, callback, Input, Output
 from apps import survey_unit_dropdown
+from apps import scatter_plot
 import dash_bootstrap_components as dbc
 
 import dash_leaflet as dl
 
 # register the page with dash giving url path
-dash.register_page(__name__, path='/survey_unit_navigation')
+dash.register_page(__name__, path='/main_dash')
 
 layout = html.Div([
     dbc.Container(
@@ -34,7 +35,9 @@ layout = html.Div([
                 ),
                 survey_unit_dropdown.layout,
                 # Place the map layout here
-                leaflet_map.layout
+                leaflet_map.layout,
+                scatter_plot.layout
+
 
             ],
             style={'display': 'flex', 'flex-wrap': 'wrap'}  # Use flexbox to control the layout

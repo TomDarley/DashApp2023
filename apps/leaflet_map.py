@@ -69,19 +69,19 @@ layout = html.Div([
 #
     ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}, id="map"),
 
-        dbc.Input(id="input", placeholder="Type something...", type="text"),
-        html.Br(),
-        html.P(id="capital"),
+        
+
 
 ])
 
-
+# Callback stores the current selection on the map
 @callback(
     Output('selected-value-storage', 'data'),
     Input('survey_units', 'click_feature'),
     prevent_initial_call=True
 )
 def update_selected_value(click_feature):
+    """If map feature selected store the value in selected-value-storage else do nothing"""
     if click_feature:
         selected_value = click_feature['properties']['sur_unit']
         return selected_value
@@ -94,6 +94,7 @@ def update_selected_value(click_feature):
     prevent_initial_call=True
 )
 def update_dropdown(selected_value):
+    """If dropdown selected store the value in selected-value-storage"""
     return selected_value
 
 
@@ -105,6 +106,8 @@ def update_dropdown(selected_value):
     prevent_initial_call=True
 )
 def update_map(selected_value, click_feature):
+    """If the click feature != dropdown selection we reload the geojson which removes the selection from the map """
+
     # You can update the GeoJSON data here based on the selected_value
     if click_feature:
 
@@ -128,33 +131,6 @@ def update_map(selected_value, click_feature):
 
 
 
-
-
-
-### Call back controls the selection of survey units from either the map or the dropdown
-#@callback(Output("survey-unit-dropdown", "value"), [Input("survey_units", "click_feature")])
-#def map_click(click_feature):
-#   if click_feature is not None:
-#       selected_value = click_feature['properties']['sur_unit']
-#       print(f"You clicked {click_feature['properties']['sur_unit']}")
-#   else:
-#       selected_value = '6aSU10'
-#   return selected_value
-#
-##if click_sur_unit['properties']['sur_unit'] is not None:
-#    #    if click_sur_unit['properties']['sur_unit']:
-#    #
-    #
-    #    return dl.GeoJSON(
-    #        data=restructured_geojson,
-    #        id="survey_units",
-    #        zoomToBoundsOnClick=True,
-    #        options={
-    #            'pointToLayer': ns("pointToLayer")
-    #        }
-    #    ),
-    #else:
-    #    pass
 
 
 

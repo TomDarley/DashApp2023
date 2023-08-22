@@ -1,11 +1,13 @@
 import dash_bootstrap_components as dbc
 
+"""The main nav bar loaded into every page"""
+
 # bootstrap navigation bar imported into pages it can be used multiple times
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/home")),
 
-        dbc.NavItem(dbc.NavLink("Survey Unit Navigation", href="/survey_unit_navigation")),
+        dbc.NavItem(dbc.NavLink("Dash", href="/main_dash")),
         dbc.NavItem(dbc.NavLink("Survey Log", href="/survey_data")),# add additional pages here
         dbc.DropdownMenu(
             children=[

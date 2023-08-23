@@ -31,7 +31,7 @@ layout = html.Div([
                         # Place the dropdown layout here
 
                     ]),
-                    width={'size': 11, 'offset': 1}  # width number of cols out of 12 it takes up
+                    width={'size': 12, 'offset': 1}  # width number of cols out of 12 it takes up
                 ),
                 survey_unit_dropdown.layout,
                 # Place the map layout here

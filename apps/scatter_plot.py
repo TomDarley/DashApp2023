@@ -13,17 +13,25 @@ import plotly.graph_objs as go
 import sqlalchemy
 from scipy.integrate import quad
 import warnings
+import time
 
 layout = html.Div([
     dbc.Container(dbc.Row(
-        [
+        [  dcc.Store(id='selected-df-storage', data={'current': None, 'previous': None}),
+            dcc.Loading(
+            id="loading-spinner",
+            type="default",
+            children=[
+            html.Div(id="output-content"),
+        ]
+    ),
             dbc.Col(dcc.Graph(id="scatter_plot",
                               ),
 
-                    width={"size": 6, 'offset': 0, "order": 2},
+                    width={"size": 12, 'offset': 0, "order": 2},
                     style={"margin-left": 0, "margin-top": 10, 'background-colour':'white' },
 
-                    )
+                    ),
         ]
     ),
     style={'background-color': '#1b1c1c',
@@ -34,7 +42,7 @@ layout = html.Div([
 ])
 
 @callback(
-    (Output("scatter_plot", "figure")),
+    (Output("scatter_plot", "figure"),Output("loading-spinner", "children"),Output('selected-df-storage', 'data')),
     [
         Input('survey-unit-dropdown', 'value'),
 
@@ -190,23 +198,6 @@ def make_scatter_plot(selected_survey_unit):
                 section_elevation=section_elevation,
             )
 
-            # Show plot for testing only
-            # plt.figure(figsize=(10, 6))
-            # plt.plot(
-            #    interpolated_x_values, interpolated_y_values, "-", label="Interpolated Line"
-            # )
-            # plt.plot(filtered_chainage, filtered_elevation, "o", label="Section Data")
-            # plt.plot(start_chainage, section_elevation, "o", label="Section Start")
-            # plt.plot(end_chainage, section_elevation, "o", label="Section End")
-            # plt.plot(
-            #    master_profile_chainage,
-            #    master_profile_elevation,
-            #    "-",
-            #    label="Master Profile",
-            # )
-            # plt.legend()
-            # plt.show()
-
             # check if any data found in section before calculating area
             if len(filtered_chainage) > 0:
                 area = abs(
@@ -245,6 +236,9 @@ def make_scatter_plot(selected_survey_unit):
         return master_df
 
     master_df = get_csa_data(survey_unit)
+
+
+
     # Pivot the data
     pivot_df = master_df.pivot(index='Profile', columns='Date', values='area')
     pivot_df.loc[:, 'Mean'] = pivot_df.mean(axis=1)
@@ -261,14 +255,23 @@ def make_scatter_plot(selected_survey_unit):
     df1 = df1.drop(['NaNCount', 'DropRow', 'countSurveyedDates', 'Mean'], axis=1)
     # fill NaN values in each row with Mean
     df1 = df1.T.fillna(df1.mean(axis=1)).T
+
+
+
+
     # add a sum of columns to df
     df1.loc['Sum'] = df1.sum()
     df1 = pd.DataFrame(df1)
+
+    # ADDING DF IN CURRENT FORMAT TO STORE FOR ERROR BAR PLOT
+    df_store = df1.to_json()
+
     df1 = df1.transpose()
     df1 = df1["Sum"]
     df2 = pd.DataFrame(df1)
     df2['index1'] = df2.index
     chart_ready_df = df2
+
     chart_ready_df['index1'] = pd.to_datetime(chart_ready_df['index1'], format='%Y-%m-%d')
     month_list = []
     for i in chart_ready_df["index1"]:
@@ -288,6 +291,11 @@ def make_scatter_plot(selected_survey_unit):
         else:
             season_list.append("gray")
     chart_ready_df['season'] = season_list
+
+    # adding store json df to be accessed by error bar plot
+    #df_store = chart_ready_df.to_json()
+    #print(type(chart_ready_df))
+
 
     # extracting values as lists for the y and x-axis
     x_axis = list(df2['index1'])
@@ -405,7 +413,7 @@ def make_scatter_plot(selected_survey_unit):
                               mode='lines',
                               name='Trend')
                    )
-    return fig
+    return fig, survey_unit, df_store
 
 
 

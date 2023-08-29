@@ -3,6 +3,7 @@ from apps import leaflet_map
 from dash import html, callback, Input, Output
 from apps import survey_unit_dropdown
 from apps import scatter_plot
+from apps import error_bar_plot
 import dash_bootstrap_components as dbc
 
 import dash_leaflet as dl
@@ -36,7 +37,20 @@ layout = html.Div([
                 survey_unit_dropdown.layout,
                 # Place the map layout here
                 leaflet_map.layout,
-                scatter_plot.layout
+
+            dbc.Col(
+                    html.Div([
+                        scatter_plot.layout,
+
+                    ]),),
+            dbc.Col(
+                    html.Div([
+                        error_bar_plot.layout,
+
+                    ]),
+
+
+            ),
 
 
             ],

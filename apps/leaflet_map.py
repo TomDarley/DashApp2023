@@ -54,6 +54,8 @@ ns = Namespace("myNamespace", "mySubNamespace")
 layout = html.Div([
 
     dcc.Store(id='selected-value-storage', data={'current': None, 'previous': None}),
+
+
      #add drop down with survey units to select
     dl.Map(children=[
         dl.TileLayer(),

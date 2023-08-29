@@ -32,7 +32,6 @@ geojson = json.loads(geojson)
 
 
 # Restructured GeoJSON data
-
 restructured_geojson = {
     "type": "FeatureCollection",
     "features": []

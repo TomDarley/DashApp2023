@@ -7,6 +7,8 @@ import dash_bootstrap_components as dbc
 #from sqlalchemy import text  # look into this for security Dash Docs!!!
 from apps import navigation
 
+
+
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY, dbc.icons.BOOTSTRAP])
 
 # Set the app layout with the navigation bar, the nav will be inherited by all pages

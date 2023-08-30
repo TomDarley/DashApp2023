@@ -5,7 +5,7 @@ from apps import survey_unit_dropdown
 from apps import scatter_plot
 from apps import error_bar_plot
 import dash_bootstrap_components as dbc
-
+from dash import dcc
 import dash_leaflet as dl
 
 # register the page with dash giving url path
@@ -37,6 +37,24 @@ layout = html.Div([
                 survey_unit_dropdown.layout,
                 # Place the map layout here
                 leaflet_map.layout,
+
+                # Add the Loading component with centered styling, the activation of this is found in the scatter plot
+                html.Div(
+                    dcc.Loading(
+                        id="loading-spinner",
+                        type="default",
+                        children=[
+                            html.Div(id="output-content"),
+                        ],
+                    ),
+                    style={
+                        "display": "flex",
+                        "align-items": "center",  # Center vertically
+                        "justify-content": "center",  # Center horizontally
+                        "height": "50px",  # Set the desired height
+                        "margin": "0px 0"  # Add margin for buffer
+                    }
+                ),
 
             dbc.Col(
                     html.Div([

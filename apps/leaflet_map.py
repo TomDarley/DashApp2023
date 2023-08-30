@@ -10,6 +10,9 @@ import dash_bootstrap_components as dbc
 from dash_extensions.javascript import Namespace
 
 
+# Define the center coordinates (latitude and longitude)
+center_coordinates = [50.739315618362184, -3.9882308804193345]
+
 # Establish database connection
 conn = psycopg2.connect(
     database="Dash_DB",
@@ -29,7 +32,6 @@ conn.close()
 # Convert to GeoJSON  format
 geojson = gdf.to_json()
 geojson = json.loads(geojson)
-
 
 # Restructured GeoJSON data
 restructured_geojson = {
@@ -55,12 +57,13 @@ layout = html.Div([
 
     dcc.Store(id='selected-value-storage', data={'current': None, 'previous': None}),
 
-
-     #add drop down with survey units to select
+    # add dropdown with survey units to select
     dl.Map(children=[
         dl.TileLayer(),
+
         dl.GeoJSON(
             data=restructured_geojson,
+
             id="survey_units",
             zoomToBoundsOnClick=True,
             options={
@@ -68,10 +71,10 @@ layout = html.Div([
             }
         ),
 #
-    ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}, id="map"),
-
-        
-
+    ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"},
+        id="map",
+        center=[50.739315618362184, -3.9882308804193345],
+        zoom=8),
 
 ])
 

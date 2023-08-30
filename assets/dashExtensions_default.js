@@ -7,7 +7,7 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
            //
 
             var defaultMarkerOptions = {
-                radius: 5,
+                radius: 10,
                 weight: 1,
                 color: 'blue',
                 fillColor: 'blue',
@@ -16,7 +16,7 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
 
 
             var selectedMarkerOptions = {
-                radius: 5,
+                radius: 15,
                 weight: 2,
                 color: 'red', // Change this to the desired selected color
                 fillColor: 'red', // Change this to the desired selected color

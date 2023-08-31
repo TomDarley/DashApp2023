@@ -1,5 +1,4 @@
 import dash
-from apps import leaflet_map
 from dash import html
 import dash_bootstrap_components as dbc
 

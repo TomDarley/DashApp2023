@@ -46,10 +46,10 @@ layout = html.Div(
 
 @callback(
     (Output("error_plot", "figure")),
-    [Input("survey-unit-dropdown", "value"), Input("selected-df-storage", "data")],
+    [Input("selected-df-storage", "data")],
 )
-def make_scatter_plot(selected_survey_unit, cpa_df):
-    print(selected_survey_unit)
+def make_scatter_plot(cpa_df):
+
     df = pd.read_json(cpa_df)
     df = df.drop("Sum", axis=0)
     # Melt the DataFrame to long format

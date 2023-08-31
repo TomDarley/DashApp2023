@@ -1,16 +1,18 @@
 import dash
-from apps import leaflet_map
 from dash import html, callback, Input, Output
-from apps import survey_unit_dropdown
-from apps import scatter_plot
-from apps import error_bar_plot
+from DashApp2023.apps import survey_unit_dropdown
+from DashApp2023.apps import scatter_plot
+from DashApp2023.apps import error_bar_plot
+from DashApp2023.apps import leaflet_map
 import dash_bootstrap_components as dbc
 from dash import dcc
-import dash_leaflet as dl
+import psycopg2
+import geopandas as gpd
+import json
+from dash_extensions.javascript import Namespace
 
 # register the page with dash giving url path
 dash.register_page(__name__, path='/main_dash')
-
 layout = html.Div([
     dbc.Container(
         dbc.Row(
@@ -38,6 +40,7 @@ layout = html.Div([
                 # Place the map layout here
                 leaflet_map.layout,
 
+
                 # Add the Loading component with centered styling, the activation of this is found in the scatter plot
                 html.Div(
                     dcc.Loading(
@@ -60,13 +63,13 @@ layout = html.Div([
                     html.Div([
                         scatter_plot.layout,
 
-                    ]),),
+                    ]),
+            ),
             dbc.Col(
                     html.Div([
                         error_bar_plot.layout,
 
                     ]),
-
 
             ),
 
@@ -78,10 +81,3 @@ layout = html.Div([
     ),
 
 ])
-
-
-
-
-
-
-

@@ -1,13 +1,7 @@
-import json
 from dash import Dash, html, Input, Output, dcc, ClientsideFunction
 import dash
 import dash_bootstrap_components as dbc
-#from retrying import retry
-#from tenacity import wait_exponential, stop_after_attempt
-#from sqlalchemy import text  # look into this for security Dash Docs!!!
 from apps import navigation
-
-
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY, dbc.icons.BOOTSTRAP])
 

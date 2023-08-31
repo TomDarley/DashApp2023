@@ -8,10 +8,7 @@ import plotly.express as px
 from flask import jsonify
 import dash_bootstrap_components as dbc
 from dash_extensions.javascript import Namespace
-
-
-# Define the center coordinates (latitude and longitude)
-center_coordinates = [50.739315618362184, -3.9882308804193345]
+from dash_extensions.javascript import assign
 
 # Establish database connection
 conn = psycopg2.connect(
@@ -27,7 +24,7 @@ query = "SELECT * FROM survey_units"  # Modify this query according to your tabl
 gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col='wkb_geometry')
 gdf = gdf.to_crs(epsg=4326)
 # Close the database connection
-conn.close()
+
 
 # Convert to GeoJSON  format
 geojson = gdf.to_json()
@@ -52,6 +49,31 @@ for original_feature in geojson["features"]:
 
 ns = Namespace("myNamespace", "mySubNamespace")
 
+
+
+# Import spatial data as GeoDataFrame
+query_profile_lines = "SELECT * FROM sw_profiles"  # Modify this query according to your table
+lines_gdf = gpd.GeoDataFrame.from_postgis(query_profile_lines, conn, geom_col='wkb_geometry')
+lines_gdf = lines_gdf.to_crs(epsg=4326)
+
+# Convert to GeoJSON  format
+line_geojson = lines_gdf.to_json()
+line_geojson = json.loads(line_geojson)
+print(lines_gdf)
+
+conn.close()
+
+def style_function(feature):
+    return {
+        "color": "red",  # Change the color value to your desired color
+        "weight": 3,     # Adjust the line weight if needed
+        "opacity": 1     # Adjust the opacity if needed
+    }
+
+
+
+
+
 # Define the layout
 layout = html.Div([
 
@@ -70,6 +92,27 @@ layout = html.Div([
                 'pointToLayer': ns("pointToLayer")
             }
         ),
+
+        dl.GeoJSON(
+            data=line_geojson ,
+            id="survey_lines",
+            zoomToBoundsOnClick=False,
+            options={
+                     },
+            click_feature={
+                "id": "feature-line-click",
+                "event": "click"
+            },
+
+            children=[dl.Tooltip(id="tooltip")]
+
+
+
+        ),
+
+        dcc.Store(id="selected-line-feature-store"),  # Store for selected feature
+
+
 #
     ], style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"},
         id="map",
@@ -107,15 +150,16 @@ def update_dropdown(selected_value):
     Input('survey-unit-dropdown', 'value'),
     Input('survey_units', 'click_feature'),
 
+
     prevent_initial_call=True
 )
-def update_map(selected_value, click_feature):
+def update_map(selected_value, points_click_feature, lines_click_feature):
     """If the click feature != dropdown selection we reload the geojson which removes the selection from the map """
 
-    # You can update the GeoJSON data here based on the selected_value
-    if click_feature:
 
-        if selected_value != click_feature['properties']['sur_unit']:
+    # You can update the GeoJSON data here based on the selected_value
+    if points_click_feature:
+        if selected_value != points_click_feature['properties']['sur_unit']:
             return [
                 dl.TileLayer(),
                 dl.GeoJSON(
@@ -133,8 +177,19 @@ def update_map(selected_value, click_feature):
     else:
         return dash.no_update
 
+@callback(Output('tooltip', 'children'), [Input('survey_lines', 'hover_feature')])
+def update_tooltip(click_feature):
+    if click_feature is not None:
+        return dl.Tooltip(children=f"This is a line feature: {click_feature['properties']['regional_n']}")
+    return dl.Tooltip()  # Clear the tooltip if no feature is hovered
 
 
 
-
+@callback(Output('survey_lines', 'options'),
+              Input('survey_lines', 'feature-line-click'))
+def update_selected_style(click_feature):
+    if click_feature is not None:
+        return {'color': 'red'}  # Change the color of the selected line
+    else:
+        return {'color': 'black'}  # Restore the default color when no feature is clicked
 

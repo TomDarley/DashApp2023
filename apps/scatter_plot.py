@@ -15,6 +15,8 @@ from scipy.integrate import quad
 import warnings
 import time
 
+
+
 layout = html.Div(
     [
         dbc.Container(
@@ -73,188 +75,19 @@ def make_scatter_plot(selected_survey_unit):
         )
 
         # Import spatial data as GeoDataFrame
-        query = f"SELECT * FROM topo_data WHERE survey_unit = '{target_survey_unit}'"
+        query = f"SELECT * FROM cpa_table WHERE survey_unit = '{target_survey_unit}'"
         df = pd.read_sql_query(query, engine)
 
         # Close the engine connection
         engine.dispose()
         return df
 
-    def extract_chainage_elevation(profile_id: str):
-        """Function extracts master profile data from SANDS exported csv. This will be refactored to connect to the
-        AWS database instead for production"""
-
-        master_profile_df = pd.read_csv(
-            r"C:\Users\darle\Desktop\DASH_Data\Master_Profile_Tests.csv"
-        )
-
-        chainage_values = []
-        elevation_values = []
-
-        filtered_df = master_profile_df.loc[
-            master_profile_df["Profile_ID"] == profile_id
-        ]
-        if len(filtered_df) > 0:
-            # Extract the chainage value for each column
-            for col in filtered_df.columns[1:]:
-                try:
-                    chainage = list(filtered_df[col])[0].split(",")[0]
-                    elevation = list(filtered_df[col])[0].split(",")[3]
-                    chainage_values.append(chainage)
-                    elevation_values.append(elevation)
-
-                except AttributeError as ae:
-                    pass
-
-            x_values = list(map(float, chainage_values))
-            y_values = list(map(float, elevation_values))
-
-            return x_values, y_values
-
-        else:
-            print(
-                f"No data could be found for the {profile_id}, does the master profile table have this profile in it?"
-            )
-            return None
-
-    def filter_df_for_master_profile(
-        df: object, start_chainage: float, end_chainage: float, section_elevation: float
-    ):
-        """Function filters the target profile df for data within the bounds of the master profile.
-        This is achieved by removing all elevation data below MLSW and corresponding chainage. Then removing all
-        chainage and corresponding elevation data lower than the upper chainage limit (the master profile start chainag
-        Need to factor in removing elevation values that are above MLSW but after where the elevation has dipped below
-        ML
-
-        Returns x: filtered chainage, y: filtered elevation
-        """
-
-        # Extract Numpy arrays of the chainage and elevation data
-        chainage = df["chainage"].values
-        elevation = df["elevation_OD"].values
-
-        # Create an interpolation function - interpolate the data to get more points
-        interpolation_func = interp1d(chainage, elevation, kind="linear")
-
-        # Create an array of x values for interpolation- get the values of the interpolated data (set to 200 points)
-        global interpolated_x_values
-        interpolated_x_values = np.linspace(min(chainage), max(chainage), num=5000)
-
-        # Use the interpolation function to get y values
-        global interpolated_y_values
-        interpolated_y_values = interpolation_func(interpolated_x_values)
-
-        # filter the interpolation values for the mlsw - elevation on the y-axis:
-        filtered_elevation_indices = interpolated_y_values >= section_elevation
-        filtered_chainage_lower = interpolated_x_values[filtered_elevation_indices]
-        filtered_elevation_lower = interpolated_y_values[filtered_elevation_indices]
-
-        # filter for lower chainage limit - chainage on the x-axis
-        filtered_chainage_indices = filtered_chainage_lower >= start_chainage
-        filtered_chainage_upper = filtered_chainage_lower[filtered_chainage_indices]
-        filtered_elevation_upper = filtered_elevation_lower[filtered_chainage_indices]
-
-        # filter for upper section chainage limit - chainage on the x-axis
-        filtered_chainage_indices = filtered_chainage_upper <= end_chainage
-        filtered_chainage_upper1 = filtered_chainage_upper[filtered_chainage_indices]
-        filtered_elevation_upper1 = filtered_elevation_upper[filtered_chainage_indices]
-
-        # clean the namespace setting the filtered data to a better name
-        filtered_chainage = filtered_chainage_upper1
-        filtered_elevation = filtered_elevation_upper1
-
-        return filtered_chainage, filtered_elevation
-
-    def calculate_area(
-        x_values: object, y_values: object, start_x: float, baseline_y: float
-    ):
-        """Calculate the area under the curve starting from a specific x-value and using a baseline y-value"""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-
-            def integrand(x):
-                return baseline_y - np.interp(x, x_values, y_values)
-
-            area, _ = quad(integrand, start_x, max(x_values))
-            return area
-
-    def get_area(df, target_profile, target_date):
-        """Function extracts the area for the given input params, also handles the creation of the
-        profile sections for each area calculation"""
-
-        total_area = []  # holds the area calculations for each profile section
-
-        # filter the df of all data for survey unit for the specific profile and date
-        filter_df_for_profile = df.loc[
-            (df["reg_id"] == target_profile) & (df["date"] == target_date)
-        ]
-
-        master_profile_xy = extract_chainage_elevation(profile_id=target_profile)
-        master_profile_chainage = master_profile_xy[0]
-        master_profile_elevation = master_profile_xy[1]
-        zipped_master_profile_data = list(
-            zip(master_profile_chainage, master_profile_elevation)
-        )
-
-        # create the sections to calculate area for
-        sections = [
-            (zipped_master_profile_data[i], zipped_master_profile_data[i + 1])
-            for i in range(len(zipped_master_profile_data) - 1)
-        ]
-
-        # zip and iterate over each xy pair for master profile chainage and elevation - the sections to calculate area for.
-        for section_data in sections:
-            start_chainage = section_data[0][0]
-            end_chainage = section_data[1][0]
-            section_elevation = section_data[0][1]
-
-            # filter the df for section
-            filtered_chainage, filtered_elevation = filter_df_for_master_profile(
-                df=filter_df_for_profile,
-                start_chainage=start_chainage,
-                end_chainage=end_chainage,
-                section_elevation=section_elevation,
-            )
-
-            # check if any data found in section before calculating area
-            if len(filtered_chainage) > 0:
-                area = abs(
-                    calculate_area(
-                        filtered_chainage,
-                        filtered_elevation,
-                        min(filtered_chainage),
-                        section_elevation,
-                    )
-                )
-                total_area.append(area)
-
-        return sum(total_area)
-
-    def get_csa_data(target_survey_unit):
-        df = get_data(target_survey_unit=target_survey_unit)
-        dates = df["date"].unique()
-        dfs = []
-
-        for date in dates:
-            df_filter_by_date = df.loc[df["date"] == date]
-            profiles_for_date = df_filter_by_date["reg_id"].unique()
-            data = []
-            for profile in profiles_for_date:
-                area = get_area(df=df, target_profile=profile, target_date=date)
-                data.append((date, profile, area))
-
-            for data_set in data:
-                df1 = pd.DataFrame([data_set], columns=["Date", "Profile", "area"])
-                dfs.append(df1)
-
-        master_df = pd.concat(dfs)
-
-        return master_df
-
-    master_df = get_csa_data(survey_unit)
+    # load data directly from the DB
+    master_df = get_data(survey_unit)
+    master_df = master_df[['date','profile', 'area']]
 
     # Pivot the data
-    pivot_df = master_df.pivot(index="Profile", columns="Date", values="area")
+    pivot_df = master_df.pivot(index="profile", columns="date", values="area")
     pivot_df.loc[:, "Mean"] = pivot_df.mean(axis=1)
     # Add column with representing the sum of the total number of dates in df
     pivot_df.loc[:, "countSurveyedDates"] = (len(list(pivot_df.columns)) - 1) / 2
@@ -304,6 +137,8 @@ def make_scatter_plot(selected_survey_unit):
         else:
             season_list.append("gray")
     chart_ready_df["season"] = season_list
+
+
 
     # extracting values as lists for the y and x-axis
     x_axis = list(df2["index1"])

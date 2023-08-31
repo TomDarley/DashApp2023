@@ -65,7 +65,8 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
 
             return marker;
 
-        }
+        },
     }
+
 });
 

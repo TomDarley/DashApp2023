@@ -160,7 +160,7 @@ layout = html.Div([
                      {'label': '6eN4', 'value': '6eN4'},
                      {'label': '6eN3', 'value': '6eN3'},
                      {'label': '6eN2', 'value': '6eN2'}],
-            value='6aSU10',
+            value='6aSU12',
             id='survey-unit-dropdown',
             style={'color': 'black', 'width': '200px', } # the width of the dropdown
         ),

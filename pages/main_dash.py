@@ -74,6 +74,7 @@ layout = html.Div([
             ),
 
 
+
             ],
             style={'display': 'flex', 'flex-wrap': 'wrap'}  # Use flexbox to control the layout
         ),

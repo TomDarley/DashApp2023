@@ -11,6 +11,12 @@ from dash_extensions.javascript import Namespace, assign
 from dash_extensions.javascript import assign
 from sqlalchemy import create_engine
 
+"""
+Leaflet Map Page
+
+Page of the app that loads and displays spatial table data from the hosted postgres database  
+ 
+ """
 
 ns = Namespace("myNamespace", "mySubNamespace")
 
@@ -63,37 +69,38 @@ conn.close()
 layout = html.Div(
     [
         html.P(id="click-output"),
-        dcc.Store( 
+        dcc.Store(
             id="selected-value-storage", data={"current": None, "previous": None}
         ),
+        dcc.Store(
+            id="selected-line-storage", data={"current": None, "previous": None}
+        ),
+
+
         # add dropdown with survey units to select
         dl.Map(
             children=[
                 dl.TileLayer(),
-
-                dl.GeoJSON(
-                    data=line_geojson,
-                    id="line_geojson",
-                    zoomToBoundsOnClick=True,
-                    options={
-        "onEachFeature": ns("lineToLayer"),
-        "style": {
-            "color": "green",  # Set the line color to blue
-            "weight": 2,       # Set the line weight
-        }
-    }
-
-                ),
-
                 dl.GeoJSON(
                     data=restructured_geojson,
                     id="point_geojson",
                     zoomToBoundsOnClick=True,
                     options={"pointToLayer": ns("pointToLayer")},
-
-
-
                 ),
+
+                dl.GeoJSON(
+                    data=line_geojson,
+                    id="line_geojson",
+                    zoomToBoundsOnClick=False,
+                    options={
+                        "onEachFeature": ns("lineToLayer"),
+                        "style": {
+                            "color": "green",  # Set the line color to blue
+                            "weight": 8,  # Set the line weight
+                        },
+                    },
+                ),
+
             ],
             style={
                 "width": "100%",
@@ -107,8 +114,6 @@ layout = html.Div(
         ),
     ]
 )
-
-
 # Callback stores the current selection on the map
 @callback(
     Output("selected-value-storage", "data"),
@@ -125,41 +130,117 @@ def update_selected_value(click_feature):
     else:
         return dash.no_update
 
-
 @callback(
-    Output("survey-unit-dropdown", "value"),
-    Input("selected-value-storage", "data"),
+    Output("selected-line-storage", "data"),
+    Input("line_geojson", "click_feature"),
     prevent_initial_call=True,
 )
-def update_dropdown(selected_value):
-    """If dropdown selected store the value in selected-value-storage"""
-    print(f"Selected value storage set to: {selected_value}")
-    return selected_value
+def update_selected_value(click_feature):
+    """If map feature selected store the value in selected-value-storage else do nothing"""
+    if click_feature:
+        # selected_value = click_feature['properties'].get('sur_unit')
+        selected_value = click_feature["properties"]["regional_n"]
+        print("Selected Value:", selected_value)
+        return selected_value
+    else:
+        return dash.no_update
 
 
 @callback(
     Output("map", "children"),
     Input("survey-unit-dropdown", "value"),
     Input("point_geojson", "click_feature"),
+    Input("survey-line-dropdown", "value"),
+    Input("line_geojson", "click_feature"),
     prevent_initial_call=True,
 )
-def update_map(selected_value, points_click_feature):
-    """If the click feature != dropdown selection we reload the geojson which removes the selection from the map"""
+def update_map(selected_value, points_click_feature, line_selected_value, lines_click_feature):
+    # Define a flag to track whether an update is needed
+    update_needed = False
 
-    # You can update the GeoJSON data here based on the selected_value
     if points_click_feature:
-        print(points_click_feature["properties"]["sur_unit"])
         if selected_value != points_click_feature["properties"]["sur_unit"]:
-            return [
-                dl.TileLayer(),
-                dl.GeoJSON(
-                    data=restructured_geojson,
-                    id="point_geojson",
-                    zoomToBoundsOnClick=True,
-                    options={"pointToLayer": ns("pointToLayer")},
-                ),
-            ]
+            update_needed = True
         else:
             return dash.no_update
-    else:
-        return dash.no_update
+
+    if lines_click_feature:
+        if line_selected_value != lines_click_feature["properties"]["regional_n"]:
+            update_needed = True
+        else:
+            return dash.no_update
+
+    if update_needed:
+        # Update the map based on the selected values and click features
+        # You can add your logic here to update the map accordingly
+        # Return the updated map components
+        return [
+            dl.TileLayer(),
+            dl.GeoJSON(
+                data=restructured_geojson,
+                id="point_geojson",
+                zoomToBoundsOnClick=True,
+                zoomToBounds=True,
+                options={"pointToLayer": ns("pointToLayer")},
+            ),
+            dl.GeoJSON(
+                data=line_geojson,
+                id="line_geojson",
+                zoomToBoundsOnClick=False,
+                options={
+                    "onEachFeature": ns("lineToLayer"),
+                    "style": {
+                        "color": "green",  # Set the line color to blue
+                        "weight": 8,  # Set the line weight
+                    },
+                },
+            ),
+        ]
+
+    return dash.no_update
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@callback(Output("line_geojson", "data"),
+          Input("survey-unit-dropdown", "value"),
+          allow_duplicate=True)
+
+def filter_survey_lines_by_survey_unit(survey_unit_dropdown):
+
+    """Function filters the survey line data for the selected survey unit"""
+
+    # filter the loaded data
+    filter_df = lines_gdf.loc[lines_gdf['surveyunit'] == survey_unit_dropdown]
+
+    # Convert to GeoJSON  format
+    filtered_line_geojson =filter_df.to_json()
+    line_geojson_json = json.loads(filtered_line_geojson)
+    return line_geojson_json
+
+
+# add logic which highlights the selected line
+
+
+
+

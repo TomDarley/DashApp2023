@@ -2,6 +2,7 @@ from dash import Dash, html, Input, Output, dcc, ClientsideFunction
 import dash
 import dash_bootstrap_components as dbc
 from apps import navigation
+from dash_extensions.javascript import Namespace
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY, dbc.icons.BOOTSTRAP])
 

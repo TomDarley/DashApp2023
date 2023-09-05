@@ -75,6 +75,7 @@ layout = html.Div(
         dcc.Store(
             id="selected-line-storage", data={"current": None, "previous": None}
         ),
+        dcc.Store(id ='selected_profile_data'),
 
 
         # add dropdown with survey units to select
@@ -199,7 +200,6 @@ def update_map(selected_value, points_click_feature, line_selected_value, lines_
 @callback(Output("line_geojson", "data"),
           Input("survey-unit-dropdown", "value"),
           allow_duplicate=True)
-
 def filter_survey_lines_by_survey_unit(survey_unit_dropdown):
 
     """Function filters the survey line data for the selected survey unit"""
@@ -208,8 +208,9 @@ def filter_survey_lines_by_survey_unit(survey_unit_dropdown):
     filter_df = lines_gdf.loc[lines_gdf['surveyunit'] == survey_unit_dropdown]
 
     # Convert to GeoJSON  format
-    filtered_line_geojson =filter_df.to_json()
+    filtered_line_geojson = filter_df.to_json()
     line_geojson_json = json.loads(filtered_line_geojson)
+
     return line_geojson_json
 
 # add logic which highlights the selected line

@@ -174,7 +174,7 @@ layout = html.Div([
         dcc.Dropdown(
             options=[]
                ,
-            value='',
+            value='6a01613',
             id='survey-line-dropdown',
             style={'color': 'black', 'width': '200px', }  # the width of the dropdown
         ),

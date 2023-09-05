@@ -38,6 +38,7 @@ layout = html.Div([
                 ),
                 survey_unit_dropdown.layout,
                 # Place the map layout here
+                #leaflet_map.layout,
                 leaflet_map.layout,
 
 

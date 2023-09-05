@@ -1,5 +1,5 @@
 import dash_leaflet as dl
-from dash import Output, Input, html, callback, dcc
+from dash import Output, Input, html, callback, dcc,State
 import psycopg2
 import geopandas as gpd
 import json
@@ -70,7 +70,7 @@ layout = html.Div(
     [
         html.P(id="click-output"),
         dcc.Store(
-            id="selected-value-storage", data={"current": None, "previous": None}
+            id="selected-value-storage", data={"current": '6aSU12', "previous": None}
         ),
         dcc.Store(
             id="selected-line-storage", data={"current": None, "previous": None}
@@ -144,15 +144,14 @@ def update_selected_value(click_feature):
         return selected_value
     else:
         return dash.no_update
-
-
+#
 @callback(
     Output("map", "children"),
     Input("survey-unit-dropdown", "value"),
     Input("point_geojson", "click_feature"),
     Input("survey-line-dropdown", "value"),
     Input("line_geojson", "click_feature"),
-    prevent_initial_call=True,
+
 )
 def update_map(selected_value, points_click_feature, line_selected_value, lines_click_feature):
     # Define a flag to track whether an update is needed
@@ -161,14 +160,10 @@ def update_map(selected_value, points_click_feature, line_selected_value, lines_
     if points_click_feature:
         if selected_value != points_click_feature["properties"]["sur_unit"]:
             update_needed = True
-        else:
-            return dash.no_update
 
     if lines_click_feature:
         if line_selected_value != lines_click_feature["properties"]["regional_n"]:
             update_needed = True
-        else:
-            return dash.no_update
 
     if update_needed:
         # Update the map based on the selected values and click features
@@ -201,27 +196,6 @@ def update_map(selected_value, points_click_feature, line_selected_value, lines_
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @callback(Output("line_geojson", "data"),
           Input("survey-unit-dropdown", "value"),
           allow_duplicate=True)
@@ -237,7 +211,6 @@ def filter_survey_lines_by_survey_unit(survey_unit_dropdown):
     filtered_line_geojson =filter_df.to_json()
     line_geojson_json = json.loads(filtered_line_geojson)
     return line_geojson_json
-
 
 # add logic which highlights the selected line
 

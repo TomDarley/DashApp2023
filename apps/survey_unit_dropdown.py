@@ -187,8 +187,6 @@ layout = html.Div([
 
     style={'display': 'flex', 'justify-content': 'flex-end'}) # the position of the dropdown in the div
 
-
-
 @callback(
     Output("survey-unit-dropdown", "value"),
     Input("selected-value-storage", "data"),

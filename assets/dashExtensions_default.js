@@ -2,28 +2,22 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
     mySubNamespace: {
 
         selectedMarker: null, // Keep track of the selected marker
-        selectedLineMarker: null,
-
-
-
+        selectedLineMarker:null,
         pointToLayer: function(feature, latlng, context) {
 
-
-           //
-
             var defaultMarkerOptions = {
-                radius: 15,
-                weight: 4,
-                color: 'orange',
+                radius: 10,
+                weight: 1,
+                color: 'blue',
                 fillColor: 'blue',
                 fillOpacity: 0.6
             };
 
 
             var selectedMarkerOptions = {
-                radius: 25,
-                weight: 4,
-                color: 'orange', // Change this to the desired selected color
+                radius: 15,
+                weight: 2,
+                color: 'red', // Change this to the desired selected color
                 fillColor: 'red', // Change this to the desired selected color
                 fillOpacity: 0.7
             };
@@ -50,11 +44,16 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
             });
 
             marker.on('click', function (e) {
+
+
+
+
+
+
+
                 if (window.myNamespace.mySubNamespace.selectedMarker) {
                     console.log('Clicked')
                     console.log(property1)
-
-
                     // Reset the style of the previously selected marker
                     window.myNamespace.mySubNamespace.selectedMarker.setStyle(defaultMarkerOptions);
                 }
@@ -74,8 +73,10 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
 
             return marker;
 
+
         },
-         lineToLayer: function (feature, layer) {
+
+    lineToLayer: function (feature, layer) {
     // Define default marker options
     var defaultMarkerOptions = {
         weight: 8,
@@ -112,8 +113,8 @@ window.myNamespace = Object.assign({}, window.myNamespace, {
 
     marker.on('click', function (e) {
         if (window.myNamespace.mySubNamespace.selectedLineMarker) {
-            console.log('Clicked');
-            console.log(property1);
+            //console.log('Clicked');
+            //console.log(property1);
 
             // Reset the style of the previously selected marker
             window.myNamespace.mySubNamespace.selectedLineMarker.setStyle(defaultMarkerOptions);

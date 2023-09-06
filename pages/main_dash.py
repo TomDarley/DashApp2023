@@ -5,6 +5,7 @@ from DashApp2023.apps import scatter_plot
 from DashApp2023.apps import error_bar_plot
 from DashApp2023.apps import leaflet_map
 from DashApp2023.apps import profile_line_plot
+from DashApp2023.apps import CSA_Table
 import dash_bootstrap_components as dbc
 from dash import dcc
 import psycopg2
@@ -79,7 +80,15 @@ layout = html.Div([
                     html.Div([
                         profile_line_plot.layout,
 
-                    ]),width={'size': 12, 'offset': 0}
+                    ]),width={'size': 6, 'offset': 0}
+
+            ),
+
+            dbc.Col(
+                    html.Div([
+                        CSA_Table.layout,
+
+                    ]),width={'size': 6, 'offset': 0}
 
             ),
 
@@ -89,7 +98,9 @@ layout = html.Div([
 
             style={'display': 'flex', 'flex-wrap': 'wrap'}  # Use flexbox to control the layout
         ),
-        style={'text-align': 'center'}
-    ),
+
+        fluid=True,  # Set fluid to True for a full-width container
+        style={"width": "100%",'text-align': 'center','margin-right': '150px', 'background-color':'black' },
+    )
 
 ])

@@ -1,5 +1,5 @@
 import dash_bootstrap_components as dbc
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output,State
 import numpy as np
 import pandas as pd
 import psycopg2
@@ -46,9 +46,9 @@ layout = html.Div(
 
 @callback(
     (Output("error_plot", "figure")),
-    [Input("selected-df-storage", "data")],
+    [Input("selected-df-storage", "data"),State("survey-unit-dropdown", "value")],
 )
-def make_scatter_plot(cpa_df):
+def make_scatter_plot(cpa_df, selected_survey_unit):
 
     df = pd.read_json(cpa_df)
     df = df.drop("Sum", axis=0)
@@ -114,8 +114,14 @@ def make_scatter_plot(cpa_df):
     fig.add_trace(dummy_legend_trace)
     fig.update_layout(showlegend=True, legend_title_text="Profile Name")
     # Update x-axis tick labels
-    fig.update_layout(
-        title_font={"size": 15, "family": "Helvetica", "color": "white"},
+    fig.update_layout(title={
+            "text": f"{selected_survey_unit}",
+            "y": 0.95,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        },
+        title_font={"size": 20, "family": "Helvetica", "color": "white"},
         yaxis_title="Combined Profile Area (m²)",
         xaxis_title=None,
         legend_title="",

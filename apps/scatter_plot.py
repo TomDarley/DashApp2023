@@ -226,13 +226,13 @@ def make_scatter_plot(selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"",
+            "text": f"{selected_survey_unit}",
             "y": 0.95,
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 15, "family": "Helvetica", "color": "white"},
+        title_font={"size": 20, "family": "Helvetica", "color": "white"},
         xaxis_title="",
         yaxis_title="Combined Profile Area (m²)",
         legend_title="",

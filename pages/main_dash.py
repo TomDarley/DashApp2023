@@ -40,9 +40,8 @@ layout = html.Div([
                 ),
                 survey_unit_dropdown.layout,
                 # Place the map layout here
-                #leaflet_map.layout,
+                # leaflet_map.layout,
                 leaflet_map.layout,
-
 
                 # Add the Loading component with centered styling, the activation of this is found in the scatter plot
                 html.Div(
@@ -62,37 +61,38 @@ layout = html.Div([
                     }
                 ),
 
-            dbc.Col(
+
+
+                dbc.Col(
                     html.Div([
                         scatter_plot.layout,
-
-                    ]),width={'size': 6, 'offset': 0}
-            ),
-            dbc.Col(
+                    ]), width={'size': 6, 'offset': 0}
+                ),
+                dbc.Col(
                     html.Div([
                         error_bar_plot.layout,
+                    ]), width={'size': 6, 'offset': 0}
+                ),
 
-                    ]),width={'size': 6, 'offset': 0}
+                # Create a new row for the "Profile Line Plot"
+                dbc.Row(
+                    dbc.Col(
+                        html.Div([
+                            profile_line_plot.layout,
+                        ]),
+                        width=True
+                    )
+                ),
 
-            ),
-
-            dbc.Col(
-                    html.Div([
-                        profile_line_plot.layout,
-
-                    ]),width={'size': 6, 'offset': 0}
-
-            ),
-
-            dbc.Col(
-                    html.Div([
-                        CSA_Table.layout,
-
-                    ]),width={'size': 6, 'offset': 0}
-
-            ),
-
-
+                # Create a new row for the "CSA Table"
+                dbc.Row(
+                    dbc.Col(
+                        html.Div([
+                            CSA_Table.layout,
+                        ]),
+                        width=True
+                    )
+                ),
 
             ],
 
@@ -100,7 +100,6 @@ layout = html.Div([
         ),
 
         fluid=True,  # Set fluid to True for a full-width container
-        style={"width": "100%",'text-align': 'center','margin-right': '150px', 'background-color':'black' },
+        style={"width": "100%", 'text-align': 'center', 'margin-right': '150px', 'background-color': 'black'},
     )
-
 ])

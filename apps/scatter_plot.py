@@ -250,6 +250,17 @@ def make_scatter_plot(selected_survey_unit):
         ),
     )
 
+    # Customize the legend font and size
+    fig.update_layout(
+        legend=dict(
+            title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
+            title_text='',  # Remove legend title
+            font=dict(size=20, family='Helvetica')  # Customize font size and family for legend labels
+        ),
+        legend_traceorder='reversed',
+        legend_title_text=f''
+    )
+
     # increase marker size
     fig.update_traces(
         marker=dict(

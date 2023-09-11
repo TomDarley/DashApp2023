@@ -12,9 +12,10 @@ layout = html.Div(
         dbc.Container(
             dbc.Row(
                 [
-                    dash_table.DataTable(id = 'CSA_table',  style_cell={'textAlign': 'left'},style_header={
+                    dash_table.DataTable(id = 'CSA_table', sort_action='native',sort_mode='single', style_cell={'textAlign': 'center'},style_header={
         'backgroundColor': 'rgb(30, 30, 30)',
-        'color': 'white'
+        'color': 'white','font-size':20
+
     },
     style_data={
         'backgroundColor': 'rgb(50, 50, 50)',
@@ -40,11 +41,12 @@ layout = html.Div(
 
 def make_csa_table(selected_csa_data):
 
+    # load in the csa table from the store, set in the scatter plot app
     df = pd.read_json(selected_csa_data)
     df= df.drop(df.index[-1])
 
 
-
+    # ranges used to decide the survey type
     spring_range = [1, 2, 3, 4]
     summer_range = [5, 6, 7, 8]
     autumn_range = [9, 10, 11, 12]
@@ -57,10 +59,6 @@ def make_csa_table(selected_csa_data):
 
         to_date = datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date()
 
-
-        #to_date  =x
-
-
         all_dates.append(to_date)
         if to_date.month in spring_range:
             classify_dates['Spring'].append(to_date)
@@ -71,52 +69,44 @@ def make_csa_table(selected_csa_data):
 
     print(all_dates)
 
-
+    # get the target columns using dates
     latest_survey = max(all_dates)
     first_survey = min(all_dates)
-    print(latest_survey)
-    print(first_survey)
 
     latest_spring = sorted(classify_dates.get('Spring'), reverse=False)[-1]
     last_years_spring = sorted(classify_dates.get('Spring'), reverse=False)[-2]
-
-    print(latest_spring)
-    print(last_years_spring)
-    #print(classify_dates)
 
     cols = list(df.columns.astype(str))
     df = df.set_axis(cols, axis=1)
     df= df.reset_index()
 
+    # get the target date columns only
     df = df[['index',str(first_survey),str(last_years_spring),str(latest_spring)]]
 
-    df['Spring to Spring Diff (m2)'] = ((df[str(last_years_spring)] - df[str(latest_spring)]))
-    df['Spring to Spring % Change'] = ((df[str(last_years_spring)] - df[str(latest_spring)]) / df[
-        str(latest_spring)]) * 100
-
-    df['Baseline to Spring Diff (m2)'] = ((df[str(first_survey)] - df[str(latest_spring)]))
-
-    df['Baseline to Spring % Change'] = ((df[str(first_survey)] - df[str(latest_spring)]) / df[
-        str(latest_spring)]) * 100
+    spr_dif_name =f'Spring to Spring Diff (m2)'
+    spr_per_name = f'Spring to Spring % Change'
+    base_dif_name = f'Baseline to Spring Diff (m2)'
+    base_per_name = f'Baseline to Spring % Change'
 
 
-    cols = list(df.columns.astype(str))
-    df = df.set_axis(cols, axis=1)
-    for x in cols:
-        print(type(x))
+    # calculate the change add as columns
+    df[spr_dif_name] = ((df[str(last_years_spring)] - df[str(latest_spring)])).round(2)
+    df[spr_per_name] = (((df[str(last_years_spring)] - df[str(latest_spring)]) / df[
+        str(latest_spring)]) * 100).round(2)
+    df[base_dif_name] = ((df[str(first_survey)] - df[str(latest_spring)])).round(2)
+    df[base_per_name] = (((df[str(first_survey)] - df[str(latest_spring)]) / df[
+        str(latest_spring)]) * 100).round(2)
 
-    df= df[['index','Spring to Spring Diff (m2)','Spring to Spring % Change','Baseline to Spring Diff (m2)','Baseline to Spring % Change']]
+    # select only the columns we want from the df
+    df= df[['index',spr_dif_name, spr_per_name,base_dif_name,base_per_name]]
 
+    df= df.rename(columns ={'index': 'Profile'})
 
-
+    # convert to records format required by dash table
     df1 = df.to_dict('records')
-    print(df1)
-
 
     # Define the columns for the DataTable
     columns = [{"name": i, "id": i} for i in df.columns]
-    print(columns)
-
 
 
 

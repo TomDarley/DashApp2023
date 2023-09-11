@@ -137,6 +137,17 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         ),
     )
 
+    # Customize the legend font and size
+    fig.update_layout(
+        legend=dict(
+            title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
+            title_text='',  # Remove legend title
+            font=dict(size=20, family='Helvetica')  # Customize font size and family for legend labels
+        ),
+        legend_traceorder='reversed',
+        legend_title_text=f''
+    )
+
     fig.update_layout(
         xaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
         yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed

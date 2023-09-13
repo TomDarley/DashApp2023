@@ -1,5 +1,6 @@
+import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, State
 import numpy as np
 import pandas as pd
 import psycopg2
@@ -19,34 +20,59 @@ import time
 
 layout = html.Div(
     [
-        dbc.Container(
-            dbc.Row(
-                [
-                    dcc.Store(
-                        id="selected-df-storage",
-                        data={"current": None, "previous": None},
-                    ),
+        dcc.Store(
+            id="selected-df-storage",
+            data={"current": None, "previous": None},
+        ),
+        dcc.Graph(id="scatter_plot"),
+        dbc.Button(
+            [html.Span(className="bi bi-info-circle-fill")],
+            size="lg",
+            id="scatter_open_info",
+            n_clicks=0,
+            className="mr-3",
+            style={'position': 'absolute', 'top': '1%', 'right': '2px'},
+        ),
+        dbc.Button(
+            [html.Span(className="fa-solid fa-expand")],
+            size="lg",
+            id="scatter_open_full",
+            n_clicks=0,
+            className="mr-3",
+            style={'position': 'absolute', 'bottom': '1%', 'right': '2px'},
+        ),
 
-                    dbc.Col(
-                        dcc.Graph(
-                            id="scatter_plot",
-                        ),
-                        width={"size": 12, "offset": 0, "order": 2},
-                        style={
-                            "margin-left": 0,
-                            "margin-top": 10,
-                            "background-colour": "white",
-                        },
-                    ),
-                ]
-            ),
-            style={
-                "background-color": "#1b1c1c",
-                "margin": 0,  # Remove container margin
-                "padding": 0,
-            },  # Remove container padding
-        )
-    ]
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
+                dbc.ModalBody("This is a nice chart!"),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close", id="scatter_info_close", className="ms-auto", n_clicks=0
+                    )
+                ),
+            ],
+            id="scatter_info_model",
+            is_open=False,
+            fullscreen=True,
+        ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
+                dbc.ModalBody(dcc.Graph(id="scatter_plot_model", style={'height': '100vh'})),## might not work
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close", id="scatter_full_close", className="ms-auto", n_clicks=0
+                    )
+                ),
+            ],
+            id="modal_scatter_plot",
+            is_open=False,
+            fullscreen=True,
+    ),
+    ],
+    style={'position': 'relative'},  # Set the position of the containing div to relative
+
 )
 
 
@@ -55,6 +81,7 @@ layout = html.Div(
         Output("scatter_plot", "figure"),
         Output("loading-spinner", "children"),
         Output("selected-df-storage", "data"),
+        Output("scatter_plot_model", "figure")
     ),
     [
         Input("survey-unit-dropdown", "value"),
@@ -274,4 +301,30 @@ def make_scatter_plot(selected_survey_unit):
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
-    return fig, f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", df_store
+    return fig, f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", df_store, fig
+
+
+@callback(
+    Output("scatter_info_model", "is_open"),
+    [Input("scatter_open_info", "n_clicks"), Input("scatter_info_close", "n_clicks")],
+    [State("scatter_info_model", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+@callback(
+    Output("modal_scatter_plot", "is_open"),
+    Output("scatter_open_full", "n_clicks"),
+    Input("scatter_open_full", "n_clicks"),
+    Input("scatter_full_close", "n_clicks"),
+    Input("scatter_plot", "relayoutData")
+)
+def toggle_modal_chart(n1, n2, relayoutData):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    if "open" in changed_id:
+        return True, 0
+    elif "close" in changed_id:
+        return False, 0
+    return False, 0

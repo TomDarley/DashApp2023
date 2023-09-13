@@ -61,42 +61,47 @@ layout = html.Div([
                     }
                 ),
 
+                # Create a new row for the "scatter_plot" and "error_bar_plot"
+                dbc.Row( children=[
+                    dbc.Col(
+                        html.Div([
+                            scatter_plot.layout,
 
-
-                dbc.Col(
-                    html.Div([
-                        scatter_plot.layout,
-                    ]), width={'size': 6, 'offset': 0}
+                        ]),
+                        width={'size': 6, 'offset': 0}
+                    ),
+                    dbc.Col(
+                        html.Div([
+                            error_bar_plot.layout,
+                        ]),
+                        width={'size': 6, 'offset': 0}
+                    )]
                 ),
-                dbc.Col(
-                    html.Div([
-                        error_bar_plot.layout,
-                    ]), width={'size': 6, 'offset': 0}
-                ),
 
-                # Create a new row for the "Profile Line Plot"
-                dbc.Row(
+
+                # Create a new row for the "Profile Line Plot" and "CSA_Table"
+                dbc.Row( children=[
                     dbc.Col(
                         html.Div([
                             profile_line_plot.layout,
-                        ]),
-                        width=True
-                    )
-                ),
 
-                # Create a new row for the "CSA Table"
-                dbc.Row(
+                        ]),
+                        width={'size': 6, 'offset': 0}
+                    ),
                     dbc.Col(
                         html.Div([
                             CSA_Table.layout,
                         ]),
-                        width=True
-                    )
+                        width={'size': 6, 'offset': 0}
+                    )]
                 ),
+
+
+
 
             ],
 
-            style={'display': 'flex', 'flex-wrap': 'wrap'}  # Use flexbox to control the layout
+            style={'display': 'flex', 'flex-wrap': 'wrap','background-color': 'black'}  # Use flexbox to control the layout
         ),
 
         fluid=True,  # Set fluid to True for a full-width container

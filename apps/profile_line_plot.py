@@ -23,7 +23,7 @@ layout = html.Div(
                         dcc.Graph(
                             id="line_plot",
                         ),
-                        width={"size": 20, "offset": 0, "order": 2},
+                        width={"size": 12, "offset": 0, "order": 2},
                         style={
                             "margin-left": 0,
                             "margin-top": 10,

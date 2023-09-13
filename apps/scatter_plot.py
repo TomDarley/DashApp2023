@@ -15,7 +15,12 @@ import sqlalchemy
 from scipy.integrate import quad
 import warnings
 import time
+import base64
 
+# delete this
+image_path = r"C:\Users\darle\PycharmProjects\Dash_App_Master\DashApp2023\media\NERD.jpeg"
+with open(image_path, "rb") as image_file:
+    encoded_image = base64.b64encode(image_file.read()).decode()
 
 
 layout = html.Div(
@@ -44,8 +49,14 @@ layout = html.Div(
 
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
-                dbc.ModalBody("This is a nice chart!"),
+                dbc.ModalHeader(dbc.ModalTitle("CSA Scatter Plot")),
+                dbc.ModalBody([
+
+                    html.P(
+                        "This chart shows the combined cross-sectional area for each profile line. It is nice, I like it a lot.",
+                        style={'font-size': 20}),
+                    html.Img(src=f"data:image/jpeg;base64,{encoded_image}", alt="CSA Scatter Plot Image", style={'height': '80vh'}),
+                ]),
                 dbc.ModalFooter(
                     dbc.Button(
                         "Close", id="scatter_info_close", className="ms-auto", n_clicks=0

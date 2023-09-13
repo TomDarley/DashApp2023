@@ -1,3 +1,4 @@
+import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc, callback, Input, Output,State
 import numpy as np
@@ -16,37 +17,67 @@ import warnings
 import time
 import matplotlib.pyplot as plt
 
-layout = html.Div(
-    [
-        dbc.Container(
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Graph(
-                            id="error_plot",
-                        ),
-                        width={"size": 12, "offset": 0, "order": 2},
-                        style={
-                            "margin-left": 0,
-                            "margin-top": 10,
-                            "background-colour": "white",
-                        },
-                    ),
-                ]
-            ),
-            style={
-                "background-color": "#1b1c1c",
-                "margin": 0,  # Remove container margin
-                "padding": 0,
-            },  # Remove container padding
-        )
-    ]
+layout = html.Div([
+    dcc.Graph(id="error_plot"),
+
+    # adding info and max view buttons
+    dbc.Button(
+            [html.Span(className="bi bi-info-circle-fill")],
+            size="lg",
+            id="error_open_info",
+            n_clicks=0,
+            className="mr-3",
+            style={'position': 'absolute', 'top': '1%', 'right': '2px'},
+        ),
+    dbc.Button(
+            [html.Span(className="fa-solid fa-expand")],
+            size="lg",
+            id="error_open_full",
+            n_clicks=0,
+            className="mr-3",
+            style={'position': 'absolute', 'bottom': '1%', 'right': '2px'},
+        ),
+
+    # adding info and max view modals (the popups)
+    dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Error Bar Magic")),
+                dbc.ModalBody("This is a nice chart!"),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close", id="error_info_close", className="ms-auto", n_clicks=0
+                    )
+                ),
+            ],
+            id="error_info_model",
+            is_open=False,
+            fullscreen=True,
+        ),
+    dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Error Bar Plot")),
+                dbc.ModalBody(dcc.Graph(id="error_plot_model", style={'height': '90vh'})),## might not work
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close", id="error_full_close", className="ms-auto", n_clicks=0
+                    )
+                ),
+            ],
+            id="modal_error_plot",
+            is_open=False,
+            fullscreen=True,
+    ),
+                       
+    ], style={'position': 'relative', 'margin-bottom': '10px'},
+    
 )
 
 
 @callback(
-    (Output("error_plot", "figure")),
-    [Input("selected-df-storage", "data"),State("survey-unit-dropdown", "value")],
+    Output("error_plot", "figure"),
+    Output('error_plot_model',"figure"),
+    Input("selected-df-storage", "data"),
+    State("survey-unit-dropdown", "value"),
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
 
@@ -153,4 +184,31 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
     )
 
-    return fig
+    return fig, fig
+
+# adding the callbacks that control the modal buttons display logic
+@callback(
+    Output("error_info_model", "is_open"),
+    [Input("error_open_info", "n_clicks"), Input("error_info_close", "n_clicks")],
+    [State("error_info_model", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+@callback(
+    Output("modal_error_plot", "is_open"),
+    Output("error_open_full", "n_clicks"),
+    Input("error_open_full", "n_clicks"),
+    Input("error_full_close", "n_clicks"),
+    Input("error_plot", "relayoutData")
+)
+def toggle_modal_chart(n1, n2, relayoutData):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    if "open" in changed_id:
+        return True, 0
+    elif "close" in changed_id:
+        return False, 0
+    return False, 0
+

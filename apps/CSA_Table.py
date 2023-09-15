@@ -7,6 +7,127 @@ from datetime import datetime
 import dash_bootstrap_components as dbc
 from dash import dcc,dash_table,Dash
 
+
+
+style_data_conditional = [
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} <= -30',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'rgb(255, 0, 0)',
+        'color': 'white'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= -30 && {Spring to Spring Diff (m2)} <= -15',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(255, 102, 102)',
+        'color': 'white'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= -15 && {Spring to Spring Diff (m2)} <= -5',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(255, 153, 153)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= -5 && {Spring to Spring Diff (m2)} <= 5',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'grey',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= 5 && {Spring to Spring Diff (m2)} <= 15',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(204, 224, 255)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= 15 && {Spring to Spring Diff (m2)} <= 30',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(128, 179, 255)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Spring to Spring Diff (m2)} >= 30',
+            'column_id': 'Spring to Spring Diff (m2)'
+        },
+        'backgroundColor': ' RGB(6, 117, 255)',
+        'color': 'black'
+    },
+    ################################################################## Baseline to Spring Diff (m2)
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} <= -30',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'rgb(255, 0, 0)',
+        'color': 'white'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= -30 && {Baseline to Spring Diff (m2)} <= -15',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(255, 102, 102)',
+        'color': 'white'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= -15 && {Baseline to Spring Diff (m2)} <= -5',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(255, 153, 153)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= -5 && {Baseline to Spring Diff (m2)} <= 5',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'grey',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= 5 && {Baseline to Spring Diff (m2)} <= 15',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(204, 224, 255)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= 15 && {Baseline to Spring Diff (m2)} <= 30',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': 'RGB(128, 179, 255)',
+        'color': 'black'
+    },
+    {
+        'if': {
+            'filter_query': '{Baseline to Spring Diff (m2)} >= 30',
+            'column_id': 'Baseline to Spring Diff (m2)'
+        },
+        'backgroundColor': ' RGB(6, 117, 255)',
+        'color': 'black'
+    },
+
+
+]
+
+
 layout = html.Div(
     [
         dbc.Container(
@@ -16,11 +137,12 @@ layout = html.Div(
         'backgroundColor': 'rgb(30, 30, 30)',
         'color': 'white','font-size':20
 
-    },
-    style_data={
-        'backgroundColor': 'rgb(50, 50, 50)',
-        'color': 'white'
-    },),
+    },columns=[{'name': 'Profile', 'id': 'Profile'}, {'name': 'Spring to Spring Diff (m2)', 'id': 'Spring to Spring Diff (m2)'}, {'name': 'Spring to Spring % Change', 'id': 'Spring to Spring % Change'}, {'name': 'Baseline to Spring Diff (m2)', 'id': 'Baseline to Spring Diff (m2)'}, {'name': 'Baseline to Spring % Change', 'id': 'Baseline to Spring % Change'}],
+    style_data_conditional=style_data_conditional,
+
+
+
+        ),
 
                 ]
             ),
@@ -89,13 +211,21 @@ def make_csa_table(selected_csa_data):
     base_per_name = f'Baseline to Spring % Change'
 
 
+    ## calculate the change add as columns
+    #df[spr_dif_name] = ((df[str(last_years_spring)] - df[str(latest_spring)])).round(2)
+    #df[spr_per_name] = (((df[str(last_years_spring)] - df[str(latest_spring)]) / df[
+    #    str(latest_spring)]) * 100).round(2)
+    #df[base_dif_name] = ((df[str(first_survey)] - df[str(latest_spring)])).round(2)
+    #df[base_per_name] = (((df[str(first_survey)] - df[str(latest_spring)]) / df[
+    #    str(latest_spring)]) * 100).round(2)
+
     # calculate the change add as columns
-    df[spr_dif_name] = ((df[str(last_years_spring)] - df[str(latest_spring)])).round(2)
-    df[spr_per_name] = (((df[str(last_years_spring)] - df[str(latest_spring)]) / df[
-        str(latest_spring)]) * 100).round(2)
-    df[base_dif_name] = ((df[str(first_survey)] - df[str(latest_spring)])).round(2)
-    df[base_per_name] = (((df[str(first_survey)] - df[str(latest_spring)]) / df[
-        str(latest_spring)]) * 100).round(2)
+    df[spr_dif_name] = ((df[str(latest_spring)] - df[str(last_years_spring)])).round(2)
+    df[spr_per_name] = (((df[str(latest_spring)] - df[str(last_years_spring)]) / df[
+        str(last_years_spring)]) * 100).round(2)
+    df[base_dif_name] = ((df[str(latest_spring)] - df[str(first_survey)])).round(2)
+    df[base_per_name] = (((df[str(latest_spring)] - df[str(first_survey)]) / df[
+        str(first_survey)]) * 100).round(2)
 
     # select only the columns we want from the df
     df= df[['index',spr_dif_name, spr_per_name,base_dif_name,base_per_name]]
@@ -107,6 +237,8 @@ def make_csa_table(selected_csa_data):
 
     # Define the columns for the DataTable
     columns = [{"name": i, "id": i} for i in df.columns]
+
+    print(columns)
 
 
 

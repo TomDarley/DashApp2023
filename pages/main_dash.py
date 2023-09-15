@@ -24,19 +24,6 @@ layout = html.Div([
                 dbc.Col(
                     html.Div([
                         mapbox.layout,
-                        #html.H2(children="SWCM Dash", style={
-                        #    'text-align': 'center',
-                        #    'margin-top': '20px',
-                        #    'font-size': '28px',
-                        #    'font-weight': 'bold',
-                        #    'color': 'white'
-                        #}),
-                        #html.P(
-                        #    children=' Welcome to the South West Coastal Monitoring Topo Dash. '
-                        #             'From this page, you can select the specific survey unit you wish to display data for:'
-                        #),
-
-                        # Place the dropdown layout here
 
                     ]),
                     width={'size': 12, 'offset': 0, 'buffer': 0}  # width number of cols out of 12 it takes up

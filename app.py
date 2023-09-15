@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from apps import navigation
 from dash_extensions.javascript import Namespace
 
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY, dbc.icons.BOOTSTRAP,dbc.icons.FONT_AWESOME, dbc.icons.BOOTSTRAP])
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.COSMO, dbc.icons.BOOTSTRAP,dbc.icons.FONT_AWESOME, dbc.icons.BOOTSTRAP])
 
 # Set the app layout with the navigation bar, the nav will be inherited by all pages
 app.layout = html.Div([

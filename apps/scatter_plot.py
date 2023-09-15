@@ -55,7 +55,7 @@ layout = html.Div(
                     html.P(
                         "This chart shows the combined cross-sectional area for each profile line. It is nice, I like it a lot.",
                         style={'font-size': 20}),
-                    html.Img(src=f"data:image/jpeg;base64,{encoded_image}", alt="CSA Scatter Plot Image", style={'height': '80vh'}),
+                    html.Img(src=f"data:image/jpeg;base64,{encoded_image}", alt="CSA Scatter Plot Image", style={'height': '40vh'}),
                 ]),
                 dbc.ModalFooter(
                     dbc.Button(
@@ -103,6 +103,7 @@ def make_scatter_plot(selected_survey_unit):
 
     current_year = datetime.now().year
     survey_unit = selected_survey_unit
+    print(survey_unit)
 
     def get_data(target_survey_unit: str):
         """Establish database connection, make query and return df, both target profile and target date

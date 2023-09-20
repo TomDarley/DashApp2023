@@ -130,9 +130,7 @@ style_data_conditional = [
 
 layout = html.Div(
     [
-        dbc.Container(
-            dbc.Row(
-                [
+
                     dash_table.DataTable(id = 'CSA_table', sort_action='native',sort_mode='single', style_cell={'textAlign': 'center'},style_header={
         'backgroundColor': 'rgb(30, 30, 30)',
         'color': 'white','font-size':20
@@ -144,16 +142,8 @@ layout = html.Div(
 
         ),
 
-                ]
-            ),
-            style={
-                "background-color": "#1b1c1c",
-                "margin": 0,  # Remove container margin
-                "padding": 0,
-            },  # Remove container padding
-        )
-    ]
-)
+                ])
+
 
 
 @callback(

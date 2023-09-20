@@ -99,7 +99,7 @@ def make_line_plot(selected_sur_unit, selected_profile):
 
     # Create a 2D line plot
     fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
-                  color_discrete_sequence=px.colors.qualitative.D3, template="plotly_dark",height=690)
+                  color_discrete_sequence=px.colors.qualitative.D3, template="plotly",)
 
     fig.add_trace(
         go.Scatter(x=master_profile_chainage, y=master_profile_elevation, line=dict(color='red', width=5, dash='dash'),

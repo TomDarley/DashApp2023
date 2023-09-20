@@ -99,7 +99,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         y="Value",
         title="",
         points=False,
-        template="plotly_dark",
+        template="plotly",
         #height=600,
     )
 
@@ -156,13 +156,13 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         yaxis_title="Combined Profile Area (m²)",
         xaxis_title=None,
         legend_title="",
-        font=dict(size=15, color="white", family="Helvetica"),
+        font=dict(size=15, color="blue", family="Helvetica"),
         xaxis=dict(
             tickmode="array",
             tickangle=45,
             tickfont=dict(
                 size=12,  # Set the font size
-                color="white",  # Set the font color
+                color="blue",  # Set the font color
                 family="Helvetica",  # Set the font family
             ),
         ),

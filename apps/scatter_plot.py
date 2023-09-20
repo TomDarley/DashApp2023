@@ -30,6 +30,14 @@ layout = html.Div(
             data={"current": None, "previous": None},
         ),
 
+        dcc.Store(id = "lowest_recorded_value"),
+        dcc.Store(id = "lowest_recorded_year"),
+        dcc.Store(id = "highest_recorded_value"),
+        dcc.Store(id = "highest_recorded_year"),
+
+
+
+
         dcc.Store(id = "change_rate"),
         dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "50vh"}),
         dbc.Button(
@@ -94,7 +102,21 @@ layout = html.Div(
         Output("scatter_plot", "figure"),
         Output("change_rate", "data"),
         Output("selected-df-storage", "data"),
-        Output("scatter_plot_model", "figure")
+        Output("scatter_plot_model", "figure"),
+
+        Output("lowest_recorded_value","data"),
+        Output("lowest_recorded_year","data"),
+        Output("highest_recorded_value","data"),
+        Output("highest_recorded_year","data"),
+
+
+
+
+
+
+
+
+
     ),
     [
         Input("survey-unit-dropdown", "value"),
@@ -156,6 +178,19 @@ def make_scatter_plot(selected_survey_unit):
     df2 = pd.DataFrame(df1)
     df2["index1"] = df2.index
     chart_ready_df = df2
+
+    # Get lowest recorded CPA
+    lowest  = chart_ready_df['Sum'].idxmin()
+    row_with_min_value = list(chart_ready_df.loc[lowest])
+    lowest_year  = row_with_min_value[0]
+    lowest_values = row_with_min_value[1]
+
+    # Get highest recorded CPA
+    highest = chart_ready_df['Sum'].idxmax()
+    row_with_max_value = list(chart_ready_df.loc[highest])
+    highest_year = row_with_max_value[0]
+    highest_values = row_with_max_value[1]
+
 
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
@@ -261,7 +296,7 @@ def make_scatter_plot(selected_survey_unit):
         color="season",
         symbol="season",
         #height=690,
-        template="plotly_dark",
+        template="plotly",
     )
 
     # Update x-axis tick labels
@@ -273,11 +308,11 @@ def make_scatter_plot(selected_survey_unit):
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 20, "family": "Helvetica", "color": "white"},
+        title_font={"size": 20, "family": "Arial", "color": "white"},
         xaxis_title="",
         yaxis_title="Combined Profile Area (m²)",
         legend_title="",
-        font=dict(size=15, color="white", family="Helvetica"),
+        font=dict(size=20, color="blue", family="Helvetica"),
         xaxis=dict(
             tickmode="array",
             tickvals=tickvals,
@@ -285,7 +320,7 @@ def make_scatter_plot(selected_survey_unit):
             tickangle=45,
             tickfont=dict(
                 size=15,  # Set the font size
-                color="white",  # Set the font color
+                color="blue",  # Set the font color
                 family="Helvetica",  # Set the font family
             ),
         ),
@@ -315,7 +350,7 @@ def make_scatter_plot(selected_survey_unit):
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
-    return fig, f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", df_store, fig
+    return fig, f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", df_store, fig,lowest_values, lowest_year, highest_values, highest_year
 
 
 @callback(

@@ -270,28 +270,26 @@ layout = html.Div(children=[
                                                 {'label': '6eN2', 'value': '6eN2'}],
             value='6aSU12',
             id='survey-unit-dropdown',
-            style= {'font-size': '18px','margin':'0 auto'}
+            style= {'font-size': '18px','margin':'0 auto','color': 'black' }
             ),
             html.H4("Profile Line:", className="card-title",style={'color': 'blue', }),
             dcc.Dropdown(
                 options=['6a01613'],
                 value='6a01613',
                 id='survey-line-dropdown',
-                style= {'font-size': '18px'}
+                style= {'font-size': '18px','color': 'black' }
 
             ),
-
-
-
 
         ])
 
     ],  style={'position': 'absolute',
                 'top': '100px',  # Adjust the top position as needed
-                'left': '30px',  # Adjust the right position as needed
+                'left': '18vw',  # Adjust the right position as needed
                 'z-index': 9,
                 'width': '300px',
-                'border-radius': '10px'})
+                'border-radius': '10px',
+                 'background-color' : '#f7fafa'})
 
 
 

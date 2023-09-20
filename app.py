@@ -9,7 +9,7 @@ app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.COSMO, dbc
 # Set the app layout with the navigation bar, the nav will be inherited by all pages
 app.layout = html.Div([
     navigation.navbar,
-    dash.page_container])
+    dash.page_container], style={'background-color':'#294169'})
 
 if __name__ == '__main__':
     app.run(debug=True)

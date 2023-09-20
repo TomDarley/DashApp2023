@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 
 
 layout = html.Div([
-    dcc.Graph(id="line_plot"),
+    dcc.Graph(id="line_plot", style={"width": "100%", "height": "50vh", 'margin-left': '20px',}),
     dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="lg",
@@ -63,7 +63,7 @@ layout = html.Div([
             fullscreen=True,
     ),
                        
-    ],style={'position': 'relative', 'margin-bottom': '10px'},
+    ],style={'position': 'relative', 'margin-bottom': '10px','margin-top': '20px','margin-right': '20px','buffer-right': '20px'},
 )
 
 
@@ -99,7 +99,7 @@ def make_line_plot(selected_sur_unit, selected_profile):
 
     # Create a 2D line plot
     fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
-                  color_discrete_sequence=px.colors.qualitative.D3, template="plotly_dark")
+                  color_discrete_sequence=px.colors.qualitative.D3, template="plotly_dark",height=690)
 
     fig.add_trace(
         go.Scatter(x=master_profile_chainage, y=master_profile_elevation, line=dict(color='red', width=5, dash='dash'),

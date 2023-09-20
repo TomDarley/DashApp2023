@@ -18,7 +18,7 @@ import time
 import matplotlib.pyplot as plt
 
 layout = html.Div([
-    dcc.Graph(id="error_plot"),
+    dcc.Graph(id="error_plot",style={"width": "100%", "height": "50vh"}),
 
     # adding info and max view buttons
     dbc.Button(
@@ -68,7 +68,7 @@ layout = html.Div([
             fullscreen=True,
     ),
                        
-    ], style={'position': 'relative', 'margin-bottom': '10px'},
+    ], style={'position': 'relative', 'margin-bottom': '10px','margin-top': '20px','margin-right': '20px','buffer-right': '20px'},
     
 )
 
@@ -100,7 +100,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         title="",
         points=False,
         template="plotly_dark",
-        height=600,
+        #height=600,
     )
 
     # Calculate the most recent value information

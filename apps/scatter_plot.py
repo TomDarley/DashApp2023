@@ -29,7 +29,9 @@ layout = html.Div(
             id="selected-df-storage",
             data={"current": None, "previous": None},
         ),
-        dcc.Graph(id="scatter_plot"),
+
+        dcc.Store(id = "change_rate"),
+        dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "50vh"}),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="lg",
@@ -82,7 +84,7 @@ layout = html.Div(
             fullscreen=True,
     ),
     ],
-    style={'position': 'relative'},  # Set the position of the containing div to relative
+    style={'position': 'relative', 'margin-right': '20px',},  # Set the position of the containing div to relative
 
 )
 
@@ -90,7 +92,7 @@ layout = html.Div(
 @callback(
     (
         Output("scatter_plot", "figure"),
-        Output("loading-spinner", "children"),
+        Output("change_rate", "data"),
         Output("selected-df-storage", "data"),
         Output("scatter_plot_model", "figure")
     ),
@@ -258,7 +260,7 @@ def make_scatter_plot(selected_survey_unit):
         y="Sum",
         color="season",
         symbol="season",
-        height=600,
+        #height=690,
         template="plotly_dark",
     )
 

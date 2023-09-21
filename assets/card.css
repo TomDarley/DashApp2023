@@ -1,99 +1,108 @@
 /* Default font size for larger screens */
 #survey_unit_card {
-    font-size: 40px; /* Adjust this to your base font size */
+    font-size: 20px; /* Adjust this to your base font size */
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width: 1400px) {
+@media screen and (min-width: 0px) and (max-width:950px) {
     #survey_unit_card {
-        font-size: 40px; /* Adjust font size for smaller screens */
+        font-size: 20px; /* Adjust font size for smaller screens */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 1401px) and (max-width: 1900px) {
+@media screen and (min-width: 950px) and (max-width: 1300px) {
     #survey_unit_card {
-        font-size: 25px; /* Adjust font size for screens in this range */
+        font-size: 15px; /* Adjust font size for screens in this range */
     }
 }
 
 /* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1901px) and (max-width: 10000px) {
+@media screen and (min-width: 1300px) and (max-width: 10000px) {
     #survey_unit_card {
-        font-size: 40px; /* Adjust font size for screens in this range */
+        font-size: 20px; /* Adjust font size for screens in this range */
     }
 }
+}
 
+/* Default font size for larger screens */
 #trend_card {
-    font-size: 40px; /* Adjust this to your base font size */
+    font-size: 20px; /* Adjust this to your base font size */
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width: 1400px) {
+@media screen and (min-width: 0px) and (max-width:950px) {
     #trend_card {
-        font-size: 40px; /* Adjust font size for smaller screens */
+        font-size: 20px; /* Adjust font size for smaller screens */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 1401px) and (max-width: 1900px) {
+@media screen and (min-width: 950px) and (max-width: 1300px) {
     #trend_card {
-        font-size: 25px; /* Adjust font size for screens in this range */
+        font-size: 15px; /* Adjust font size for screens in this range */
     }
 }
 
 /* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1901px) and (max-width: 10000px) {
+@media screen and (min-width: 1300px) and (max-width: 10000px) {
     #trend_card {
-        font-size: 40px; /* Adjust font size for screens in this range */
+        font-size: 20px; /* Adjust font size for screens in this range */
     }
 }
+}
+
+
+/* Default font size for larger screens */
 #highest_card {
-    font-size: 40px; /* Adjust this to your base font size */
+    font-size: 20px; /* Adjust this to your base font size */
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width: 1400px) {
+@media screen and (min-width: 0px) and (max-width:950px) {
     #highest_card {
-        font-size: 40px; /* Adjust font size for smaller screens */
+        font-size: 20px; /* Adjust font size for smaller screens */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 1401px) and (max-width: 1900px) {
+@media screen and (min-width: 950px) and (max-width: 1300px) {
     #highest_card {
-        font-size: 25px; /* Adjust font size for screens in this range */
+        font-size: 15px; /* Adjust font size for screens in this range */
     }
 }
 
 /* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1901px) and (max-width: 10000px) {
+@media screen and (min-width: 1300px) and (max-width: 10000px) {
     #highest_card {
-        font-size: 40px; /* Adjust font size for screens in this range */
+        font-size: 20px; /* Adjust font size for screens in this range */
     }
 }
+}
 
+/* Default font size for larger screens */
 #lowest_card {
-    font-size: 40px; /* Adjust this to your base font size */
+    font-size: 20px; /* Adjust this to your base font size */
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width: 1400px) {
+@media screen and (min-width: 0px) and (max-width:950px) {
     #lowest_card {
-        font-size: 40px; /* Adjust font size for smaller screens */
+        font-size: 20px; /* Adjust font size for smaller screens */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 1401px) and (max-width: 1900px) {
+@media screen and (min-width: 950px) and (max-width: 1300px) {
     #lowest_card {
-        font-size: 25px; /* Adjust font size for screens in this range */
+        font-size: 15px; /* Adjust font size for screens in this range */
     }
 }
 
 /* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1901px) and (max-width: 10000px) {
+@media screen and (min-width: 1300px) and (max-width: 10000px) {
     #lowest_card {
-        font-size: 40px; /* Adjust font size for screens in this range */
+        font-size: 20px; /* Adjust font size for screens in this range */
     }
+}
 }

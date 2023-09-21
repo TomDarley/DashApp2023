@@ -4,10 +4,10 @@ from dash import html
 
 # Define custom CSS style for navigation links
 custom_navlink_style = {
-    "font-size": "25px"  # Adjust the font size as needed
+    "font-size": "18px"  # Adjust the font size as needed
 }
 
-custom_brand_style ={"font-size": "30px"}
+custom_brand_style ={"font-size": "20px"}
 SWCM_LOGO = r"https://southwest.coastalmonitoring.org/wp-content/themes/swrcmp/images/logo.png"
 
 
@@ -30,7 +30,7 @@ navbar = dbc.NavbarSimple(
             label="More",style=custom_navlink_style
 
         ),
-    dbc.Col(html.Img(src = SWCM_LOGO, height= "50px")),
+    dbc.Col(html.Img(src = SWCM_LOGO, height= "30px")),
     ],
     brand="SWCM Topo Dash",
     brand_href="https://southwest.coastalmonitoring.org/",

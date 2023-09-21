@@ -21,7 +21,7 @@ gdf = gdf.to_crs(epsg=4326)
 # Extract latitude and longitude from the geometry column
 gdf['lat'] = gdf['wkb_geometry'].y
 gdf['long'] = gdf['wkb_geometry'].x
-gdf['size'] = 10
+gdf['size'] = 8
 lon = gdf['wkb_geometry']
 
 set_survey_unit = '6aSU12'
@@ -39,7 +39,7 @@ center_lon = selected_point['long']
 
 
 fig = px.scatter_mapbox(gdf, lat="lat", lon="long", hover_name="sur_unit", hover_data=['sur_unit'],
-                        color_discrete_sequence=["blue", "red"], zoom=7,  size ='size',color='color',
+                        color_discrete_sequence=["blue", "red"], zoom=7,  size ='size',color='color'
                         )
 
 
@@ -102,10 +102,10 @@ layout = html.Div(children=[
         style={
             "position": "relative",
             "width": "100%",
-            "height": "calc(50vh)",  # Adjust the height as needed
+            "height": "100%",  # Adjust the height as needed
             "display": "block",
-            "margin-top":"20px",
-            "buffer-top":"20px",
+            "margin-top":"10px",
+
 
         },
     ),
@@ -281,14 +281,14 @@ layout = html.Div(children=[
 
             ),
 
-        ])
+        ],id  = 'drop_down_card')
 
-    ],id  = 'drop_down_card'  )
-
-
+    ]  )
 
 
-])
+
+
+], style={'height': '100%'})
 
 @callback(
 Output("selected-value-storage", "data"),

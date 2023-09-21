@@ -39,7 +39,20 @@ layout = html.Div(
 
 
         dcc.Store(id = "change_rate"),
-        dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "50vh"}),
+
+
+        # wrap inside card so it scales correctly .... stupid
+        dbc.Card([
+            dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "60vh"}, config={'responsive': True}),
+
+
+        ]),
+
+
+
+
+
+
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="lg",
@@ -92,7 +105,7 @@ layout = html.Div(
             fullscreen=True,
     ),
     ],
-    style={'position': 'relative', 'margin-right': '20px',},  # Set the position of the containing div to relative
+    style={'position': 'relative','height': '100%', 'margin-right' : '20px'},  # Set the position of the containing div to relative
 
 )
 
@@ -108,12 +121,6 @@ layout = html.Div(
         Output("lowest_recorded_year","data"),
         Output("highest_recorded_value","data"),
         Output("highest_recorded_year","data"),
-
-
-
-
-
-
 
 
 
@@ -295,7 +302,7 @@ def make_scatter_plot(selected_survey_unit):
         y="Sum",
         color="season",
         symbol="season",
-        #height=690,
+        #height=550,
         template="plotly",
     )
 
@@ -308,18 +315,18 @@ def make_scatter_plot(selected_survey_unit):
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 20, "family": "Arial", "color": "white"},
+        title_font={"size": 12, "family": "Arial", "color": "white"},
         xaxis_title="",
         yaxis_title="Combined Profile Area (m²)",
         legend_title="",
-        font=dict(size=20, color="blue", family="Helvetica"),
+        font=dict(size=12, color="blue", family="Helvetica"),
         xaxis=dict(
             tickmode="array",
             tickvals=tickvals,
             ticktext=ticktext,
             tickangle=45,
             tickfont=dict(
-                size=15,  # Set the font size
+                size=12,  # Set the font size
                 color="blue",  # Set the font color
                 family="Helvetica",  # Set the font family
             ),
@@ -329,9 +336,9 @@ def make_scatter_plot(selected_survey_unit):
     # Customize the legend font and size
     fig.update_layout(
         legend=dict(
-            title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
+            title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
             title_text='',  # Remove legend title
-            font=dict(size=20, family='Helvetica')  # Customize font size and family for legend labels
+            font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
         legend_title_text=f''
@@ -340,7 +347,7 @@ def make_scatter_plot(selected_survey_unit):
     # increase marker size
     fig.update_traces(
         marker=dict(
-            size=10,
+            size=12,
             line=dict(
                 width=0,
             ),

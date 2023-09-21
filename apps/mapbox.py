@@ -281,9 +281,9 @@ layout = html.Div(children=[
 
             ),
 
-        ],id  = 'drop_down_card')
+        ])
 
-    ]  )
+    ] ,id  = 'drop_down_card' )
 
 
 

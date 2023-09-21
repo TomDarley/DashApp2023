@@ -2,18 +2,19 @@
 
 #drop_down_card {
     position: absolute;
-    top: 100px;
+    top: 0px;
 
     z-index: 9;
     width: 300px;
     border-radius: 10px;
     background-color: #f7fafa;
-    margin-left: 10px
+    margin-left: 0px
 
 }
 
+
 /* Media query for screens with a maximum width of 500 pixels */
-@media screen and (max-width: 1400px) {
+@media screen and (max-width: 14px) {
     #drop_down_card {
         position: absolute;
         z-index: 9;
@@ -23,6 +24,5 @@
         left: 20px; /* Adjust the left position for smaller screens */
     }
 }
-
 
 

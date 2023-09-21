@@ -28,7 +28,7 @@ set_survey_unit = '6aSU12'
 set_profile_line ='6a01613'
 
 # Set the color of the selected survey unit to red
-gdf.loc[gdf['sur_unit'] == set_survey_unit, 'color'] = 'red'
+gdf.loc[gdf['sur_unit'] == set_survey_unit, 'color'] = 'yellow'
 
 
 gdf['color'].fillna('blue', inplace=True)  # Fill other points with the default color
@@ -283,13 +283,7 @@ layout = html.Div(children=[
 
         ])
 
-    ],  style={'position': 'absolute',
-                'top': '100px',  # Adjust the top position as needed
-                'left': '18vw',  # Adjust the right position as needed
-                'z-index': 9,
-                'width': '300px',
-                'border-radius': '10px',
-                 'background-color' : '#f7fafa'})
+    ],id  = 'drop_down_card'  )
 
 
 

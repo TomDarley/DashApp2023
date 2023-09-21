@@ -140,12 +140,10 @@ layout = html.Div(
 
 
 
+
         ),
 
-                ])
-
-
-
+                ], style ={'margin': '20px' })
 @callback(
     (Output("CSA_table", "data"),Output("CSA_table", "columns")),
     [Input("selected-df-storage", "data")],

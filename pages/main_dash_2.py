@@ -26,50 +26,49 @@ layout = html.Div([
 
                     dbc.Card([
                         dbc.CardBody([
-                            html.H4("Survey Unit:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                            html.Div("6aSU12",id='survey_unit_card', style={'font-size': '40px'})
+                            html.H4("Survey Unit:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px', }),
+                            html.Div("6aSU12",id='survey_unit_card')
 
                         ])
-                        ], style={'margin': '10px'}),
+                        ] , style={'margin': '20px'}),
 
                     dbc.Card([
                         dbc.CardBody([
                             html.H4("Trend:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                            html.Div("----",id='trend_card', style={'font-size': '40px'})
+                            html.Div("----",id='trend_card')
 
                         ])
-                        ], style={'margin': '10px'}),
+                        ], style={'margin': '20px'}),
 
                     dbc.Card([
                         dbc.CardBody([
                             html.H4("Highest Recorded CPA:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                            html.Div("----",id='highest_card', style={'font-size': '40px'})
+                            html.Div("----",id='highest_card')
 
                         ])
-                        ], style={'margin': '10px'}),
+                        ], style={'margin': '20px'}),
 
                     dbc.Card([
                         dbc.CardBody([
                             html.H4("Lowest Recorded CPA:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                            html.Div("----",id='lowest_card', style={'font-size': '40px'})
+                            html.Div("----",id='lowest_card')
 
                         ])
-                        ], style={'margin': '10px'}),
+                        ], style={'margin': '20px'}),
+
+
+                ]),
+
+                    xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 2, "offset": 0}
 
 
 
-                        dbc.Card([
-                        dbc.CardBody([
-                            html.H4("Generate Report:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                            html.Button("Download Report", id="btn_csv"),
-                            dcc.Download(id="download-dataframe-csv"),
-                        ])
-                        ], style={'margin': '10px'}),
-
-
-
-
-                ]),width={"size": 2, "offset":0}),
+),
 
                 dbc.Col(html.Div([
                     mapbox.layout,
@@ -79,7 +78,12 @@ layout = html.Div([
                 ],
                     style={'margin-left': '20px'}),
 
-                    width={"size": 5, "offset":0},),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 12, "offset": 0},
+                    xl={"size": 12, "offset": 0},
+                    xxl={"size":5 , "offset": 0},),
 
                 dbc.Col(html.Div(
                     scatter_plot.layout,
@@ -89,21 +93,51 @@ layout = html.Div([
 
 
                 ),  style={'margin-top': '20px'},
-                    width={"size": 5, "offset":0}),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 12, "offset": 0},
+                    xl={"size": 12, "offset": 0},
+                    xxl={"size": 5, "offset": 0}),
             ],
             align="start"
 
         ),
     dbc.Row(
-        [   dbc.Col(html.Div([ ]),width={"size": 2, "offset":0}),
-            dbc.Col(html.Div(profile_line_plot.layout),width={"size": 5, "offset":0}),
-            dbc.Col(html.Div(error_bar_plot.layout),width={"size": 5, "offset":0}),
+        [   dbc.Col(html.Div([ ]),  xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 2, "offset": 0}),
+            dbc.Col(html.Div(profile_line_plot.layout),  xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 5, "offset": 0}),
+            dbc.Col(html.Div(error_bar_plot.layout), xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 5, "offset": 0}),
 
         ],
         align="center",),
     dbc.Row(
-        [
-            dbc.Col(html.Div(CSA_Table.layout), width={"size": 12, "offset": 0}),
+        [   dbc.Col(html.Div([ ]), xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 2, "offset": 0}),
+            dbc.Col(html.Div(CSA_Table.layout),  xs = {"size": 12, "offset":0},
+                    sm={"size": 12, "offset":0},
+                    md = {"size": 12, "offset": 0},
+                    lg = {"size": 12, "offset": 0},
+                    xl = {"size": 12, "offset": 0},
+                    xxl={"size": 10, "offset": 0}),
 
 
         ],

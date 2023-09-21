@@ -278,7 +278,7 @@ layout = html.Div(
                                         CSA_Table.layout,
                                     ]
                                 ),
-                                width={"size": 6, "offset": 0},
+                                width={"size": 3, "offset": 6},
                             ),
                         ]
                     ),

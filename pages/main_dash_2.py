@@ -78,7 +78,7 @@ layout = html.Div([
 
 
                 ],
-                    style={'margin-left': '20px', 'height': '60vh'}),
+                    style={ 'margin-top': '10px','height': '60vh'}),
 
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
@@ -102,7 +102,7 @@ layout = html.Div([
 
 
             align="start",
-            style= {'margin-top' : '15px'}
+            style= {}
 
         ),
     dbc.Row(
@@ -121,11 +121,6 @@ layout = html.Div([
             ], style={'margin': '20px', 'position': 'block'}),
 
 
-
-
-
-
-
         ]),  xs = {"size": 12, "offset":0},
                     sm={"size": 12, "offset":0},
                     md = {"size": 12, "offset": 0},
@@ -139,6 +134,7 @@ layout = html.Div([
                     lg = {"size": 5, "offset": 0},
                     xl = {"size": 5, "offset": 0},
                     xxl={"size": 5, "offset": 0}),
+
             dbc.Col(html.Div(error_bar_plot.layout), xs = {"size": 12, "offset":0},
                     sm={"size": 12, "offset":0},
                     md = {"size": 12, "offset": 0},

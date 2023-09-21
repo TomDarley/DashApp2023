@@ -303,7 +303,7 @@ def make_scatter_plot(selected_survey_unit):
         color="season",
         symbol="season",
         #height=550,
-        template="plotly",
+        template="seaborn",
     )
 
     # Update x-axis tick labels

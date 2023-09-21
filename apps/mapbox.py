@@ -21,7 +21,7 @@ gdf = gdf.to_crs(epsg=4326)
 # Extract latitude and longitude from the geometry column
 gdf['lat'] = gdf['wkb_geometry'].y
 gdf['long'] = gdf['wkb_geometry'].x
-gdf['size'] = 8
+gdf['size'] = 3
 lon = gdf['wkb_geometry']
 
 set_survey_unit = '6aSU12'
@@ -39,7 +39,7 @@ center_lon = selected_point['long']
 
 
 fig = px.scatter_mapbox(gdf, lat="lat", lon="long", hover_name="sur_unit", hover_data=['sur_unit'],
-                        color_discrete_sequence=["blue", "red"], zoom=7,  size ='size',color='color'
+                        color_discrete_sequence=["blue", "red"], zoom=7,  size ='size',color='color',size_max=10
                         )
 
 
@@ -104,7 +104,7 @@ layout = html.Div(children=[
             "width": "100%",
             "height": "100%",  # Adjust the height as needed
             "display": "block",
-            "margin-top":"10px",
+
 
 
         },
@@ -112,7 +112,7 @@ layout = html.Div(children=[
 
     dbc.Card([
         dbc.CardBody([
-            html.H4("  Survey Unit:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
+            html.H6("  Survey Unit:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
             dcc.Dropdown(
             options=[
                                                 {'label': '6aSU10', 'value': '6aSU10'},
@@ -270,14 +270,14 @@ layout = html.Div(children=[
                                                 {'label': '6eN2', 'value': '6eN2'}],
             value='6aSU12',
             id='survey-unit-dropdown',
-            style= {'font-size': '18px','margin':'0 auto','color': 'black' }
+            style= {'font-size': '12px','color': 'black' ,'width': '200px'}
             ),
-            html.H4("Profile Line:", className="card-title",style={'color': 'blue', }),
+            html.H6("Profile Line:", className="card-title",style={'color': 'blue', }),
             dcc.Dropdown(
                 options=['6a01613'],
                 value='6a01613',
                 id='survey-line-dropdown',
-                style= {'font-size': '18px','color': 'black' }
+                style= {'font-size': '12px','color': 'black','width': '200px', 'margin': '1px' }
 
             ),
 
@@ -407,6 +407,7 @@ def update_map(selection,zoom_level):
         zoom=zoom_level,
         #height=690,
         size= 'size',
+        size_max=10
 
 
     )

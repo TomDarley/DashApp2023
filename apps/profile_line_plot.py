@@ -16,7 +16,7 @@ from sqlalchemy import create_engine
 
 
 layout = html.Div([
-    dcc.Graph(id="line_plot", style={"width": "100%", "height": "50vh", 'margin-left': '20px',}),
+    dcc.Graph(id="line_plot", style={"width": "100%", "height": "50vh", 'margin-left': '0px',}),
     dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="lg",
@@ -63,7 +63,7 @@ layout = html.Div([
             fullscreen=True,
     ),
                        
-    ],style={'position': 'relative', 'margin-bottom': '10px','margin-top': '20px','margin-right': '20px','buffer-right': '20px'},
+    ],style={'position': 'relative', 'margin-bottom': '10px','margin-top': '20px','margin-right': '0px'},
 )
 
 
@@ -99,7 +99,7 @@ def make_line_plot(selected_sur_unit, selected_profile):
 
     # Create a 2D line plot
     fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
-                  color_discrete_sequence=px.colors.qualitative.D3, template="plotly",)
+                  color_discrete_sequence=px.colors.qualitative.D3, template="seaborn",)
 
     fig.add_trace(
         go.Scatter(x=master_profile_chainage, y=master_profile_elevation, line=dict(color='red', width=5, dash='dash'),
@@ -109,29 +109,29 @@ def make_line_plot(selected_sur_unit, selected_profile):
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(
         title_text='Chainage (m)',
-        title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
-        tickfont=dict(size=20, family='Helvetica')  # Customize tick font size and family
+        title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
+        tickfont=dict(size=12, family='Helvetica')  # Customize tick font size and family
     )
 
     fig.update_yaxes(
         title_text='Elevation (m)',
-        title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
-        tickfont=dict(size=20, family='Helvetica')  # Customize tick font size and family
+        title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
+        tickfont=dict(size=12, family='Helvetica')  # Customize tick font size and family
     )
 
     # Customize the legend font and size
     fig.update_layout(
         legend=dict(
-            title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
+            title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
             title_text='',  # Remove legend title
-            font=dict(size=20, family='Helvetica')  # Customize font size and family for legend labels
+            font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
         legend_title_text=f''
     )
 
     # Add a title to the plot
-    fig.update_layout(title=f'{selected_profile}', title_font=dict(size=20, family='Helvetica'),title_x=0.5)
+    fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
     return fig, fig
 

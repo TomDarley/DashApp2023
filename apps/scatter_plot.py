@@ -16,6 +16,7 @@ from scipy.integrate import quad
 import warnings
 import time
 import base64
+import io
 
 # delete this
 image_path = r"C:\Users\darle\PycharmProjects\Dash_App_Master\DashApp2023\media\NERD.jpeg"
@@ -30,15 +31,14 @@ layout = html.Div(
             data={"current": None, "previous": None},
         ),
 
+        # stores for the metrics generated in plot creation
         dcc.Store(id = "lowest_recorded_value"),
         dcc.Store(id = "lowest_recorded_year"),
         dcc.Store(id = "highest_recorded_value"),
         dcc.Store(id = "highest_recorded_year"),
 
-
-
-
         dcc.Store(id = "change_rate"),
+        dcc.Store(id ='scatter_chart'),
 
 
         # wrap inside card so it scales correctly .... stupid
@@ -47,11 +47,6 @@ layout = html.Div(
 
 
         ]),
-
-
-
-
-
 
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -122,12 +117,11 @@ layout = html.Div(
         Output("highest_recorded_value","data"),
         Output("highest_recorded_year","data"),
 
-
-
-    ),
-    [
+        Output('scatter_chart', "data"),
         Input("survey-unit-dropdown", "value"),
-    ],
+
+
+    ),allow_duplicate=True
 )
 def make_scatter_plot(selected_survey_unit):
     print(selected_survey_unit)
@@ -357,7 +351,24 @@ def make_scatter_plot(selected_survey_unit):
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
-    return fig, f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", df_store, fig,lowest_values, lowest_year, highest_values, highest_year
+
+    # Serialize the figure to JSON
+    serialized_fig = fig.to_json()
+
+    # Update the 'cpa' key in the store's data with the serialized figure
+    chart_data = {"cpa": serialized_fig}
+
+    return fig, \
+        f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", \
+        df_store, \
+        fig,\
+        lowest_values,\
+        lowest_year, \
+        highest_values, \
+        highest_year, \
+        chart_data
+
+
 
 
 @callback(

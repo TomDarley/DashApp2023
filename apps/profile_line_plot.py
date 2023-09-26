@@ -13,9 +13,12 @@ import statsmodels.api as sm
 import plotly.graph_objs as go
 import json
 from sqlalchemy import create_engine
-
+import io
+import base64
 
 layout = html.Div([
+    dcc.Store(id='line_chart'),
+
     dcc.Graph(id="line_plot", style={"width": "100%", "height": "50vh", 'margin-left': '0px',}),
     dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -70,9 +73,13 @@ layout = html.Div([
 @callback(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
+    Output('line_chart', "data"),
+
+
     Input('survey-unit-dropdown', 'value'),
     Input('survey-line-dropdown', 'value'),
-    prevent_initial_call=False)
+    prevent_initial_call=False,
+    allow_duplicate=True)
 
 def make_line_plot(selected_sur_unit, selected_profile):
     # All shapefile loaded into the database should not be promoted to multi
@@ -133,7 +140,15 @@ def make_line_plot(selected_sur_unit, selected_profile):
     # Add a title to the plot
     fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
-    return fig, fig
+    # Serialize the figure to JSON
+    serialized_fig = fig.to_json()
+
+    # Update the 'cpa' key in the store's data with the serialized figure
+    chart_data = {"line_plot": serialized_fig}
+
+
+
+    return fig, fig, chart_data
 
 
 @callback(

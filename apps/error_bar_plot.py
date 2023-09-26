@@ -18,6 +18,7 @@ import time
 import matplotlib.pyplot as plt
 
 layout = html.Div([
+    dcc.Store(id ='error_chart'),
     dcc.Graph(id="error_plot",style={"width": "100%", "height": "50vh"}),
 
     # adding info and max view buttons
@@ -76,8 +77,10 @@ layout = html.Div([
 @callback(
     Output("error_plot", "figure"),
     Output('error_plot_model',"figure"),
+    Output('error_chart', "data"),
     Input("selected-df-storage", "data"),
     State("survey-unit-dropdown", "value"),
+
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
 
@@ -184,7 +187,13 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
     )
 
-    return fig, fig
+    # Serialize the figure to JSON
+    serialized_fig = fig.to_json()
+
+    # Update the 'cpa' key in the store's data with the serialized figure
+    chart_data = {"error_plot": serialized_fig}
+
+    return fig, fig, chart_data
 
 # adding the callbacks that control the modal buttons display logic
 @callback(

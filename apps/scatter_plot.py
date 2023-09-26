@@ -43,10 +43,10 @@ layout = html.Div(
 
         # wrap inside card so it scales correctly .... stupid
         dbc.Card([
-            dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "60vh"}, config={'responsive': True}),
+            dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "60vh", }, config={'responsive': True}),
 
 
-        ]),
+        ], ),
 
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -54,7 +54,7 @@ layout = html.Div(
             id="scatter_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'top': '1%', 'right': '2px'},
+            style={'position': 'absolute', 'top': '1%', 'right': '8px'},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -62,7 +62,7 @@ layout = html.Div(
             id="scatter_open_full",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'right': '2px'},
+            style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
         ),
 
         dbc.Modal(

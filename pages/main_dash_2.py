@@ -73,6 +73,24 @@ layout = html.Div([
                     ])
                 ], style={'margin': '10px', 'border-radius': '10px'}),
 
+                dbc.Card([
+                    dbc.CardBody([
+                        #html.H4("Download Charts:", className="card-title",
+                         #       style={'color': 'blue', 'margin-bottom': '10px', }),
+
+                        dcc.Checklist(id='download-check-list',
+                                      options=[
+                                          {'label': ' CPA Plot', 'value': 'cpa'},
+                                          {'label': ' Line Plot', 'value': 'line_plot'},
+                                          {'label': ' Box Plot', 'value': 'box_plot'}
+                                      ],
+                                      value=[]),
+
+                        dbc.Button('Download Charts', id='download-charts-button', n_clicks=0, size='sm'),
+
+                    ])
+                ], style={'margin': '10px', 'position': 'block', 'border-radius': '10px'}),
+
             ]),
 
                 xs={"size": 12, "offset": 0},
@@ -117,26 +135,7 @@ layout = html.Div([
     ),
     dbc.Row(
         [dbc.Col(html.Div([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Download Charts:", className="card-title",
-                            style={'color': 'blue', 'margin-bottom': '10px', }),
 
-
-                    dcc.Checklist(id= 'download-check-list',
-                        options=[
-                            {'label': ' CPA Plot', 'value': 'cpa'},
-                            {'label': ' Line Plot', 'value': 'line_plot'},
-                            {'label': ' Box Plot', 'value': 'box_plot'}
-                        ],
-                        value =[]),
-
-                    dbc.Button('Lock Selection',id = 'download-charts-button', n_clicks=0),
-
-
-
-                ])
-            ], style={'margin': '10px', 'position': 'block', 'border-radius': '10px'}),
 
         ]), xs={"size": 12, "offset": 0},
             sm={"size": 12, "offset": 0},
@@ -280,6 +279,13 @@ def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, li
 
     subplot = make_subplots(rows=rows, cols=1, subplot_titles=titles,row_heights=row_heights, shared_xaxes=False)
 
+
+    if rows == 1:
+        subplot.update_layout(height=800, width  =2000)
+    elif rows == 2:
+        subplot.update_layout(height=1500, width  =2000)
+    elif rows == 3:
+        subplot.update_layout(height=2000, width  =2000)
 
 
     if n_clicks is None:

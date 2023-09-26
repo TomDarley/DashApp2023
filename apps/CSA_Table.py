@@ -143,7 +143,7 @@ layout = html.Div(
 
         ),
 
-                ], style ={'margin': '20px' })
+                ], style ={'margin-left':'0px', "margin-right": "20px","margin-bottom":"50px","margin-top":"30px"  })
 @callback(
     (Output("CSA_table", "data"),Output("CSA_table", "columns")),
     [Input("selected-df-storage", "data")],

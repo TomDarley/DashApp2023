@@ -26,7 +26,7 @@ layout = html.Div([
             id="line_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'top': '1%', 'right': '2px'},
+            style={'position': 'absolute', 'top': '1%', 'right': '8px'},
         ),
     dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -34,7 +34,7 @@ layout = html.Div([
             id="line_open_full",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'right': '2px'},
+            style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
         ),
 
     dbc.Modal(
@@ -90,10 +90,13 @@ def make_line_plot(selected_sur_unit, selected_profile):
     # Load topo data from DB
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND reg_id = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
+    topo_df =topo_df.sort_values(by='chainage')
 
     # Load master profile data from DB, extract chainage and elevation
     master_profile_chainage = []
     master_profile_elevation = []
+
+
     master_profile_query = f"SELECT * FROM master_profiles WHERE profile_id = '{selected_profile}'"
     mp_df = pd.read_sql_query(master_profile_query, conn)
     mp_df = mp_df.dropna(axis=1, how='any')

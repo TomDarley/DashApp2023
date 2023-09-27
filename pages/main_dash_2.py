@@ -80,9 +80,9 @@ layout = html.Div([
 
                         dcc.Checklist(id='download-check-list',
                                       options=[
-                                          {'label': ' CPA Plot', 'value': 'cpa'},
-                                          {'label': ' Line Plot', 'value': 'line_plot'},
-                                          {'label': ' Box Plot', 'value': 'box_plot'}
+                                          {'label': ' CPA Plot ', 'value': 'cpa'},
+                                          {'label': ' Line Plot ', 'value': 'line_plot'},
+                                          {'label': ' Box Plot ', 'value': 'box_plot'}
                                       ],
                                       value=[]),
 

@@ -128,24 +128,104 @@ style_data_conditional = [
 ]
 
 
-layout = html.Div(
-    [
+#layout = html.Div(
+#    [
+#
+#                    dash_table.DataTable(id = 'CSA_table', sort_action='native',sort_mode='single', style_cell={'textAlign': 'center'},style_header={
+#        'backgroundColor': 'rgb(30, 30, 30)',
+#        'color': 'white','font-size':20
+#
+#    },columns=[{'name': 'Profile', 'id': 'Profile'}, {'name': 'Spring to Spring Diff (m2)', 'id': 'Spring to Spring Diff (m2)'}, {'name': 'Spring to Spring % Change', 'id': 'Spring to Spring % Change'}, {'name': 'Baseline to Spring Diff (m2)', 'id': 'Baseline to Spring Diff (m2)'}, {'name': 'Baseline to Spring % Change', 'id': 'Baseline to Spring % Change'}],
+#    style_data_conditional=style_data_conditional,
+#
+#
+#
+#
+#        ),
+#
+#                ], style ={'margin-left':'0px', "margin-right": "20px","margin-bottom":"50px","margin-top":"30px"  })
+#
 
-                    dash_table.DataTable(id = 'CSA_table', sort_action='native',sort_mode='single', style_cell={'textAlign': 'center'},style_header={
-        'backgroundColor': 'rgb(30, 30, 30)',
-        'color': 'white','font-size':20
 
-    },columns=[{'name': 'Profile', 'id': 'Profile'}, {'name': 'Spring to Spring Diff (m2)', 'id': 'Spring to Spring Diff (m2)'}, {'name': 'Spring to Spring % Change', 'id': 'Spring to Spring % Change'}, {'name': 'Baseline to Spring Diff (m2)', 'id': 'Baseline to Spring Diff (m2)'}, {'name': 'Baseline to Spring % Change', 'id': 'Baseline to Spring % Change'}],
-    style_data_conditional=style_data_conditional,
+layout = html.Div([
+    dbc.Row([
 
 
 
+        dbc.Col(html.Div([
 
+            dbc.Card([
+                dbc.CardBody([
+                    html.H5("Survey Unit:", id= 'spring_to_spring_header',className="card-title",
+                            style={'color': 'white', 'margin-bottom': '5px', 'text-align':'center','backgroundColor': '#0d4eb8'}),
+                    dash_table.DataTable(id = 'spr_to_spr_table', sort_action='native',sort_mode='single',
+                                         style_cell={'textAlign': 'center',},
+                                         style_header={'backgroundColor': '#0d4eb8', 'color': 'white','font-size':12 },
+                                         columns=[{'name': 'Profile', 'id': 'Profile'},
+                                                  {'name': 'Spring to Spring Diff (m2)',
+                                                   'id': 'Spring to Spring Diff (m2)'},
+                                                  {'name': 'Spring to Spring % Change',
+                                                   'id': 'Spring to Spring % Change'},
+                                               ],
+
+                                         style_data_conditional=style_data_conditional,
+                                         ),
+
+
+                            ],style={'width': '100%'})
+                    ], style={'margin-right': '0px', 'border-radius': '10px', 'width': '100%'}),
+
+
+           ]),style={'align':'center'},
         ),
 
-                ], style ={'margin-left':'0px', "margin-right": "20px","margin-bottom":"50px","margin-top":"30px"  })
+        dbc.Col(html.Div([
+
+            dbc.Card([
+                dbc.CardBody([
+                    html.H5("Baseline to Spring:", id='baseline_to_spring_header', className="card-title",
+                            style={'color': 'white', 'margin-bottom': '5px', 'text-align':'center',
+                                   'backgroundColor': '#0d4eb8'}),
+                    dash_table.DataTable(id='spr_to_baseline_table', sort_action='native', sort_mode='single',
+                                         style_cell={'textAlign': 'center',},
+                                         style_header={'backgroundColor': '#0d4eb8', 'color': 'white',
+                                                       'font-size': 12},
+                                         columns=[{'name': 'Profile', 'id': 'Profile'},
+                                                  {'name': 'Baseline to Spring Diff (m2)',
+                                                   'id': 'Baseline to Spring Diff (m2)'},
+                                                  {'name': 'Baseline to Spring % Change',
+                                                   'id': 'Baseline to Spring % Change'}],
+
+                                         style_data_conditional=style_data_conditional,
+                                         ),
+
+                ],style={})
+            ], style={'margin-left': '0px', 'border-radius': '10px','width': '100%'}),
+
+        ]),
+        )
+
+        ], style={'margin-right': '0px'},align="start")
+
+
+])
+
+
+#@callback(
+#    (Output("CSA_table", "data"),Output("CSA_table", "columns")),
+#    [Input("selected-df-storage", "data")],
+#)
+
 @callback(
-    (Output("CSA_table", "data"),Output("CSA_table", "columns")),
+    (Output("spr_to_spr_table", "data"),
+     Output("spr_to_spr_table", "columns"),
+     Output("spring_to_spring_header", "children"),
+
+     Output("spr_to_baseline_table", "data"),
+     Output("spr_to_baseline_table", "columns"),
+     Output("baseline_to_spring_header", "children"),
+
+     ),
     [Input("selected-df-storage", "data")],
 )
 
@@ -220,14 +300,26 @@ def make_csa_table(selected_csa_data):
 
     df= df.rename(columns ={'index': 'Profile'})
 
+    # split df into two dfs, each representing the table for each card
+    spr_spr_df = df[['Profile','Spring to Spring Diff (m2)','Spring to Spring % Change']]
+    base_spr_df = df[['Profile', 'Baseline to Spring Diff (m2)', 'Baseline to Spring % Change', ]]
+
     # convert to records format required by dash table
-    df1 = df.to_dict('records')
+    spr_spr_df_to_records  = spr_spr_df.to_dict('records')
+    base_spr_df_to_records = base_spr_df.to_dict('records')
 
-    # Define the columns for the DataTable
-    columns = [{"name": i, "id": i} for i in df.columns]
+    # Define the columns for the DataTableS
+    spr_spr_columns = [{"name": i, "id": i} for i in spr_spr_df.columns]
 
-    print(columns)
+    base_spr_columns = [{"name": i, "id": i} for i in base_spr_df.columns]
+
+    # Generate the dates as text for the card titles holding each table
+
+    spr_spr_title = f"{last_years_spring} - {latest_spring}"
+    base_spr_title = f"{first_survey} - {latest_spring}"
 
 
 
-    return  df1, columns
+
+
+    return  spr_spr_df_to_records, spr_spr_columns,spr_spr_title, base_spr_df_to_records,  base_spr_columns , base_spr_title

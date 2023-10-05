@@ -19,23 +19,48 @@ import base64
 layout = html.Div([
     dcc.Store(id='line_chart'),
 
+
     dcc.Graph(id="line_plot", style={"width": "100%", "height": "50vh", 'margin-left': '0px',}),
     dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
-            size="lg",
+            size="md",
             id="line_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'top': '1%', 'right': '8px'},
+            style={'position': 'absolute', 'bottom': '1%', 'left': '8px'},
         ),
+
     dbc.Button(
-            [html.Span(className="fa-solid fa-expand")],
-            size="lg",
-            id="line_open_full",
+        [html.Span(className="fa-solid fa-expand")],
+        size="md",
+        id="line_open_full",
+        n_clicks=0,
+        className="mr-3",
+        style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
+    ),
+
+
+
+    dbc.Button(
+            [html.Span(className="bi bi-badge-3d")],
+            size="md",
+            id="3D_plot",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
+            style={'position': 'absolute', 'top': '1%', 'left': '60px'},
         ),
+
+    dbc.Button(
+            [html.Span(className="bi bi-badge-sd")],
+            size="md",
+            id="2D_plot",
+            n_clicks=0,
+            className="mr-3",
+            style={'position': 'absolute', 'top': '1%', 'left': '8px'},
+        ),
+
+
+
 
     dbc.Modal(
             [
@@ -78,10 +103,26 @@ layout = html.Div([
 
     Input('survey-unit-dropdown', 'value'),
     Input('survey-line-dropdown', 'value'),
+    Input('3D_plot', 'n_clicks'),
+    Input('2D_plot', 'n_clicks'),
+
+
     prevent_initial_call=False,
     allow_duplicate=True)
 
-def make_line_plot(selected_sur_unit, selected_profile):
+def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d):
+
+    # check if a chart mode button has been selected, use it to render the correct chart mode
+    trigger = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    print(trigger)
+    if trigger == '3D_plot.n_clicks':
+        selection = '3D'
+    elif trigger == '2D_ploy_n_clicks':
+        selection = '2D'
+    else:
+        selection = '2D'
+
+
     # All shapefile loaded into the database should not be promoted to multi
     engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
     # Connect to the database using the engine
@@ -107,26 +148,61 @@ def make_line_plot(selected_sur_unit, selected_profile):
         master_profile_chainage.append(first)
         master_profile_elevation.append(last)
 
-    # Create a 2D line plot
-    fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
-                  color_discrete_sequence=px.colors.qualitative.D3, template="seaborn",)
 
-    fig.add_trace(
-        go.Scatter(x=master_profile_chainage, y=master_profile_elevation, line=dict(color='red', width=5, dash='dash'),
-                   name='Master Profile')
-    )
+
+    #dummy_y= topo_df['date'].
+
+    if selection == '3D':
+
+        # create 3D plot
+        surface_elevation = []
+        for x in range(len(topo_df['chainage'])):
+            surface_elevation.append(master_profile_elevation)
+
+        fig = px.line_3d(topo_df, x= 'chainage', y='date', z= 'elevation_OD',color='date')
+
+
+
+        fig.add_trace(
+            go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
+                       name='Master Profile', colorscale='Fall')
+
+        )
+
+        fig.update_layout(
+            legend=dict(
+                orientation='h',  # Horizontal orientation
+                yanchor='top',  # Anchor to the top of the chart
+                y=1.05,  # Adjust the vertical position as needed
+                xanchor='left',  # Anchor to the left side of the chart
+                x=0.01  # Adjust the horizontal position as needed
+            )
+        )
+    else:
+
+        # Create a 2D line plot
+        fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
+                      color_discrete_sequence=px.colors.qualitative.D3, template="seaborn", )
+
+        fig.add_trace(
+            go.Scatter(x=master_profile_chainage, y=master_profile_elevation,
+                       line=dict(color='red', width=5, dash='dash'),
+                       name='Master Profile')
+        )
+
+
 
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(
         title_text='Chainage (m)',
-        title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
-        tickfont=dict(size=12, family='Helvetica')  # Customize tick font size and family
+        title_font=dict(size=15, family='Helvetica', color = 'blue'),  # Customize font size and family
+        tickfont=dict(size=15, family='Helvetica', color ='blue')  # Customize tick font size and family
     )
 
     fig.update_yaxes(
         title_text='Elevation (m)',
-        title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
-        tickfont=dict(size=12, family='Helvetica')  # Customize tick font size and family
+        title_font=dict(size=15, family='Helvetica', color = 'blue'),  # Customize font size and family
+        tickfont=dict(size=15, family='Helvetica', color ='blue')  # Customize tick font size and family
     )
 
     # Customize the legend font and size

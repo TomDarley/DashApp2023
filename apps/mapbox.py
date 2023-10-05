@@ -28,10 +28,10 @@ set_survey_unit = '6aSU12'
 set_profile_line ='6a01613'
 
 # Set the color of the selected survey unit to red
-gdf.loc[gdf['sur_unit'] == set_survey_unit, 'color'] = 'yellow'
+gdf.loc[gdf['sur_unit'] == set_survey_unit, 'color'] = '#eb05c4'
 
 
-gdf['color'].fillna('blue', inplace=True)  # Fill other points with the default color
+gdf['color'].fillna('#4459c2', inplace=True)  # Fill other points with the default color
 # Extract the coordinates of the selected survey unit
 selected_point =gdf.loc[gdf['sur_unit'] == set_survey_unit].iloc[0]
 center_lat = selected_point['lat']
@@ -39,7 +39,7 @@ center_lon = selected_point['long']
 
 
 fig = px.scatter_mapbox(gdf, lat="lat", lon="long", hover_name="sur_unit", hover_data=['sur_unit'],
-                        color_discrete_sequence=["blue", "red"], zoom=7,  size ='size',color='color',size_max=10
+                        color_discrete_sequence=["#4459c2", "#eb05c4"], zoom=7,  size ='size',color='color',size_max=12
                         )
 
 
@@ -53,7 +53,7 @@ line_data = gpd.GeoDataFrame(
     {'geometry': [loads(wkt) for wkt in lines_gdf['wkb_geometry'].astype("string")]}
 )
 
-# adding each WKT string as trace to the fig as a trace
+
 # adding each WKT string as trace to the fig as a trace
 for i, row in line_data.iterrows():
     line = row['geometry']
@@ -64,10 +64,10 @@ for i, row in line_data.iterrows():
     profile_line_id = lines_gdf.iloc[i]['profname']
 
     if set_profile_line == profile_line_id:
-        colour = 'red'
+        colour = '#e8d90c'
         width = 8
     else:
-        colour ='blue'
+        colour ='#246673'
         width = 5
 
     # Add the LineString trace to the map
@@ -388,8 +388,8 @@ def update_map(selection,zoom_level):
     updated_gdf = updated_gdf.drop('color',axis=1)
 
     # Set the color of the selected survey unit to red
-    updated_gdf.loc[updated_gdf['sur_unit'] == set_survey_unit, 'color'] = 'red'
-    updated_gdf['color'].fillna('blue', inplace=True)  # Fill other points with the default color
+    updated_gdf.loc[updated_gdf['sur_unit'] == set_survey_unit, 'color'] = '#eb05c4'
+    updated_gdf['color'].fillna('#4459c2', inplace=True)  # Fill other points with the default color
     # Extract the coordinates of the selected survey unit
     selected_point = updated_gdf.loc[updated_gdf['sur_unit'] == set_survey_unit].iloc[0]
     center_lat = selected_point['lat']
@@ -402,12 +402,12 @@ def update_map(selection,zoom_level):
         hover_name="sur_unit",
         hover_data=['sur_unit'],
         color='color',  # Use the 'color' column to specify point colors
-        color_discrete_sequence=["blue", "red"],  # Define colors for the legend
+        color_discrete_sequence=["#4459c2", "#eb05c4"],  # Define colors for the legend
         center={"lat": center_lat, "lon": center_lon},  # Set the map center to the selected point
         zoom=zoom_level,
         #height=690,
         size= 'size',
-        size_max=10
+        size_max=12
 
 
     )
@@ -434,10 +434,10 @@ def update_map(selection,zoom_level):
         profile_line_id = lines_gdf.iloc[i]['profname']
 
         if set_profile_line == profile_line_id:
-            colour = 'red'
+            colour = '#e8d90c'
             width = 8
         else:
-            colour ='blue'
+            colour ='#246673'
             width = 5
 
         # Add the LineString trace to the map

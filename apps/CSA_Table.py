@@ -127,26 +127,6 @@ style_data_conditional = [
 
 ]
 
-
-#layout = html.Div(
-#    [
-#
-#                    dash_table.DataTable(id = 'CSA_table', sort_action='native',sort_mode='single', style_cell={'textAlign': 'center'},style_header={
-#        'backgroundColor': 'rgb(30, 30, 30)',
-#        'color': 'white','font-size':20
-#
-#    },columns=[{'name': 'Profile', 'id': 'Profile'}, {'name': 'Spring to Spring Diff (m2)', 'id': 'Spring to Spring Diff (m2)'}, {'name': 'Spring to Spring % Change', 'id': 'Spring to Spring % Change'}, {'name': 'Baseline to Spring Diff (m2)', 'id': 'Baseline to Spring Diff (m2)'}, {'name': 'Baseline to Spring % Change', 'id': 'Baseline to Spring % Change'}],
-#    style_data_conditional=style_data_conditional,
-#
-#
-#
-#
-#        ),
-#
-#                ], style ={'margin-left':'0px', "margin-right": "20px","margin-bottom":"50px","margin-top":"30px"  })
-#
-
-
 layout = html.Div([
     dbc.Row([
 
@@ -210,12 +190,6 @@ layout = html.Div([
 
 ])
 
-
-#@callback(
-#    (Output("CSA_table", "data"),Output("CSA_table", "columns")),
-#    [Input("selected-df-storage", "data")],
-#)
-
 @callback(
     (Output("spr_to_spr_table", "data"),
      Output("spr_to_spr_table", "columns"),
@@ -235,14 +209,11 @@ def make_csa_table(selected_csa_data):
     df = pd.read_json(selected_csa_data)
     df= df.drop(df.index[-1])
 
-
     # ranges used to decide the survey type
     spring_range = [1, 2, 3, 4]
     summer_range = [5, 6, 7, 8]
     autumn_range = [9, 10, 11, 12]
     all_dates = []
-
-
 
     classify_dates ={'Spring':[], 'Summer':[], 'Autumn': []}
     for x in df.columns:
@@ -278,15 +249,6 @@ def make_csa_table(selected_csa_data):
     base_dif_name = f'Baseline to Spring Diff (m2)'
     base_per_name = f'Baseline to Spring % Change'
 
-
-    ## calculate the change add as columns
-    #df[spr_dif_name] = ((df[str(last_years_spring)] - df[str(latest_spring)])).round(2)
-    #df[spr_per_name] = (((df[str(last_years_spring)] - df[str(latest_spring)]) / df[
-    #    str(latest_spring)]) * 100).round(2)
-    #df[base_dif_name] = ((df[str(first_survey)] - df[str(latest_spring)])).round(2)
-    #df[base_per_name] = (((df[str(first_survey)] - df[str(latest_spring)]) / df[
-    #    str(latest_spring)]) * 100).round(2)
-
     # calculate the change add as columns
     df[spr_dif_name] = ((df[str(latest_spring)] - df[str(last_years_spring)])).round(2)
     df[spr_per_name] = (((df[str(latest_spring)] - df[str(last_years_spring)]) / df[
@@ -317,9 +279,5 @@ def make_csa_table(selected_csa_data):
 
     spr_spr_title = f"{last_years_spring} - {latest_spring}"
     base_spr_title = f"{first_survey} - {latest_spring}"
-
-
-
-
 
     return  spr_spr_df_to_records, spr_spr_columns,spr_spr_title, base_spr_df_to_records,  base_spr_columns , base_spr_title

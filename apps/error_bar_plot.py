@@ -24,15 +24,15 @@ layout = html.Div([
     # adding info and max view buttons
     dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
-            size="lg",
+            size="md",
             id="error_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'top': '1%', 'right': '8px'},
+            style={'position': 'absolute', 'bottom': '1%', 'left': '8px'},
         ),
     dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
-            size="lg",
+            size="md",
             id="error_open_full",
             n_clicks=0,
             className="mr-3",
@@ -142,8 +142,10 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         x=[None],
         y=[None],
         mode="markers",
-        marker=dict(color="red", size=10),
+        marker=dict(color="red", size=8),
         name="Latest Survey",
+
+
     )
     fig.add_trace(dummy_legend_trace)
     fig.update_layout(showlegend=True, legend_title_text="Profile Name")
@@ -155,8 +157,8 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 20, "family": "Helvetica", "color": "white"},
-        yaxis_title="Combined Profile Area (m²)",
+        title_font={"size": 15, "family": "Helvetica", "color": "white"},
+        yaxis_title={'text':"Combined Profile Area (m²)", 'font': {'size':15}},
         xaxis_title=None,
         legend_title="",
         font=dict(size=15, color="blue", family="Helvetica"),
@@ -169,14 +171,15 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
                 family="Helvetica",  # Set the font family
             ),
         ),
+
     )
 
     # Customize the legend font and size
     fig.update_layout(
         legend=dict(
-            title_font=dict(size=20, family='Helvetica'),  # Customize font size and family
+            title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
             title_text='',  # Remove legend title
-            font=dict(size=20, family='Helvetica')  # Customize font size and family for legend labels
+            font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
         legend_title_text=f''

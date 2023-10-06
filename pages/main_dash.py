@@ -9,7 +9,7 @@ from DashApp2023.apps import error_bar_plot
 from DashApp2023.apps import mapbox
 
 from DashApp2023.apps import profile_line_plot
-from DashApp2023.apps import CSA_Table
+from DashApp2023.apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
 import psycopg2
@@ -275,7 +275,7 @@ layout = html.Div(
                             dbc.Col(
                                 html.Div(
                                     [
-                                        CSA_Table.layout,
+                                        csa_table.layout,
                                     ]
                                 ),
                                 width={"size": 3, "offset": 6},

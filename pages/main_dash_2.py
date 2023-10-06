@@ -1,38 +1,27 @@
 import dash
 from dash import html, callback, Input, Output, State
-
-# from DashApp2023.apps import survey_unit_dropdown
 from DashApp2023.apps import scatter_plot
 from DashApp2023.apps import error_bar_plot
-
-# from DashApp2023.apps import leaflet_map
 from DashApp2023.apps import mapbox
-
 from DashApp2023.apps import profile_line_plot
-from DashApp2023.apps import CSA_Table
+from DashApp2023.apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
 from plotly.subplots import make_subplots
-import psycopg2
-import geopandas as gpd
 import json
-from dash_extensions.javascript import Namespace
 import plotly.graph_objs as go
 from datetime import datetime
-import io
-import base64
 from dash.exceptions import PreventUpdate
-from base64 import b64encode
-
 
 
 # register the page with dash giving url path
 dash.register_page(__name__, path="/main_dash2")
+
+# define the layout of the main page
 layout = html.Div([
     dcc.Store(id='generated_charts',data={"cpa": None, 'line_plot': None, 'error_plot': None} ),
     dcc.Graph(id='hidden-chart', style ={'display': 'none'}),
     dcc.Download(id  ='download'),
-
 
     dbc.Row(
         [
@@ -167,7 +156,7 @@ layout = html.Div([
                  lg={"size": 2, "offset": 0},
                  xl={"size": 2, "offset": 0},
                  xxl={"size": 2, "offset": 0}),
-         dbc.Col(html.Div(CSA_Table.layout), xs={"size": 12, "offset": 0},
+         dbc.Col(html.Div(csa_table.layout), xs={"size": 12, "offset": 0},
                  sm={"size": 12, "offset": 0},
                  md={"size": 12, "offset": 0},
                  lg={"size": 10, "offset": 0},
@@ -178,7 +167,6 @@ layout = html.Div([
         align="start", ),
 
 ])
-
 
 @callback(
     Output("survey_unit_card", "children"),
@@ -247,13 +235,14 @@ def update_highest_cpa_card(highest_data, highest_year):
     prevent_initial_call= True
 )
 def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, line_chart):
+    """Function controls the logic behind which charts are to be downloaded using the download checklist"""
+
     print(n_clicks)
 
     if n_clicks is None:
         raise PreventUpdate
 
-
-    # order map
+    # dict that stores the order of the selected maps to be downloaded
     order_map = {}
 
     # generate the right number of subplots based on user selection:
@@ -276,9 +265,7 @@ def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, li
         row_heights.append(0.3)
         order_map.update({'error_plot': [rows]})
 
-
-    subplot = make_subplots(rows=rows, cols=1, subplot_titles=titles,row_heights=row_heights, shared_xaxes=False)
-
+    subplot = make_subplots(rows=rows, cols=1, subplot_titles=titles, row_heights=row_heights, shared_xaxes=False)
 
     if rows == 1:
         subplot.update_layout(height=800, width  =2000)
@@ -287,33 +274,28 @@ def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, li
     elif rows == 3:
         subplot.update_layout(height=2000, width  =2000)
 
-
     if n_clicks is None:
         return dash.no_update
     else:
-        print(chart_selection)
-        #print(charts)
 
         if 'cpa' in chart_selection:
             cpa_figure_data = scatter_chart.get("cpa")
             cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
-            # Update the x-axis formatting for the subplot to display dates
 
-            row =order_map.get('cpa')
+            # Update the x-axis formatting for the subplot to display dates
+            row = order_map.get('cpa')
 
             for i in range(len(cpa_figure.data)):
                 trace = cpa_figure.data[i]
                 numeric_dates = trace.x
+
                 # Convert numeric dates to datetime objects
                 datetime_dates = [datetime.utcfromtimestamp(date * 24 * 60 * 60) for date in numeric_dates]
+
                 # Format datetime dates as text using strftime (adjust the format as needed)
                 formatted_dates = [date.strftime('%Y-%m-%d') for date in datetime_dates]
-                trace.x  = formatted_dates
-
-
-
+                trace.x = formatted_dates
                 subplot.add_trace(trace, row=row, col=1)
-
 
         if 'line_plot' in chart_selection:
             line_figure_data = line_chart.get("line_plot")
@@ -333,48 +315,8 @@ def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, li
 
         # Save the subplot as an image
         img_bytes = subplot.to_image(format="png")
-        # Create a BytesIO object
-        img_io = io.BytesIO(img_bytes)
-        # Encode the BytesIO object as base64
-        encoding = base64.b64encode(img_io.read()).decode()
 
-        #dcc.send_bytes(subplot.write_image, "figure.png")
     return subplot, dcc.send_bytes(img_bytes, filename='SWCM_Chart_Selection.png')
-        # downloads as png
-
-
-
-#@callback(Output('download', 'data'),
-#          Input('download-charts-button', 'n_clicks'),
-#          State("hidden-chart", "figure"),
-#          prevent_initial_call=True,
-#
-#          )
-#
-#def download_figure(n_clicks, figure):
-#    if n_clicks is None:
-#        raise PreventUpdate
-#
-#    f = figure
-#    # Create an in-memory buffer to save the PNG image
-#    buffer = io.BytesIO()
-#
-#    pio.orca.config.format = 'png'
-#
-#    # Save the figure as a PNG image
-#    pio.write_image(go.Figure(figure), buffer, format="png")
-#
-#    # Get the PNG image data from the buffer
-#    png_data = buffer.getvalue()
-#
-#    # Encode the PNG data as a base64 string
-#    encoded_png = base64.b64encode(png_data).decode('utf-8')
-#
-#    # Define the download filename and content
-#    download_data = dict(content=encoded_png, filename="downloaded_figure.png")
-#
-#    return download_data
-#
 
 
 

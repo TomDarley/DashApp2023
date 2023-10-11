@@ -129,7 +129,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     conn = engine.connect()
 
     # Load topo data from DB
-    topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND reg_id = '{selected_profile}'"  # Modify this query according to your table
+    topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
     topo_df =topo_df.sort_values(by='chainage')
 
@@ -159,7 +159,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         for x in range(len(topo_df['chainage'])):
             surface_elevation.append(master_profile_elevation)
 
-        fig = px.line_3d(topo_df, x= 'chainage', y='date', z= 'elevation_OD',color='date')
+        fig = px.line_3d(topo_df, x= 'chainage', y='date', z= 'elevation_od',color='date')
 
 
 
@@ -181,7 +181,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     else:
 
         # Create a 2D line plot
-        fig = px.line(topo_df, x='chainage', y='elevation_OD', color='date',
+        fig = px.line(topo_df, x='chainage', y='elevation_od', color='date',
                       color_discrete_sequence=px.colors.qualitative.D3, template="seaborn", )
 
         fig.add_trace(
@@ -189,8 +189,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                        line=dict(color='red', width=5, dash='dash'),
                        name='Master Profile')
         )
-
-
 
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(

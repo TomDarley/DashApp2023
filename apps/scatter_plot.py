@@ -3,20 +3,13 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc, callback, Input, Output, State
 import numpy as np
 import pandas as pd
-import psycopg2
-import geopandas as gpd
-from scipy.interpolate import interp1d
 from datetime import datetime
 import matplotlib.dates as mdates
 import plotly.express as px
 import statsmodels.api as sm
 import plotly.graph_objs as go
 import sqlalchemy
-from scipy.integrate import quad
-import warnings
-import time
 import base64
-import io
 
 # delete this
 image_path = r"C:\Users\darle\PycharmProjects\Dash_App_Master\DashApp2023\media\NERD.jpeg"

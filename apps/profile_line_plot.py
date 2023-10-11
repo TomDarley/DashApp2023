@@ -114,7 +114,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    print(trigger)
+
+
+
     if trigger == '3D_plot.n_clicks':
         selection = '3D'
     elif trigger == '2D_ploy_n_clicks':
@@ -172,8 +174,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         fig.update_layout(
             legend=dict(
                 orientation='h',  # Horizontal orientation
-                yanchor='top',  # Anchor to the top of the chart
-                y=1.05,  # Adjust the vertical position as needed
+                yanchor='bottom',  # Anchor to the top of the chart
+                y=-0.05,  # Adjust the vertical position as needed
                 xanchor='left',  # Anchor to the left side of the chart
                 x=0.01  # Adjust the horizontal position as needed
             )

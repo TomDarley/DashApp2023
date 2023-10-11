@@ -117,11 +117,10 @@ layout = html.Div(
     ),allow_duplicate=True
 )
 def make_scatter_plot(selected_survey_unit):
-    print(selected_survey_unit)
 
     current_year = datetime.now().year
     survey_unit = selected_survey_unit
-    print(survey_unit)
+    #print(survey_unit)
 
     def get_data(target_survey_unit: str):
         """Establish database connection, make query and return df, both target profile and target date

@@ -228,7 +228,7 @@ def make_csa_table(selected_csa_data):
         elif to_date.month in autumn_range:
             classify_dates['Autumn'].append(to_date)
 
-    print(all_dates)
+
 
     # get the target columns using dates
     latest_survey = max(all_dates)

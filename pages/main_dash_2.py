@@ -237,7 +237,6 @@ def update_highest_cpa_card(highest_data, highest_year):
 def get_selected_charts(n_clicks,chart_selection, scatter_chart, error_chart, line_chart):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
-    print(n_clicks)
 
     if n_clicks is None:
         raise PreventUpdate

@@ -332,7 +332,7 @@ def set_selected_survey_unit(selected_value, click_data, current_data, profile_d
                 second_dropdown_options = unit_to_options.get(set_survey_unit, [])
                 current_data["survey_unit"] = clicked_survey_unit
                 current_data["profile_line"] = second_dropdown_options[0]
-                print(current_data)
+                #print(current_data)
 
 
                 return current_data, set_survey_unit, second_dropdown_options, second_dropdown_options[0]
@@ -343,7 +343,7 @@ def set_selected_survey_unit(selected_value, click_data, current_data, profile_d
                 set_profile_line = clicked_profile_line
                 second_dropdown_options = unit_to_options.get(current_data["survey_unit"], [])
                 current_data["profile_line"] = clicked_profile_line
-                print(current_data)
+                #print(current_data)
 
                 return current_data, dash.no_update,second_dropdown_options,set_profile_line
 
@@ -354,13 +354,13 @@ def set_selected_survey_unit(selected_value, click_data, current_data, profile_d
         second_dropdown_options = unit_to_options.get(set_survey_unit, [])
         current_data["survey_unit"] = set_survey_unit
         current_data["profile_line"] = second_dropdown_options[0]
-        print(current_data)
+        #print(current_data)
         return current_data, dash.no_update, second_dropdown_options,second_dropdown_options[0]
 
     # if the profile line dropdown was used
     elif triggered_id == 'survey-line-dropdown':
         current_data["profile_line"] = profile_dropdown_selection
-        print(current_data)
+       # print(current_data)
 
 
         return current_data, dash.no_update,dash.no_update,profile_dropdown_selection

@@ -261,23 +261,28 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             width=5,
         ), )
 
-        fig.add_trace(
-            go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
-                       name='Master Profile', colorscale='Fall', )
-
-        )
-
         # logic to initially show only the profiles we want
         for i, trace in enumerate(fig.data):
             trace.visible = 'legendonly' if i not in initial_visible_traces else True
 
+
+
+        custom_color_scale = ['#9e0909','#9e0909']
+        fig.add_trace(
+            go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
+                       name='Master Profile',  colorscale=custom_color_scale,showscale=False)
+
+        )
+
+
+
         fig.update_layout(
             legend=dict(
-                orientation='h',  # Horizontal orientation
-                yanchor='bottom',  # Anchor to the top of the chart
-                y=-0.05,  # Adjust the vertical position as needed
-                xanchor='left',  # Anchor to the left side of the chart
-                x=0.01  # Adjust the horizontal position as needed
+                orientation='v',  # Horizontal orientation
+                yanchor='top',  # Anchor to the top of the chart
+                #y=-0.05,  # Adjust the vertical position as needed
+                xanchor='right',  # Anchor to the left side of the chart
+                #x=0.01  # Adjust the horizontal position as needed
             )
         )
 

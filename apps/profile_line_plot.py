@@ -254,7 +254,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
         # Set custom axis labels
         fig.update_layout(
-            scene=dict(xaxis_title='Chainage (m)', yaxis_title='Date', zaxis_title='Elevation OD (m)'))
+            scene=dict(xaxis_title='Chainage (m)', yaxis_title='Date', zaxis_title='Elevation (m)'))
 
 
         fig.update_traces(line=dict(
@@ -320,11 +320,15 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
-        legend_title_text=f''
+        legend_title_text=f'',
+        title=f'{selected_profile}',
+        title_font=dict(size=15, family='Helvetica', color = 'blue'),
+        title_x=0.5,
     )
 
+
     # Add a title to the plot
-    fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
+    #fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
     # Serialize the figure to JSON
     serialized_fig = fig.to_json()

@@ -12,7 +12,7 @@ import sqlalchemy
 import base64
 
 # delete this
-image_path = r"C:\Users\darle\PycharmProjects\Dash_App_Master\DashApp2023\media\NERD.jpeg"
+image_path = r"C:\Users\tdarley\PycharmProjects\DashApp2023_Office1\media\NERD.jpeg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 

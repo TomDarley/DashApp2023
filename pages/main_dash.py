@@ -2,14 +2,13 @@ import dash
 from dash import html, callback, Input, Output
 
 # from DashApp2023.apps import survey_unit_dropdown
-from DashApp2023.apps import scatter_plot
-from DashApp2023.apps import error_bar_plot
+from apps import scatter_plot
+from apps import error_bar_plot
 
 # from DashApp2023.apps import leaflet_map
-from DashApp2023.apps import mapbox
-
-from DashApp2023.apps import profile_line_plot
-from DashApp2023.apps import csa_table
+from apps import mapbox
+from apps import profile_line_plot
+from apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
 import psycopg2

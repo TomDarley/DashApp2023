@@ -15,6 +15,9 @@ import json
 from sqlalchemy import create_engine
 import io
 import base64
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
 
 layout = html.Div([
     dcc.Store(id='line_chart'),
@@ -115,15 +118,12 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-
-
     if trigger == '3D_plot.n_clicks':
         selection = '3D'
     elif trigger == '2D_ploy_n_clicks':
         selection = '2D'
     else:
         selection = '2D'
-
 
     # All shapefile loaded into the database should not be promoted to multi
     engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
@@ -133,26 +133,115 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     # Load topo data from DB
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
-    topo_df =topo_df.sort_values(by='chainage')
+
+    # must sort the data by chainage for it to display correctly
+    topo_df = topo_df.sort_values(by=['chainage'])
+
+    # get a list of survey dates and order them, this list is then used to order the date traces in the legend
+    dates = topo_df['date'].sort_values(ascending=True)
+    date_order = []
+    for item in dates:
+        if item not in date_order:
+            date_order.append(item)
+
+
+    # Define a color scale that scales on the number of profiles
+    color_scale = ['#00f6ff',
+'#4cf0f5',
+'#69eaec',
+'#78e5e4',
+'#85e1dd',
+'#90dcd6',
+'#9ad8cf',
+'#a3d3c8',
+'#a8d0c4',
+'#adcdc0',
+'#b1cabb',
+'#b5c7b7',
+'#b9c4b3',
+'#bdc1ae',
+'#c1beaa',
+'#c4bba6',
+'#c7b8a1',
+'#cbb59d',
+'#cdb299',
+'#d0af94',
+'#d3ab90',
+'#d7a68a',
+'#dba183',
+'#de9c7c',
+'#e19776',
+'#e5906d',
+'#e88a66',
+'#eb835e',
+'#ef7b55',
+'#f2704a',
+'#f5653e',
+'#f85833',
+'#fa4a27',
+'#fc381a',
+'#fe1f0a',
+]
+
+    custom_color_mapping = {}
+
+    interval = len(color_scale) // len(date_order)
+
+    # Manually set the line colors based on the color scale
+    #for i, date in enumerate(date_order):
+    #    color_index = i * interval
+    #    custom_color_mapping.update({date: color_scale[color_index]})
+
+    def generate_custom_colors(num_colors):
+        # Define a list of color names
+        color_names = ['#000b5c',
+                        '#003494',
+                        '#005abf',
+                        '#007fd2',
+                        '#00a2ca',
+                        '#00c4a8',
+                        '#00e471',
+                        '#00ff02',]
+
+        # Repeat the color names as needed to match the desired number of colors
+        custom_colors = color_names * (num_colors // len(color_names))
+
+        # Add any remaining colors
+        custom_colors += color_names[:num_colors % len(color_names)]
+
+        return custom_colors
+
+    num_colors = len(date_order)
+    custom_color_list = generate_custom_colors(num_colors)
+    for i, date in enumerate(date_order):
+     color_index = i
+     custom_color_mapping.update({date: custom_color_list[color_index]})
+
+
+    # Initial Display of lines  - find the most recent date, date-1 amd first
+    first_trace_date = 0
+    newest_trace_date = len(date_order)-1
+    previous_trace_date = len(date_order)-2
+
+    # the traces of the dates to show initially
+    initial_visible_traces = [first_trace_date,
+                              newest_trace_date,
+                              previous_trace_date]
 
     # Load master profile data from DB, extract chainage and elevation
     master_profile_chainage = []
     master_profile_elevation = []
 
-
     master_profile_query = f"SELECT * FROM master_profiles WHERE profile_id = '{selected_profile}'"
     mp_df = pd.read_sql_query(master_profile_query, conn)
     mp_df = mp_df.dropna(axis=1, how='any')
+
     for col in mp_df.columns[1:]:
         mp_df[col] = mp_df[col].str.split(',')
         first = mp_df[col][0][0]
         last = mp_df[col][0][-2]
         master_profile_chainage.append(first)
         master_profile_elevation.append(last)
-
-
-
-    #dummy_y= topo_df['date'].
 
     if selection == '3D':
 
@@ -161,15 +250,26 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         for x in range(len(topo_df['chainage'])):
             surface_elevation.append(master_profile_elevation)
 
-        fig = px.line_3d(topo_df, x= 'chainage', y='date', z= 'elevation_od',color='date')
+        fig = px.line_3d(topo_df, x= 'chainage', y='date', z= 'elevation_od',color='date',category_orders={'date': date_order}, color_discrete_map=custom_color_mapping,)
+
+        # Set custom axis labels
+        fig.update_layout(
+            scene=dict(xaxis_title='Chainage (m)', yaxis_title='Date', zaxis_title='Elevation OD (m)'))
 
 
+        fig.update_traces(line=dict(
+            width=5,
+        ), )
 
         fig.add_trace(
             go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
-                       name='Master Profile', colorscale='Fall')
+                       name='Master Profile', colorscale='Fall', )
 
         )
+
+        # logic to initially show only the profiles we want
+        for i, trace in enumerate(fig.data):
+            trace.visible = 'legendonly' if i not in initial_visible_traces else True
 
         fig.update_layout(
             legend=dict(
@@ -180,11 +280,17 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 x=0.01  # Adjust the horizontal position as needed
             )
         )
+
     else:
 
         # Create a 2D line plot
         fig = px.line(topo_df, x='chainage', y='elevation_od', color='date',
-                      color_discrete_sequence=px.colors.qualitative.D3, template="seaborn", )
+                      color_discrete_map=custom_color_mapping, template="seaborn",category_orders={'date': date_order} )
+
+        # logic to initially show only the profiles we want
+        for i, trace in enumerate(fig.data):
+            trace.visible = 'legendonly' if i not in initial_visible_traces else True
+
 
         fig.add_trace(
             go.Scatter(x=master_profile_chainage, y=master_profile_elevation,
@@ -199,10 +305,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         tickfont=dict(size=15, family='Helvetica', color ='blue')  # Customize tick font size and family
     )
 
+    # y axis on the line plot is Elevation 0D
     fig.update_yaxes(
         title_text='Elevation (m)',
-        title_font=dict(size=15, family='Helvetica', color = 'blue'),  # Customize font size and family
-        tickfont=dict(size=15, family='Helvetica', color ='blue')  # Customize tick font size and family
+        title_font=dict(size=15, family='Helvetica', color='blue'),  # Customize font size and family
+        tickfont=dict(size=15, family='Helvetica', color='blue')  # Customize tick font size and family
     )
 
     # Customize the legend font and size
@@ -224,8 +331,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
     # Update the 'cpa' key in the store's data with the serialized figure
     chart_data = {"line_plot": serialized_fig}
-
-
 
     return fig, fig, chart_data
 
@@ -254,7 +359,6 @@ def toggle_modal_chart(n1, n2, relayoutData):
     elif "close" in changed_id:
         return False, 0
     return False, 0
-
 
 
 

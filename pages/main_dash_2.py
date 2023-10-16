@@ -1,10 +1,10 @@
 import dash
 from dash import html, callback, Input, Output, State
-from DashApp2023.apps import scatter_plot
-from DashApp2023.apps import error_bar_plot
-from DashApp2023.apps import mapbox
-from DashApp2023.apps import profile_line_plot
-from DashApp2023.apps import csa_table
+from apps import scatter_plot
+from apps import error_bar_plot
+from apps import mapbox
+from apps import profile_line_plot
+from apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
 from plotly.subplots import make_subplots
@@ -21,7 +21,7 @@ dash.register_page(__name__, path="/main_dash2")
 layout = html.Div([
     dcc.Store(id='generated_charts',data={"cpa": None, 'line_plot': None, 'error_plot': None} ),
     dcc.Graph(id='hidden-chart', style ={'display': 'none'}),
-    dcc.Download(id  ='download'),
+    dcc.Download(id ='download'),
 
     dbc.Row(
         [
@@ -34,7 +34,7 @@ layout = html.Div([
                         html.Div("6aSU12", id='survey_unit_card')
 
                     ])
-                ], style={'margin': '10px', 'border-radius': '10px'}),
+                ], style={'margin': '10px', 'border-radius': '10px', }),
 
                 dbc.Card([
                     dbc.CardBody([
@@ -170,12 +170,14 @@ layout = html.Div([
 
 @callback(
     Output("survey_unit_card", "children"),
-    Input("survey-unit-dropdown", "value"), )
-def update_survey_unit_card(current_sur_unit):
-    """Callback populates the survey unit CPA card with the current selected survey unit"""
+    Input("survey-unit-dropdown", "value"),
+    State("survey-unit-dropdown","options"),)
 
+def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
+    """Callback populates the survey unit CPA card with the current selected survey unit"""
     if current_sur_unit:
-        return current_sur_unit
+        label = [x['label'] for x in current_sur_unit_state if x['value'] == current_sur_unit]
+        return label
 
 
 @callback(

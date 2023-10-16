@@ -254,30 +254,35 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
         # Set custom axis labels
         fig.update_layout(
-            scene=dict(xaxis_title='Chainage (m)', yaxis_title='Date', zaxis_title='Elevation OD (m)'))
+            scene=dict(xaxis_title='Chainage (m)', yaxis_title='Date', zaxis_title='Elevation (m)'))
 
 
         fig.update_traces(line=dict(
             width=5,
         ), )
 
-        fig.add_trace(
-            go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
-                       name='Master Profile', colorscale='Fall', )
-
-        )
-
         # logic to initially show only the profiles we want
         for i, trace in enumerate(fig.data):
             trace.visible = 'legendonly' if i not in initial_visible_traces else True
 
+
+
+        custom_color_scale = ['#9e0909','#9e0909']
+        fig.add_trace(
+            go.Surface(x=master_profile_chainage,y =topo_df['date'] , z= surface_elevation,showlegend=False,
+                       name='Master Profile',  colorscale=custom_color_scale,showscale=False)
+
+        )
+
+
+
         fig.update_layout(
             legend=dict(
-                orientation='h',  # Horizontal orientation
-                yanchor='bottom',  # Anchor to the top of the chart
-                y=-0.05,  # Adjust the vertical position as needed
-                xanchor='left',  # Anchor to the left side of the chart
-                x=0.01  # Adjust the horizontal position as needed
+                orientation='v',  # Horizontal orientation
+                yanchor='top',  # Anchor to the top of the chart
+                #y=-0.05,  # Adjust the vertical position as needed
+                xanchor='right',  # Anchor to the left side of the chart
+                #x=0.01  # Adjust the horizontal position as needed
             )
         )
 
@@ -320,11 +325,15 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
-        legend_title_text=f''
+        legend_title_text=f'',
+        title=f'{selected_profile}',
+        title_font=dict(size=15, family='Helvetica', color = 'blue'),
+        title_x=0.5,
     )
 
+
     # Add a title to the plot
-    fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
+    #fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
     # Serialize the figure to JSON
     serialized_fig = fig.to_json()

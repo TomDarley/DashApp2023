@@ -152,12 +152,15 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(title={
             "text": f"{selected_survey_unit}",
-            "y": 0.95,
+            "y": 0.96,
+
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 15, "family": "Helvetica", "color": "white"},
+
+        title_font=dict(size=15, family='Helvetica'),
+        title_x=0.5,
         yaxis_title={'text':"Combined Profile Area (m²)", 'font': {'size':15}},
         xaxis_title=None,
         legend_title="",

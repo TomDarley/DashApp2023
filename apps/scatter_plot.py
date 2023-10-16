@@ -12,7 +12,7 @@ import sqlalchemy
 import base64
 
 # delete this
-image_path = r"C:\Users\darle\PycharmProjects\Dash_App_Master\DashApp2023\media\NERD.jpeg"
+image_path = r"C:\Users\tdarley\PycharmProjects\DashApp2023_Office1\media\NERD.jpeg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -300,8 +300,9 @@ def make_scatter_plot(selected_survey_unit):
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
+
         },
-        title_font={"size": 12, "family": "Arial", "color": "white"},
+        title_font={"size": 15, "family": "Helvetica", "color": "blue"},
         xaxis_title="",
         yaxis_title="Combined Profile Area (m²)",
         legend_title="",
@@ -316,15 +317,6 @@ def make_scatter_plot(selected_survey_unit):
                 color="blue",  # Set the font color
                 family="Helvetica",  # Set the font family
             ),
-        ),
-    )
-
-    # Customize the legend font and size
-    fig.update_layout(
-        legend=dict(
-            title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
-            title_text='',  # Remove legend title
-            font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
         ),
         legend_traceorder='reversed',
         legend_title_text=f''
@@ -359,9 +351,6 @@ def make_scatter_plot(selected_survey_unit):
         highest_values, \
         highest_year, \
         chart_data
-
-
-
 
 @callback(
     Output("scatter_info_model", "is_open"),

@@ -5,7 +5,8 @@ import geopandas as gpd
 import plotly.express as px
 from shapely.wkt import loads
 import dash_bootstrap_components as dbc
-
+import numpy as np
+import plotly.graph_objects as go
 
 unit_to_options = {
     "6aSU10": [
@@ -3627,44 +3628,32 @@ engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB
 # Connect to the database using the engine
 conn = engine.connect()
 
-# Import spatial data as GeoDataFrame
+# Import point (survey unit) spatial data as GeoDataFrame
 query = "SELECT * FROM survey_units"  # Modify this query according to your table
 gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
 gdf = gdf.to_crs(epsg=4326)
 # Extract latitude and longitude from the geometry column
 gdf["lat"] = gdf["wkb_geometry"].y
 gdf["long"] = gdf["wkb_geometry"].x
-gdf["size"] = 3
+gdf["size"] = 15
 lon = gdf["wkb_geometry"]
 
 set_survey_unit = "6aSU12"
 set_profile_line = "6a01613"
 
 # Set the color of the selected survey unit to red
+gdf["color"] = ''
+gdf['color'] = gdf['color'].astype(str)
 gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
+gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
 
 
-gdf["color"].fillna("#4459c2", inplace=True)  # Fill other points with the default color
 # Extract the coordinates of the selected survey unit
 selected_point = gdf.loc[gdf["sur_unit"] == set_survey_unit].iloc[0]
 center_lat = selected_point["lat"]
 center_lon = selected_point["long"]
 
-
-fig = px.scatter_mapbox(
-    gdf,
-    lat="lat",
-    lon="long",
-    hover_name="sur_unit",
-    hover_data=["sur_unit"],
-    color_discrete_sequence=["#4459c2", "#eb05c4"],
-    zoom=7,
-    size="size",
-    color="color",
-    size_max=12,
-)
-
-
+# Get the line data from the database
 query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '6aSU12'"  # Modify this query according to your table
 lines_gdf = gpd.GeoDataFrame.from_postgis(
     query_profile_lines, conn, geom_col="wkb_geometry"
@@ -3678,7 +3667,22 @@ line_data = gpd.GeoDataFrame(
 )
 
 
+scatter_trace = px.scatter_mapbox(
+    gdf,
+    lat="lat",
+    lon="long",
+    hover_name="sur_unit",
+    hover_data=["sur_unit"],
+    color_discrete_sequence=["#4459c2", "#eb05c4"],
+    zoom=7,
+    size="size",
+    color="color",
+    size_max=18,
+
+)
+
 # adding each WKT string as trace to the fig as a trace
+line_traces =[]
 for i, row in line_data.iterrows():
     line = row["geometry"]
     latitudes = [coord[1] for coord in line.coords]
@@ -3704,14 +3708,29 @@ for i, row in line_data.iterrows():
 
     # Update the marker color
     trace.update_traces(line=dict(color=colour, width=width))
+    line_traces.append(trace)
 
-    fig.add_trace(trace.data[0])
+
+
+fig = go.Figure()
+for i in range(len(line_traces)):
+    fig.add_trace(line_traces[i].data[0])
+
+# Add the scatter trace to the figure
+fig.add_traces(scatter_trace.data)
 
 fig.update_layout(mapbox_style="open-street-map")
-
 # this removes white space around the map
 fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
 fig.update_traces(showlegend=False)
+
+fig.update_layout(
+        mapbox={
+            "center": {"lat": center_lat, "lon": center_lon},
+            "zoom": 6,
+        }
+    )
+
 
 layout = html.Div(
     children=[
@@ -4298,19 +4317,20 @@ def update_map(selection, zoom_level):
     set_profile_line = selection["profile_line"]
 
     updated_gdf = gdf.copy()
+
     updated_gdf = updated_gdf.drop("color", axis=1)
+    updated_gdf["color"] = ''
 
     # Set the color of the selected survey unit to red
     updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
-    updated_gdf["color"].fillna(
-        "#4459c2", inplace=True
-    )  # Fill other points with the default color
+    updated_gdf.loc[updated_gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
+
     # Extract the coordinates of the selected survey unit
     selected_point = updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit].iloc[0]
     center_lat = selected_point["lat"]
     center_lon = selected_point["long"]
     # Update the map
-    updated_fig = px.scatter_mapbox(
+    updated_scatter_trace = px.scatter_mapbox(
         updated_gdf,
         lat="lat",
         lon="long",
@@ -4327,7 +4347,7 @@ def update_map(selection, zoom_level):
         size="size",
         size_max=12,
     )
-    updated_fig.update_layout(mapbox_style="open-street-map")
+
 
     query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
     lines_gdf = gpd.GeoDataFrame.from_postgis(
@@ -4343,6 +4363,7 @@ def update_map(selection, zoom_level):
     line_traces = []
 
     # adding each WKT string as trace to the fig as a trace
+    line_traces=[]
     for i, row in line_data.iterrows():
         line = row["geometry"]
         latitudes = [coord[1] for coord in line.coords]
@@ -4369,20 +4390,37 @@ def update_map(selection, zoom_level):
         # Update the marker color
         trace.update_traces(line=dict(color=colour, width=width))
 
-        line_traces.append(trace.data[0])
+        line_traces.append(trace)
 
         # Add the modified trace to the figure
         # updated_fig.add_trace(trace.data[0])
+    fig = go.Figure()  # Set the map center to the selected point)
+    #fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
 
-    for trace in line_traces:
-        updated_fig.add_trace(trace)
 
-    updated_fig.update_traces(showlegend=False)
-    updated_fig.update_layout(
-        margin=dict(l=0, r=0, b=0, t=0)  # left margin  # right margin  # bottom margin
-    )  # top margin
+    for i in range(len(line_traces)):
+        fig.add_trace(line_traces[i].data[0])
 
-    return updated_fig
+
+    fig.update_layout(mapbox_style="open-street-map", )
+
+
+    # Add the scatter trace to the figure
+    fig.add_traces(updated_scatter_trace.data)
+
+    # this removes white space around the map
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+    fig.update_traces(showlegend=False)
+
+    fig.update_layout(
+        mapbox={
+            "center": {"lat": center_lat, "lon": center_lon},
+            "zoom": 14,
+        }
+    )
+
+
+    return fig
 
 
 # @app.callback(

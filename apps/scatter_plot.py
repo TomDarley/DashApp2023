@@ -12,7 +12,7 @@ import sqlalchemy
 import base64
 
 # delete this
-image_path = r"C:\Users\tdarley\PycharmProjects\DashApp2023_Office1\media\NERD.jpeg"
+image_path = r"media/NERD.jpeg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -23,31 +23,33 @@ layout = html.Div(
             id="selected-df-storage",
             data={"current": None, "previous": None},
         ),
-
         # stores for the metrics generated in plot creation
-        dcc.Store(id = "lowest_recorded_value"),
-        dcc.Store(id = "lowest_recorded_year"),
-        dcc.Store(id = "highest_recorded_value"),
-        dcc.Store(id = "highest_recorded_year"),
-
-        dcc.Store(id = "change_rate"),
-        dcc.Store(id ='scatter_chart'),
-
-
+        dcc.Store(id="lowest_recorded_value"),
+        dcc.Store(id="lowest_recorded_year"),
+        dcc.Store(id="highest_recorded_value"),
+        dcc.Store(id="highest_recorded_year"),
+        dcc.Store(id="change_rate"),
+        dcc.Store(id="scatter_chart"),
         # wrap inside card so it scales correctly .... stupid
-        dbc.Card([
-            dcc.Graph(id="scatter_plot", style={"width": "100%", "height": "60vh", }, config={'responsive': True}),
-
-
-        ], ),
-
+        dbc.Card(
+            [
+                dcc.Graph(
+                    id="scatter_plot",
+                    style={
+                        "width": "100%",
+                        "height": "60vh",
+                    },
+                    config={"responsive": True},
+                ),
+            ],
+        ),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="md",
             id="scatter_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'left': '8px'},
+            style={"position": "absolute", "bottom": "1%", "left": "8px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -55,22 +57,30 @@ layout = html.Div(
             id="scatter_open_full",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
+            style={"position": "absolute", "bottom": "1%", "right": "8px"},
         ),
-
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("CSA Scatter Plot")),
-                dbc.ModalBody([
-
-                    html.P(
-                        "This chart shows the combined cross-sectional area for each profile line. It is nice, I like it a lot.",
-                        style={'font-size': 20}),
-                    html.Img(src=f"data:image/jpeg;base64,{encoded_image}", alt="CSA Scatter Plot Image", style={'height': '40vh'}),
-                ]),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            "This chart shows the combined cross-sectional area for each profile line. It is nice, I like it a lot.",
+                            style={"font-size": 20},
+                        ),
+                        html.Img(
+                            src=f"data:image/jpeg;base64,{encoded_image}",
+                            alt="CSA Scatter Plot Image",
+                            style={"height": "40vh"},
+                        ),
+                    ]
+                ),
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="scatter_info_close", className="ms-auto", n_clicks=0
+                        "Close",
+                        id="scatter_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
                     )
                 ),
             ],
@@ -81,20 +91,28 @@ layout = html.Div(
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
-                dbc.ModalBody(dcc.Graph(id="scatter_plot_model", style={'height': '100vh'})),## might not work
+                dbc.ModalBody(
+                    dcc.Graph(id="scatter_plot_model", style={"height": "100vh"})
+                ),  ## might not work
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="scatter_full_close", className="ms-auto", n_clicks=0
+                        "Close",
+                        id="scatter_full_close",
+                        className="ms-auto",
+                        n_clicks=0,
                     )
                 ),
             ],
             id="modal_scatter_plot",
             is_open=False,
             fullscreen=True,
-    ),
+        ),
     ],
-    style={'position': 'relative','height': '100%', 'margin-right' : '20px'},  # Set the position of the containing div to relative
-
+    style={
+        "position": "relative",
+        "height": "100%",
+        "margin-right": "20px",
+    },  # Set the position of the containing div to relative
 )
 
 
@@ -104,23 +122,19 @@ layout = html.Div(
         Output("change_rate", "data"),
         Output("selected-df-storage", "data"),
         Output("scatter_plot_model", "figure"),
-
-        Output("lowest_recorded_value","data"),
-        Output("lowest_recorded_year","data"),
-        Output("highest_recorded_value","data"),
-        Output("highest_recorded_year","data"),
-
-        Output('scatter_chart', "data"),
+        Output("lowest_recorded_value", "data"),
+        Output("lowest_recorded_year", "data"),
+        Output("highest_recorded_value", "data"),
+        Output("highest_recorded_year", "data"),
+        Output("scatter_chart", "data"),
         Input("survey-unit-dropdown", "value"),
-
-
-    ),allow_duplicate=True
+    ),
+    allow_duplicate=True,
 )
 def make_scatter_plot(selected_survey_unit):
-
     current_year = datetime.now().year
     survey_unit = selected_survey_unit
-    #print(survey_unit)
+    # print(survey_unit)
 
     def get_data(target_survey_unit: str):
         """Establish database connection, make query and return df, both target profile and target date
@@ -140,7 +154,7 @@ def make_scatter_plot(selected_survey_unit):
 
     # load data directly from the DB
     master_df = get_data(survey_unit)
-    master_df = master_df[['date','profile', 'area']]
+    master_df = master_df[["date", "profile", "area"]]
 
     # Pivot the data
     pivot_df = master_df.pivot(index="profile", columns="date", values="area")
@@ -173,17 +187,16 @@ def make_scatter_plot(selected_survey_unit):
     chart_ready_df = df2
 
     # Get lowest recorded CPA
-    lowest  = chart_ready_df['Sum'].idxmin()
+    lowest = chart_ready_df["Sum"].idxmin()
     row_with_min_value = list(chart_ready_df.loc[lowest])
-    lowest_year  = row_with_min_value[0]
+    lowest_year = row_with_min_value[0]
     lowest_values = row_with_min_value[1]
 
     # Get highest recorded CPA
-    highest = chart_ready_df['Sum'].idxmax()
+    highest = chart_ready_df["Sum"].idxmax()
     row_with_max_value = list(chart_ready_df.loc[highest])
     highest_year = row_with_max_value[0]
     highest_values = row_with_max_value[1]
-
 
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
@@ -206,8 +219,6 @@ def make_scatter_plot(selected_survey_unit):
         else:
             season_list.append("gray")
     chart_ready_df["season"] = season_list
-
-
 
     # extracting values as lists for the y and x-axis
     x_axis = list(df2["index1"])
@@ -288,7 +299,7 @@ def make_scatter_plot(selected_survey_unit):
         y="Sum",
         color="season",
         symbol="season",
-        #height=550,
+        # height=550,
         template="seaborn",
     )
 
@@ -300,7 +311,6 @@ def make_scatter_plot(selected_survey_unit):
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
-
         },
         title_font={"size": 15, "family": "Helvetica", "color": "blue"},
         xaxis_title="",
@@ -318,8 +328,8 @@ def make_scatter_plot(selected_survey_unit):
                 family="Helvetica",  # Set the font family
             ),
         ),
-        legend_traceorder='reversed',
-        legend_title_text=f''
+        legend_traceorder="reversed",
+        legend_title_text=f"",
     )
 
     # increase marker size
@@ -342,15 +352,18 @@ def make_scatter_plot(selected_survey_unit):
     # Update the 'cpa' key in the store's data with the serialized figure
     chart_data = {"cpa": serialized_fig}
 
-    return fig, \
-        f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ", \
-        df_store, \
-        fig,\
-        lowest_values,\
-        lowest_year, \
-        highest_values, \
-        highest_year, \
-        chart_data
+    return (
+        fig,
+        f"{state}: {round(accretion_levels, 1)}m² yˉ¹ ",
+        df_store,
+        fig,
+        lowest_values,
+        lowest_year,
+        highest_values,
+        highest_year,
+        chart_data,
+    )
+
 
 @callback(
     Output("scatter_info_model", "is_open"),
@@ -362,15 +375,16 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
+
 @callback(
     Output("modal_scatter_plot", "is_open"),
     Output("scatter_open_full", "n_clicks"),
     Input("scatter_open_full", "n_clicks"),
     Input("scatter_full_close", "n_clicks"),
-    Input("scatter_plot", "relayoutData")
+    Input("scatter_plot", "relayoutData"),
 )
 def toggle_modal_chart(n1, n2, relayoutData):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
     if "open" in changed_id:
         return True, 0
     elif "close" in changed_id:

@@ -1,298 +1,412 @@
 import dash
-from dash import html, callback, Input, Output
-
-# from DashApp2023.apps import survey_unit_dropdown
+from dash import html, callback, Input, Output, State
 from apps import scatter_plot
 from apps import error_bar_plot
-
-# from DashApp2023.apps import leaflet_map
 from apps import mapbox
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
-import psycopg2
-import geopandas as gpd
+from plotly.subplots import make_subplots
 import json
-from dash_extensions.javascript import Namespace
+import plotly.graph_objs as go
+from datetime import datetime
+from dash.exceptions import PreventUpdate
+
 
 # register the page with dash giving url path
 dash.register_page(__name__, path="/main_dash")
+
+# define the layout of the main page
 layout = html.Div(
     [
-        dbc.Container(
-            dbc.Row(
-                [
-                    dbc.Col(
-                        html.Div(
-                            [
-                                mapbox.layout,
-                            ]
-                        ),
-                        width={
-                            "size": 9,
-                            "offset": 0,
-                            "buffer": 0,
-
-                        },
-
-                        style={"margin-bottom": "10px"}# width number of cols out of 12 it takes up
-                    ),
-
-
-                    dbc.Col(
-                        html.Div(
-                            [
-                                dbc.Card(id="Survey_Unit_Label"),
-                                dbc.CardBody(
-                                    [
-                                        html.H2("  Survey Unit:", className="card-title", style={'color': 'blue' ,'margin-bottom': '10px' }),
-                                        dcc.Dropdown(
-                                            options=[
-                                                {'label': '6aSU10', 'value': '6aSU10'},
-                                                {'label': '6aSU12', 'value': '6aSU12'},
-                                                {'label': '6aSU13', 'value': '6aSU13'},
-                                                {'label': '6aSU16-1', 'value': '6aSU16-1'},
-                                                {'label': '6aSU2', 'value': '6aSU2'},
-                                                {'label': '6aSU3-2', 'value': '6aSU3-2'},
-                                                {'label': '6aSU3-3', 'value': '6aSU3-3'},
-                                                {'label': '6aSU3-5', 'value': '6aSU3-5'},
-                                                {'label': '6aSU4', 'value': '6aSU4'},
-                                                {'label': '6aSU5-2', 'value': '6aSU5-2'},
-                                                {'label': '6aSU5-4', 'value': '6aSU5-4'},
-                                                {'label': '6aSU6-1', 'value': '6aSU6-1'},
-                                                {'label': '6aSU6-2', 'value': '6aSU6-2'},
-                                                {'label': '6aSU7-1', 'value': '6aSU7-1'},
-                                                {'label': '6aSU8-1', 'value': '6aSU8-1'},
-                                                {'label': '6bSU16-3', 'value': '6bSU16-3'},
-                                                {'label': '6bSU17', 'value': '6bSU17'},
-                                                {'label': '6bSU18-1', 'value': '6bSU18-1'},
-                                                {'label': '6bSU18-2', 'value': '6bSU18-2'},
-                                                {'label': '6bSU20-1', 'value': '6bSU20-1'},
-                                                {'label': '6bSU21-2', 'value': '6bSU21-2'},
-                                                {'label': '6bSU21-4', 'value': '6bSU21-4'},
-                                                {'label': '6bSU21-5', 'value': '6bSU21-5'},
-                                                {'label': '6bSU21-6', 'value': '6bSU21-6'},
-                                                {'label': '6bSU21-8', 'value': '6bSU21-8'},
-                                                {'label': '6bSU25-2', 'value': '6bSU25-2'},
-                                                {'label': '6bSU26-1', 'value': '6bSU26-1'},
-                                                {'label': '6bSU26-2', 'value': '6bSU26-2'},
-                                                {'label': '6bSU26-3', 'value': '6bSU26-3'},
-                                                {'label': '6cSU28', 'value': '6cSU28'},
-                                                {'label': '6cSU30-2', 'value': '6cSU30-2'},
-                                                {'label': '6cSU30-4', 'value': '6cSU30-4'},
-                                                {'label': '6cSU31-1', 'value': '6cSU31-1'},
-                                                {'label': '6cSU31-2', 'value': '6cSU31-2'},
-                                                {'label': '6cSU31-3', 'value': '6cSU31-3'},
-                                                {'label': '6cSU33', 'value': '6cSU33'},
-                                                {'label': '6cSU38', 'value': '6cSU38'},
-                                                {'label': '6d6D1-4', 'value': '6d6D1-4'},
-                                                {'label': '6d6D1-6', 'value': '6d6D1-6'},
-                                                {'label': '6d6D1-8', 'value': '6d6D1-8'},
-                                                {'label': '6d6D2-13', 'value': '6d6D2-13'},
-                                                {'label': '6d6D2-15', 'value': '6d6D2-15'},
-                                                {'label': '6d6D2-17', 'value': '6d6D2-17'},
-                                                {'label': '6d6D2-4', 'value': '6d6D2-4'},
-                                                {'label': '6d6D2-7', 'value': '6d6D2-7'},
-                                                {'label': '6d6D3-10', 'value': '6d6D3-10'},
-                                                {'label': '6d6D3-12', 'value': '6d6D3-12'},
-                                                {'label': '6d6D3-2', 'value': '6d6D3-2'},
-                                                {'label': '6d6D3-4', 'value': '6d6D3-4'},
-                                                {'label': '6d6D3-6', 'value': '6d6D3-6'},
-                                                {'label': '6d6D5-10', 'value': '6d6D5-10'},
-                                                {'label': '6d6D5-11', 'value': '6d6D5-11'},
-                                                {'label': '6d6D5-12', 'value': '6d6D5-12'},
-                                                {'label': '6d6D5-14', 'value': '6d6D5-14'},
-                                                {'label': '6d6D5-15', 'value': '6d6D5-15'},
-                                                {'label': '6d6D5-17', 'value': '6d6D5-17'},
-                                                {'label': '6d6D5-2', 'value': '6d6D5-2'},
-                                                {'label': '6d6D5-4', 'value': '6d6D5-4'},
-                                                {'label': '6eSU10-1', 'value': '6eSU10-1'},
-                                                {'label': '6eSU10-2', 'value': '6eSU10-2'},
-                                                {'label': '6eSU11', 'value': '6eSU11'},
-                                                {'label': '6eSU3-2', 'value': '6eSU3-2'},
-                                                {'label': '6eSU3-4', 'value': '6eSU3-4'},
-                                                {'label': '6eSU3-6', 'value': '6eSU3-6'},
-                                                {'label': '6eSU4-3', 'value': '6eSU4-3'},
-                                                {'label': '6eSU4-4', 'value': '6eSU4-4'},
-                                                {'label': '6eSU4-5', 'value': '6eSU4-5'},
-                                                {'label': '6eSU4-6', 'value': '6eSU4-6'},
-                                                {'label': '6eSU4', 'value': '6eSU4'},
-                                                {'label': '6eSU6-2', 'value': '6eSU6-2'},
-                                                {'label': '6eSU8-2', 'value': '6eSU8-2'},
-                                                {'label': '6eSU9-2', 'value': '6eSU9-2'},
-                                                {'label': '7a7A1-2', 'value': '7a7A1-2'},
-                                                {'label': '7a7A2-2', 'value': '7a7A2-2'},
-                                                {'label': '7a7A2-3', 'value': '7a7A2-3'},
-                                                {'label': '7a7A2-4', 'value': '7a7A2-4'},
-                                                {'label': '7a7A2-5', 'value': '7a7A2-5'},
-                                                {'label': '7a7A2-6', 'value': '7a7A2-6'},
-                                                {'label': '7a7A2-7', 'value': '7a7A2-7'},
-                                                {'label': '7a7A3-13', 'value': '7a7A3-13'},
-                                                {'label': '7a7A3-15', 'value': '7a7A3-15'},
-                                                {'label': '7a7A3-17', 'value': '7a7A3-17'},
-                                                {'label': '7a7A3-18', 'value': '7a7A3-18'},
-                                                {'label': '7a7A3-19', 'value': '7a7A3-19'},
-                                                {'label': '7a7A3-2', 'value': '7a7A3-2'},
-                                                {'label': '7a7A3-21', 'value': '7a7A3-21'},
-                                                {'label': '7a7A3-23', 'value': '7a7A3-23'},
-                                                {'label': '7a7A3-4', 'value': '7a7A3-4'},
-                                                {'label': '7a7A3-8', 'value': '7a7A3-8'},
-                                                {'label': '7a7A3-9', 'value': '7a7A3-9'},
-                                                {'label': '7b7B1-2', 'value': '7b7B1-2'},
-                                                {'label': '7b7B1-8', 'value': '7b7B1-8'},
-                                                {'label': '7b7B2-4', 'value': '7b7B2-4'},
-                                                {'label': '7b7B3-1', 'value': '7b7B3-1'},
-                                                {'label': '7b7B3-2', 'value': '7b7B3-2'},
-                                                {'label': '7b7B3-4', 'value': '7b7B3-4'},
-                                                {'label': '7cSAUN1', 'value': '7cSAUN1'},
-                                                {'label': '7cWEST2', 'value': '7cWEST2'},
-                                                {'label': '7dBURN2', 'value': '7dBURN2'},
-                                                {'label': '7dBURN3', 'value': '7dBURN3'},
-                                                {'label': '7dBURN4-A', 'value': '7dBURN4-A'},
-                                                {'label': '7dBURN4-B', 'value': '7dBURN4-B'},
-                                                {'label': '7dLILS2', 'value': '7dLILS2'},
-                                                {'label': '7dMINE1', 'value': '7dMINE1'},
-                                                {'label': '7dMINE2', 'value': '7dMINE2'},
-                                                {'label': '7dMINE3', 'value': '7dMINE3'},
-                                                {'label': '7dMINE4', 'value': '7dMINE4'},
-                                                {'label': '7dMINE5', 'value': '7dMINE5'},
-                                                {'label': '7dMINE6', 'value': '7dMINE6'},
-                                                {'label': '7dPARR2', 'value': '7dPARR2'},
-                                                {'label': '7dPARR3', 'value': '7dPARR3'},
-                                                {'label': '7dPORL1', 'value': '7dPORL1'},
-                                                {'label': '7dPORL2', 'value': '7dPORL2'},
-                                                {'label': '7dPORL3', 'value': '7dPORL3'},
-                                                {'label': '7eSANB1', 'value': '7eSANB1'},
-                                                {'label': '7eSU15-1', 'value': '7eSU15-1'},
-                                                {'label': '7eSU15-2', 'value': '7eSU15-2'},
-                                                {'label': '7eSU17-2', 'value': '7eSU17-2'},
-                                                {'label': '7eSU17-5', 'value': '7eSU17-5'},
-                                                {'label': '7eWSM1', 'value': '7eWSM1'},
-                                                {'label': '7eWSM2', 'value': '7eWSM2'},
-                                                {'label': '7eSAUN1', 'value': '7eSAUN1'},
-                                                {'label': '6eA8-1', 'value': '6eA8-1'},
-                                                {'label': '6eA8-2', 'value': '6eA8-2'},
-                                                {'label': '6eA8-4', 'value': '6eA8-4'},
-                                                {'label': '6eA4-2', 'value': '6eA4-2'},
-                                                {'label': '6eM15', 'value': '6eM15'},
-                                                {'label': '6eM12', 'value': '6eM12'},
-                                                {'label': '6eM9', 'value': '6eM9'},
-                                                {'label': '6eM7', 'value': '6eM7'},
-                                                {'label': '6eM6', 'value': '6eM6'},
-                                                {'label': '6eM5', 'value': '6eM5'},
-                                                {'label': '6eM4', 'value': '6eM4'},
-                                                {'label': '6eM3', 'value': '6eM3'},
-                                                {'label': '6eM2', 'value': '6eM2'},
-                                                {'label': '6eM1-3', 'value': '6eM1-3'},
-                                                {'label': '6eM1-4', 'value': '6eM1-4'},
-                                                {'label': '6eT6', 'value': '6eT6'},
-                                                {'label': '6eT1', 'value': '6eT1'},
-                                                {'label': '6eT7', 'value': '6eT7'},
-                                                {'label': '6eT5', 'value': '6eT5'},
-                                                {'label': '6eT4', 'value': '6eT4'},
-                                                {'label': '6eT3-2', 'value': '6eT3-2'},
-                                                {'label': '6eB3-1', 'value': '6eB3-1'},
-                                                {'label': '6eB3-2', 'value': '6eB3-2'},
-                                                {'label': '6eB1-1', 'value': '6eB1-1'},
-                                                {'label': '6eB4', 'value': '6eB4'},
-                                                {'label': '6eB1-4', 'value': '6eB1-4'},
-                                                {'label': '6eB1-5', 'value': '6eB1-5'},
-                                                {'label': '6eN1', 'value': '6eN1'},
-                                                {'label': '6eN4', 'value': '6eN4'},
-                                                {'label': '6eN3', 'value': '6eN3'},
-                                                {'label': '6eN2', 'value': '6eN2'}],
-                                            value='6aSU12',
-                                            id='survey-unit-dropdown',
-                                            style= {'font-size': '25px','margin':'0 auto'}
-
-
-                                        ),
-
-                                        html.H2("Profile Line:", className="card-title",
-                                                style={'color': 'blue', }),
-                                        dcc.Dropdown(
-                                            options=['6a01613'],
-                                            value='6a01613',
-                                            id='survey-line-dropdown',
-                                            style= {'font-size': '25px'}
-
-                                        ),
-
-
-
-                                    ]
-                                ),
-                            ],
-                            style={
-                                'display': 'flex',
-                                'align-items': 'center',
-                                "margin": "auto",
-                                "marginTop": "20px",
-                                "textAlign": "left",
-                                "border": "1px solid #ccc",'background-color' :'#9de8f5'
-
-                            },
-                        ),
-
-                        width={"size": 3, "offset":0},
-                    ),
-
-
-                    # Create a new row for the "scatter_plot" and "error_bar_plot"
-                    dbc.Row(
-                        children=[
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        scatter_plot.layout,
-                                    ]
-                                ),
-                                width={"size": 6, "offset": 0},
+        dcc.Store(
+            id="generated_charts",
+            data={"cpa": None, "line_plot": None, "error_plot": None},
+        ),
+        dcc.Graph(id="hidden-chart", style={"display": "none"}),
+        dcc.Download(id="download"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        [
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            html.H6(
+                                                "Survey Unit:",
+                                                className="card-title",
+                                                style={
+                                                    "color": "blue",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            html.Div("6aSU12", id="survey_unit_card"),
+                                        ]
+                                    )
+                                ],
+                                style={
+                                    "margin": "10px",
+                                    "border-radius": "10px",
+                                },
                             ),
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        error_bar_plot.layout,
-                                    ]
-                                ),
-                                width={"size": 6, "offset": 0},
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            html.H6(
+                                                "Trend:",
+                                                className="card-title",
+                                                style={
+                                                    "color": "blue",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            html.Div("----", id="trend_card"),
+                                        ]
+                                    )
+                                ],
+                                style={"margin": "10px", "border-radius": "10px"},
+                            ),
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            html.H6(
+                                                "Highest Recorded CPA:",
+                                                className="card-title",
+                                                style={
+                                                    "color": "blue",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            html.Div("----", id="highest_card"),
+                                        ]
+                                    )
+                                ],
+                                style={"margin": "10px", "border-radius": "10px"},
+                            ),
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            html.H6(
+                                                "Lowest Recorded CPA:",
+                                                className="card-title",
+                                                style={
+                                                    "color": "blue",
+                                                    "margin-bottom": "5px",
+                                                },
+                                            ),
+                                            html.Div("----", id="lowest_card"),
+                                        ]
+                                    )
+                                ],
+                                style={"margin": "10px", "border-radius": "10px"},
+                            ),
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            # html.H4("Download Charts:", className="card-title",
+                                            #       style={'color': 'blue', 'margin-bottom': '10px', }),
+                                            dcc.Checklist(
+                                                id="download-check-list",
+                                                options=[
+                                                    {
+                                                        "label": " CPA Plot ",
+                                                        "value": "cpa",
+                                                    },
+                                                    {
+                                                        "label": " Line Plot ",
+                                                        "value": "line_plot",
+                                                    },
+                                                    {
+                                                        "label": " Box Plot ",
+                                                        "value": "box_plot",
+                                                    },
+                                                ],
+                                                value=[],
+                                            ),
+                                            dbc.Button(
+                                                "Download Charts",
+                                                id="download-charts-button",
+                                                n_clicks=0,
+                                                size="sm",
+                                            ),
+                                        ]
+                                    )
+                                ],
+                                style={
+                                    "margin": "10px",
+                                    "position": "block",
+                                    "border-radius": "10px",
+                                },
                             ),
                         ]
                     ),
-                    # Create a new row for the "Profile Line Plot" and "CSA_Table"
-                    dbc.Row(
-                        children=[
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        profile_line_plot.layout,
-                                    ]
-                                ),
-                                width={"size": 6, "offset": 0},
-                            ),
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        csa_table.layout,
-                                    ]
-                                ),
-                                width={"size": 3, "offset": 6},
-                            ),
-                        ]
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 2, "offset": 0},
+                    xl={"size": 2, "offset": 0},
+                    xxl={"size": 2, "offset": 0},
+                    align="start",
+                ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            mapbox.layout,
+                        ],
+                        style={"margin-top": "10px", "height": "60vh"},
                     ),
-                ],
-                style={
-                    "display": "flex",
-                    "flex-wrap": "wrap",
-                },  # Use flexbox to control the layout
-            ),
-            fluid=True,  # Set fluid to True for a full-width container
-            style={
-                "width": "100%",
-                "text-align": "center",
-                "margin-right": "150px",
-            },
-        )
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 5, "offset": 0},
+                    xl={"size": 5, "offset": 0},
+                    xxl={"size": 5, "offset": 0},
+                ),
+                dbc.Col(
+                    html.Div(
+                        scatter_plot.layout,
+                    ),
+                    style={
+                        "margin-top": "10px",
+                        "height": "100%",
+                    },
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 5, "offset": 0},
+                    xl={"size": 5, "offset": 0},
+                    xxl={"size": 5, "offset": 0},
+                ),
+            ],
+            align="start",
+            style={},
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div([]),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 2, "offset": 0},
+                    xl={"size": 2, "offset": 0},
+                    xxl={"size": 2, "offset": 0},
+                    align="start",
+                ),
+                dbc.Col(
+                    html.Div(profile_line_plot.layout),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 5, "offset": 0},
+                    xl={"size": 5, "offset": 0},
+                    xxl={"size": 5, "offset": 0},
+                ),
+                dbc.Col(
+                    html.Div(error_bar_plot.layout),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 5, "offset": 0},
+                    xl={"size": 5, "offset": 0},
+                    xxl={"size": 5, "offset": 0},
+                ),
+            ],
+            align="start",
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div([]),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 2, "offset": 0},
+                    xl={"size": 2, "offset": 0},
+                    xxl={"size": 2, "offset": 0},
+                ),
+                dbc.Col(
+                    html.Div(csa_table.layout),
+                    xs={"size": 12, "offset": 0},
+                    sm={"size": 12, "offset": 0},
+                    md={"size": 12, "offset": 0},
+                    lg={"size": 10, "offset": 0},
+                    xl={"size": 10, "offset": 0},
+                    xxl={"size": 10, "offset": 0},
+                ),
+            ],
+            align="start",
+        ),
     ]
 )
+
+
+@callback(
+    Output("survey_unit_card", "children"),
+    Input("survey-unit-dropdown", "value"),
+    State("survey-unit-dropdown", "options"),
+)
+def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
+    """Callback populates the survey unit CPA card with the current selected survey unit"""
+    if current_sur_unit:
+        label = [
+            x["label"] for x in current_sur_unit_state if x["value"] == current_sur_unit
+        ]
+        return label
+
+
+@callback(
+    Output("trend_card", "children"),
+    Input("change_rate", "data"),
+)
+def update_trend_card(trend):
+    """Callback grabs the trend data from the change rate store found in the scatter plot page.
+    Formats the output string"""
+
+    if trend:
+        if "Accretion Rate" in trend:
+            value = trend.split(":")[-1]
+            comment = f" Accreting {value}"
+            return html.Span(f"{comment}", style={"color": "green"})
+        elif "Erosion Rate" in trend:
+            value = trend.split(":")[-1]
+            comment = f" Eroding {value}"
+            return html.Span(f"{comment}", style={"color": "red"})
+    else:
+        return f"{trend}"
+
+
+@callback(
+    Output("lowest_card", "children"),
+    Input("lowest_recorded_value", "data"),
+    Input("lowest_recorded_year", "data"),
+)
+def update_lowest_cpa_card(lowest_data, lowest_year):
+    """Callback updates the lowest cpa card. It grabs the data from the stores in the scatter plot page"""
+
+    if lowest_data and lowest_year:
+        comment = f"{lowest_data} "
+        return html.Span(f"{comment}", style={"color": "red"})
+
+
+@callback(
+    Output("highest_card", "children"),
+    Input("highest_recorded_value", "data"),
+    Input("highest_recorded_year", "data"),
+)
+def update_highest_cpa_card(highest_data, highest_year):
+    """Callback updates the highest cpa card. It grabs the data from the stores in the scatter plot page"""
+    if highest_data and highest_year:
+        comment = f"{highest_data} "
+        return html.Span(f"{comment}", style={"color": "green"})
+
+
+@callback(
+    Output("hidden-chart", "figure"),
+    Output("download", "data"),
+    Input("download-charts-button", "n_clicks"),
+    State("download-check-list", "value"),
+    State("scatter_chart", "data"),
+    State("error_chart", "data"),
+    State("line_chart", "data"),
+    allow_duplicate=True,
+    prevent_initial_call=True,
+)
+def get_selected_charts(
+    n_clicks, chart_selection, scatter_chart, error_chart, line_chart
+):
+    """Function controls the logic behind which charts are to be downloaded using the download checklist"""
+
+    if n_clicks is None:
+        raise PreventUpdate
+
+    # dict that stores the order of the selected maps to be downloaded
+    order_map = {}
+
+    # generate the right number of subplots based on user selection:
+    rows = 0
+    titles = []
+    row_heights = []
+    if "cpa" in chart_selection:
+        rows += 1
+        titles.append("Combined Profile Area")
+        row_heights.append(0.4)
+        order_map.update({"cpa": [rows]})
+    if "line_plot" in chart_selection:
+        rows += 1
+        titles.append("Cross-Sectional Line Plot")
+        row_heights.append(0.3)
+        order_map.update({"line_plot": [rows]})
+    if "box_plot" in chart_selection:
+        rows += 1
+        titles.append("CPA Box Plot")
+        row_heights.append(0.3)
+        order_map.update({"error_plot": [rows]})
+
+    subplot = make_subplots(
+        rows=rows,
+        cols=1,
+        subplot_titles=titles,
+        row_heights=row_heights,
+        shared_xaxes=False,
+    )
+
+    if rows == 1:
+        subplot.update_layout(height=800, width=2000)
+    elif rows == 2:
+        subplot.update_layout(height=1500, width=2000)
+    elif rows == 3:
+        subplot.update_layout(height=2000, width=2000)
+
+    if n_clicks is None:
+        return dash.no_update
+    else:
+        if "cpa" in chart_selection:
+            cpa_figure_data = scatter_chart.get("cpa")
+            cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
+
+            # Update the x-axis formatting for the subplot to display dates
+            row = order_map.get("cpa")
+
+            for i in range(len(cpa_figure.data)):
+                trace = cpa_figure.data[i]
+                numeric_dates = trace.x
+
+                # Convert numeric dates to datetime objects
+                datetime_dates = [
+                    datetime.utcfromtimestamp(date * 24 * 60 * 60)
+                    for date in numeric_dates
+                ]
+
+                # Format datetime dates as text using strftime (adjust the format as needed)
+                formatted_dates = [date.strftime("%Y-%m-%d") for date in datetime_dates]
+                trace.x = formatted_dates
+                subplot.add_trace(trace, row=row, col=1)
+
+        if "line_plot" in chart_selection:
+            line_figure_data = line_chart.get("line_plot")
+            line_figure = go.Figure(json.loads(line_figure_data))
+            row = order_map.get("line_plot")
+
+            for i in range(len(line_figure.data)):
+                subplot.add_trace(line_figure.data[i], row=row, col=1)
+
+        if "box_plot" in chart_selection:
+            error_figure_data = error_chart.get("error_plot")
+            error_figure = go.Figure(json.loads(error_figure_data))
+            row = order_map.get("error_plot")
+
+            for i in range(len(error_figure.data)):
+                subplot.add_trace(error_figure.data[i], row=row, col=1)
+
+        # Save the subplot as an image
+        img_bytes = subplot.to_image(format="png")
+
+    return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")

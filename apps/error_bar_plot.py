@@ -1,46 +1,34 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc, callback, Input, Output,State
-import numpy as np
+from dash import html, dcc, callback, Input, Output, State
 import pandas as pd
-import psycopg2
-import geopandas as gpd
-from scipy.interpolate import interp1d
-from datetime import datetime
-import matplotlib.dates as mdates
 import plotly.express as px
-import statsmodels.api as sm
 import plotly.graph_objs as go
-import sqlalchemy
-from scipy.integrate import quad
-import warnings
-import time
-import matplotlib.pyplot as plt
 
-layout = html.Div([
-    dcc.Store(id ='error_chart'),
-    dcc.Graph(id="error_plot",style={"width": "100%", "height": "50vh"}),
 
-    # adding info and max view buttons
-    dbc.Button(
+layout = html.Div(
+    [
+        dcc.Store(id="error_chart"),
+        dcc.Graph(id="error_plot", style={"width": "100%", "height": "50vh"}),
+        # adding info and max view buttons
+        dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="md",
             id="error_open_info",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'left': '8px'},
+            style={"position": "absolute", "bottom": "1%", "left": "8px"},
         ),
-    dbc.Button(
+        dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
             size="md",
             id="error_open_full",
             n_clicks=0,
             className="mr-3",
-            style={'position': 'absolute', 'bottom': '1%', 'right': '8px'},
+            style={"position": "absolute", "bottom": "1%", "right": "8px"},
         ),
-
-    # adding info and max view modals (the popups)
-    dbc.Modal(
+        # adding info and max view modals (the popups)
+        dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Error Bar Magic")),
                 dbc.ModalBody("This is a nice chart!"),
@@ -54,10 +42,12 @@ layout = html.Div([
             is_open=False,
             fullscreen=True,
         ),
-    dbc.Modal(
+        dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Error Bar Plot")),
-                dbc.ModalBody(dcc.Graph(id="error_plot_model", style={'height': '90vh'})),## might not work
+                dbc.ModalBody(
+                    dcc.Graph(id="error_plot_model", style={"height": "90vh"})
+                ),  ## might not work
                 dbc.ModalFooter(
                     dbc.Button(
                         "Close", id="error_full_close", className="ms-auto", n_clicks=0
@@ -67,23 +57,26 @@ layout = html.Div([
             id="modal_error_plot",
             is_open=False,
             fullscreen=True,
-    ),
-                       
-    ], style={'position': 'relative', 'margin-bottom': '10px','margin-top': '20px','margin-right': '20px','buffer-right': '20px'},
-    
+        ),
+    ],
+    style={
+        "position": "relative",
+        "margin-bottom": "10px",
+        "margin-top": "20px",
+        "margin-right": "20px",
+        "buffer-right": "20px",
+    },
 )
 
 
 @callback(
     Output("error_plot", "figure"),
-    Output('error_plot_model',"figure"),
-    Output('error_chart', "data"),
+    Output("error_plot_model", "figure"),
+    Output("error_chart", "data"),
     Input("selected-df-storage", "data"),
     State("survey-unit-dropdown", "value"),
-
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
-
     df = pd.read_json(cpa_df)
     df = df.drop("Sum", axis=0)
     # Melt the DataFrame to long format
@@ -103,7 +96,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         title="",
         points=False,
         template="plotly",
-        #height=600,
+        # height=600,
     )
 
     # Calculate the most recent value information
@@ -144,24 +137,21 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         mode="markers",
         marker=dict(color="red", size=8),
         name="Latest Survey",
-
-
     )
     fig.add_trace(dummy_legend_trace)
     fig.update_layout(showlegend=True, legend_title_text="Profile Name")
     # Update x-axis tick labels
-    fig.update_layout(title={
+    fig.update_layout(
+        title={
             "text": f"{selected_survey_unit}",
             "y": 0.96,
-
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
         },
-
-        title_font=dict(size=15, family='Helvetica'),
+        title_font=dict(size=15, family="Helvetica"),
         title_x=0.5,
-        yaxis_title={'text':"Combined Profile Area (m²)", 'font': {'size':15}},
+        yaxis_title={"text": "Combined Profile Area (m²)", "font": {"size": 15}},
         xaxis_title=None,
         legend_title="",
         font=dict(size=15, color="blue", family="Helvetica"),
@@ -174,18 +164,21 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
                 family="Helvetica",  # Set the font family
             ),
         ),
-
     )
 
     # Customize the legend font and size
     fig.update_layout(
         legend=dict(
-            title_font=dict(size=12, family='Helvetica'),  # Customize font size and family
-            title_text='',  # Remove legend title
-            font=dict(size=12, family='Helvetica')  # Customize font size and family for legend labels
+            title_font=dict(
+                size=12, family="Helvetica"
+            ),  # Customize font size and family
+            title_text="",  # Remove legend title
+            font=dict(
+                size=12, family="Helvetica"
+            ),  # Customize font size and family for legend labels
         ),
-        legend_traceorder='reversed',
-        legend_title_text=f''
+        legend_traceorder="reversed",
+        legend_title_text=f"",
     )
 
     fig.update_layout(
@@ -201,6 +194,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
 
     return fig, fig, chart_data
 
+
 # adding the callbacks that control the modal buttons display logic
 @callback(
     Output("error_info_model", "is_open"),
@@ -212,18 +206,18 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
+
 @callback(
     Output("modal_error_plot", "is_open"),
     Output("error_open_full", "n_clicks"),
     Input("error_open_full", "n_clicks"),
     Input("error_full_close", "n_clicks"),
-    Input("error_plot", "relayoutData")
+    Input("error_plot", "relayoutData"),
 )
 def toggle_modal_chart(n1, n2, relayoutData):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
     if "open" in changed_id:
         return True, 0
     elif "close" in changed_id:
         return False, 0
     return False, 0
-

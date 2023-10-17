@@ -11,7 +11,7 @@ custom_navlink_style = {
 
 custom_brand_style = {"font-size": "20px", "font-color": "white"}
 
-SWCM_LOGO = r"assets/swcm_logo.png"  # must be assets folder for some reason
+SWCM_LOGO = r"assets/Full-Logo-White.png"  # must be assets folder for some reason
 
 navbar = html.Div(
     dbc.Row(
@@ -56,5 +56,5 @@ navbar = html.Div(
                 ]
             )
         ]
-    )
+    ), style={'margin-bottom':'10px'}
 )

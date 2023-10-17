@@ -24,7 +24,7 @@ layout = html.Div(
             id="line_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -32,7 +32,7 @@ layout = html.Div(
             id="line_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="bi bi-badge-3d")],
@@ -40,7 +40,7 @@ layout = html.Div(
             id="3D_plot",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "60px"},
+            style={"position": "absolute", "top": "1%", "left": "60px","border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="bi bi-badge-sd")],
@@ -48,7 +48,7 @@ layout = html.Div(
             id="2D_plot",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "8px"},
+            style={"position": "absolute", "top": "1%", "left": "8px","border-radius": "5px"},
         ),
         dbc.Modal(
             [
@@ -86,6 +86,8 @@ layout = html.Div(
         "margin-bottom": "10px",
         "margin-top": "20px",
         "margin-right": "0px",
+        "border-radius": "10px", "overflow": "hidden"
+
     },
 )
 
@@ -266,7 +268,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         for i, trace in enumerate(fig.data):
             trace.visible = "legendonly" if i not in initial_visible_traces else True
 
-        custom_color_scale = ["#9e0909", "#9e0909"]
+        custom_color_scale = ["grey", "black"]
         fig.add_trace(
             go.Surface(
                 x=master_profile_chainage,
@@ -299,6 +301,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             color_discrete_map=custom_color_mapping,
             template="seaborn",
             category_orders={"date": date_order},
+
         )
 
         # logic to initially show only the profiles we want
@@ -311,6 +314,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 y=master_profile_elevation,
                 line=dict(color="red", width=5, dash="dash"),
                 name="Master Profile",
+
             )
         )
 

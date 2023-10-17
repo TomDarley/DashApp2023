@@ -1,6 +1,8 @@
+
+
 /* Default font size for larger screens */
 #survey_unit_card {
-    font-size: 20px; /* Adjust this to your base font size */
+    font-size: 15px; /* Adjust this to your base font size */
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */

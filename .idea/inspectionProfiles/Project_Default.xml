@@ -1,0 +1,37 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="16">
+            <item index="0" class="java.lang.String" itemvalue="pandas" />
+            <item index="1" class="java.lang.String" itemvalue="arcgis" />
+            <item index="2" class="java.lang.String" itemvalue="geopandas" />
+            <item index="3" class="java.lang.String" itemvalue="numpy" />
+            <item index="4" class="java.lang.String" itemvalue="requests" />
+            <item index="5" class="java.lang.String" itemvalue="matplotlib" />
+            <item index="6" class="java.lang.String" itemvalue="PyQt5-Qt5" />
+            <item index="7" class="java.lang.String" itemvalue="PyQt5" />
+            <item index="8" class="java.lang.String" itemvalue="certifi" />
+            <item index="9" class="java.lang.String" itemvalue="conda" />
+            <item index="10" class="java.lang.String" itemvalue="conda-build" />
+            <item index="11" class="java.lang.String" itemvalue="PyQt5-sip" />
+            <item index="12" class="java.lang.String" itemvalue="anaconda-navigator" />
+            <item index="13" class="java.lang.String" itemvalue="PyQtWebEngine-Qt5" />
+            <item index="14" class="java.lang.String" itemvalue="Pillow" />
+            <item index="15" class="java.lang.String" itemvalue="PyQtWebEngine" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="object.__getitem__" />
+          <option value="object.loc" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

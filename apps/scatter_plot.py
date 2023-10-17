@@ -41,7 +41,7 @@ layout = html.Div(
                     },
                     config={"responsive": True},
                 ),
-            ],
+            ],style={"border-radius": "10px", "overflow": "hidden"}
         ),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -49,7 +49,7 @@ layout = html.Div(
             id="scatter_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -57,7 +57,7 @@ layout = html.Div(
             id="scatter_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
         ),
         dbc.Modal(
             [

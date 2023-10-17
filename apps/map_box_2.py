@@ -3623,132 +3623,135 @@ unit_to_options = {
     ],
 }
 
-# All shapefile loaded into the database should not be promoted to multi
-engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+INITIAL_LOAD_SURVEY_UNIT = '6aSU12'
+INITIAL_LOAD_PROFILE_LINE = '6a01613'
 
-# Connect to the database using the engine
-conn = engine.connect()
-
-# Import point (survey unit) spatial data as GeoDataFrame
-query = "SELECT * FROM survey_units"  # Modify this query according to your table
-gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
-gdf = gdf.to_crs(epsg=4326)
-# Extract latitude and longitude from the geometry column
-gdf["lat"] = gdf["wkb_geometry"].y
-gdf["long"] = gdf["wkb_geometry"].x
-gdf["size"] = 15
-lon = gdf["wkb_geometry"]
-
-set_survey_unit = "6aSU12"
-set_profile_line = "6a01613"
-
-# Set the color of the selected survey unit to red
-gdf["color"] = ''
-gdf['color'] = gdf['color'].astype(str)
-gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
-gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
-
-# Extract the coordinates of the selected survey unit
-selected_point = gdf.loc[gdf["sur_unit"] == set_survey_unit].iloc[0]
-center_lat = selected_point["lat"]
-center_lon = selected_point["long"]
-
-# Get the line data from the database
-query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '6aSU12'"  # Modify this query according to your table
-lines_gdf = gpd.GeoDataFrame.from_postgis(
-    query_profile_lines, conn, geom_col="wkb_geometry"
-)
-lines_gdf = lines_gdf.to_crs(epsg=4326)
-lines_gdf["type"] = "line"
-
-# Extract individual WKT strings and create LineString geometries and get selected fields for popup
-line_data = gpd.GeoDataFrame(
-    {'profile': lines_gdf['regional_n'],
-     "baseline": lines_gdf['baseline'],
-     "interim": lines_gdf['interim'],
-     "post_storm": lines_gdf['post_storm'],
-     "strategy": lines_gdf['strategy'],
-     "geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")],
-     }
-)
-
-scatter_trace = px.scatter_mapbox(
-    gdf,
-    lat="lat",
-    lon="long",
-    hover_name="sur_unit",
-    hover_data=["sur_unit"],
-    color_discrete_sequence=["#4459c2", "#eb05c4"],
-    zoom=7,
-    size="size",
-    color="color",
-    size_max=18,
-
-)
-
-# adding each WKT string as trace to the fig as a trace
-line_traces = []
-for i, row in line_data.iterrows():
-    line = row["geometry"]
-    latitudes = [coord[1] for coord in line.coords]
-    longitudes = [coord[0] for coord in line.coords]
-
-    # Get the survey_unit value for this row
-    profile_line_id = row['profile']
-    baseline = row['baseline']
-    interim = row['interim']
-    post_storm = row['post_storm']
-    strategy = row['strategy']
-
-    # Format the popup data
-    custom_data = f"Profile Line ID: {profile_line_id}" \
-                  f"<br>Interim: {interim.title()}" \
-                  f"<br>Baseline: {baseline.title()}" \
-                  f"<br>Post Storm: {post_storm.title()}" \
-                  f"<br>Strategy: {strategy.title().replace('_', ' ')}"
-
-    if set_profile_line == profile_line_id:
-        colour = "#e8d90c"
-        width = 8
-    else:
-        colour = "#246673"
-        width = 5
-
-    # Add the LineString trace to the map
-    trace = px.line_mapbox(
-        line_data,
-        lat=latitudes,
-        lon=longitudes,
-        # hover_name=[custom_data] * len(latitudes),
-
-    )
-
-    # trace.update_traces(
-    #    hoverinfo='none',
-    # )
-
-    # Update the marker color
-    trace.update_traces(line=dict(color=colour, width=width))
-    line_traces.append(trace)
-
+## All shapefile loaded into the database should not be promoted to multi
+#engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+#
+## Connect to the database using the engine
+#conn = engine.connect()
+#
+## Import point (survey unit) spatial data as GeoDataFrame
+#query = "SELECT * FROM survey_units"  # Modify this query according to your table
+#gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
+#gdf = gdf.to_crs(epsg=4326)
+## Extract latitude and longitude from the geometry column
+#gdf["lat"] = gdf["wkb_geometry"].y
+#gdf["long"] = gdf["wkb_geometry"].x
+#gdf["size"] = 15
+#lon = gdf["wkb_geometry"]
+#
+#set_survey_unit = "6aSU12"
+#set_profile_line = "6a01613"
+#
+## Set the color of the selected survey unit to red
+#gdf["color"] = ''
+#gdf['color'] = gdf['color'].astype(str)
+#gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
+#gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
+#
+## Extract the coordinates of the selected survey unit
+#selected_point = gdf.loc[gdf["sur_unit"] == set_survey_unit].iloc[0]
+#center_lat = selected_point["lat"]
+#center_lon = selected_point["long"]
+#
+## Get the line data from the database
+#query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '6aSU12'"  # Modify this query according to your table
+#lines_gdf = gpd.GeoDataFrame.from_postgis(
+#    query_profile_lines, conn, geom_col="wkb_geometry"
+#)
+#lines_gdf = lines_gdf.to_crs(epsg=4326)
+#lines_gdf["type"] = "line"
+#
+## Extract individual WKT strings and create LineString geometries and get selected fields for popup
+#line_data = gpd.GeoDataFrame(
+#    {'profile': lines_gdf['regional_n'],
+#     "baseline": lines_gdf['baseline'],
+#     "interim": lines_gdf['interim'],
+#     "post_storm": lines_gdf['post_storm'],
+#     "strategy": lines_gdf['strategy'],
+#     "geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")],
+#     }
+#)
+#
+#scatter_trace = px.scatter_mapbox(
+#    gdf,
+#    lat="lat",
+#    lon="long",
+#    hover_name="sur_unit",
+#    hover_data=["sur_unit"],
+#    color_discrete_sequence=["#4459c2", "#eb05c4"],
+#    zoom=7,
+#    size="size",
+#    color="color",
+#    size_max=18,
+#
+#)
+#
+## adding each WKT string as trace to the fig as a trace
+#line_traces = []
+#for i, row in line_data.iterrows():
+#    line = row["geometry"]
+#    latitudes = [coord[1] for coord in line.coords]
+#    longitudes = [coord[0] for coord in line.coords]
+#
+#    # Get the survey_unit value for this row
+#    profile_line_id = row['profile']
+#    baseline = row['baseline']
+#    interim = row['interim']
+#    post_storm = row['post_storm']
+#    strategy = row['strategy']
+#
+#    # Format the popup data
+#    custom_data = f"Profile Line ID: {profile_line_id}" \
+#                  f"<br>Interim: {interim.title()}" \
+#                  f"<br>Baseline: {baseline.title()}" \
+#                  f"<br>Post Storm: {post_storm.title()}" \
+#                  f"<br>Strategy: {strategy.title().replace('_', ' ')}"
+#
+#    if set_profile_line == profile_line_id:
+#        colour = "#e8d90c"
+#        width = 8
+#    else:
+#        colour = "#246673"
+#        width = 5
+#
+#    # Add the LineString trace to the map
+#    trace = px.line_mapbox(
+#        line_data,
+#        lat=latitudes,
+#        lon=longitudes,
+#        # hover_name=[custom_data] * len(latitudes),
+#
+#    )
+#
+#    # trace.update_traces(
+#    #    hoverinfo='none',
+#    # )
+#
+#    # Update the marker color
+#    trace.update_traces(line=dict(color=colour, width=width))
+#    line_traces.append(trace)
+#
 fig = go.Figure()
-for i in range(len(line_traces)):
-    fig.add_trace(line_traces[i].data[0])
-
-# Add the scatter trace to the figure
-fig.add_traces(scatter_trace.data)
-
-fig.update_layout(mapbox_style="open-street-map")
-# this removes white space around the map
-fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-fig.update_traces(showlegend=False)
-
-fig.update_layout(
-    mapbox={
-        "center": {"lat": center_lat, "lon": center_lon},
-        "zoom": 6,
-    }
-)
+#for i in range(len(line_traces)):
+#    fig.add_trace(line_traces[i].data[0])
+#
+## Add the scatter trace to the figure
+#fig.add_traces(scatter_trace.data)
+#
+#fig.update_layout(mapbox_style="open-street-map")
+## this removes white space around the map
+#fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+#fig.update_traces(showlegend=False)
+#
+#fig.update_layout(
+#    mapbox={
+#        "center": {"lat": center_lat, "lon": center_lon},
+#        "zoom": 6,
+#    }
+#)
 
 layout = html.Div(
     children=[
@@ -4225,7 +4228,7 @@ layout = html.Div(
                     ],
                 )
             ],
-            style={"width": "350px", "background-color": "#ebf5ff"},
+            style={"width": "350px", "background-color": "#ebf5ff", "border-radius": "10px"},
             id="drop_down_card",
         ),
     ],
@@ -4244,7 +4247,7 @@ layout = html.Div(
         "selected-value-storage", "data"
     ),  # current data, the object holding the selected values
     Input("survey-line-dropdown", "value"),
-    prevent_initial_call=True,
+    prevent_initial_call=False,
 )
 def set_selected_survey_unit(
         selected_value, click_data, current_data, profile_dropdown_selection
@@ -4257,96 +4260,139 @@ def set_selected_survey_unit(
     the dropdown will update with the selected survey unit value. Same for the profile lines. This also works in reverse
     , if dropdown is used only the data store is updated."""
 
-    # have to work out which method (dropdown/map click) fired the app callback, do this with ctx
-    triggered_id = ctx.triggered_id
+    # check if the initial call triggered the callback, if initial we set intial load values
+    ctx = dash.callback_context
+    if not ctx.triggered:
 
-    # if the map triggered the callback
-    if triggered_id == "example-map":
-        # then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
-        if click_data is not None:
-            if click_data.get("points", [])[0].get("customdata") == None:
-                line = True
-            else:
-                line = False
+        default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE}
+        default_options= [{'label': "6a01613",'value': "6a01613"},
+                                     {'label': "6a01614",'value': "6a01614"},
+                                     {'label': "6a01615",'value': "6a01615"},
+                                     {'label': "6a01616",'value': "6a01616"},
+                                     {'label': "6a01617",'value': "6a01617"},
+                                     {'label': "6a01618",'value': "6a01618"},
+                                     {'label': "6a01619",'value': "6a01619"},
+                                     {'label': "6a01620",'value': "6a01620"},
+                                     {'label': "6a01621",'value': "6a01621"},
+                                     {'label': "6a01622",'value': "6a01622"},
+                                     {'label': "6a01623",'value': "6a01623"},
+                                     {'label': "6a01624",'value': "6a01624"}]
 
-            # if the points (survey units) were clicked:
-            if not line:
-                clicked_survey_unit = click_data.get("points", [])[0].get("customdata")[
-                    0
-                ]
-                set_survey_unit = clicked_survey_unit
-                second_dropdown_options = unit_to_options.get(set_survey_unit, [])
-                current_data["survey_unit"] = clicked_survey_unit
-                current_data["profile_line"] = second_dropdown_options[0]
-                # print(current_data)
 
-                return (
-                    current_data,
-                    set_survey_unit,
-                    second_dropdown_options,
-                    second_dropdown_options[0],
-                )
-
-            # if the lines (profile lines) were clicked:
-            elif line:
-                clicked_profile_line = click_data.get("points", [])[0].get("hovertext")
-                set_profile_line = clicked_profile_line
-                second_dropdown_options = unit_to_options.get(
-                    current_data["survey_unit"], []
-                )
-                current_data["profile_line"] = clicked_profile_line
-                # print(current_data)
-
-                return (
-                    current_data,
-                    dash.no_update,
-                    second_dropdown_options,
-                    set_profile_line,
-                )
-
-    # if the survey unit dropdown triggered the callback
-    elif triggered_id == "survey-unit-dropdown":
-        set_survey_unit = selected_value
-
-        second_dropdown_options = unit_to_options.get(set_survey_unit, [])
-        current_data["survey_unit"] = set_survey_unit
-        current_data["profile_line"] = second_dropdown_options[0]
-        # print(current_data)
-        return (
-            current_data,
-            dash.no_update,
-            second_dropdown_options,
-            second_dropdown_options[0],
-        )
-
-    # if the profile line dropdown was used
-    elif triggered_id == "survey-line-dropdown":
-        current_data["profile_line"] = profile_dropdown_selection
-        # print(current_data)
-
-        return current_data, dash.no_update, dash.no_update, profile_dropdown_selection
+        return default_values_for_store, INITIAL_LOAD_SURVEY_UNIT, default_options, INITIAL_LOAD_PROFILE_LINE
 
     else:
-        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+        print(click_data)
+        # have to work out which method (dropdown/map click) fired the app callback, do this with ctx
+        triggered_id = ctx.triggered_id
+
+        # if the map triggered the callback
+        if triggered_id == "example-map":
+            # then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
+            if click_data is not None:
+                if len(click_data.get("points", [])[0].get("hovertext")) >50:
+                    line = True
+                else:
+                    line = False
+
+                # if the points (survey units) were clicked:
+                if not line:
+                    clicked_survey_unit = click_data.get("points", [])[0].get("customdata")[0]
+                    set_survey_unit = clicked_survey_unit
+                    second_dropdown_options = unit_to_options.get(set_survey_unit, [])
+                    current_data["survey_unit"] = clicked_survey_unit
+                    current_data["profile_line"] = second_dropdown_options[0]
+                    # print(current_data)
+
+                    return (
+                        current_data,
+                        set_survey_unit,
+                        second_dropdown_options,
+                        second_dropdown_options[0],
+                    )
+
+                # if the lines (profile lines) were clicked:
+                elif line:
+                    clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[1].replace(" ","")
+                    set_profile_line = clicked_profile_line
+                    second_dropdown_options = unit_to_options.get(
+                        current_data["survey_unit"], []
+                    )
+                    current_data["profile_line"] = clicked_profile_line
+                    # print(current_data)
+
+                    return (
+                        current_data,
+                        dash.no_update,
+                        second_dropdown_options,
+                        set_profile_line,
+                    )
+
+        # if the survey unit dropdown triggered the callback
+        elif triggered_id == "survey-unit-dropdown":
+            set_survey_unit = selected_value
+
+            second_dropdown_options = unit_to_options.get(set_survey_unit, [])
+            current_data["survey_unit"] = set_survey_unit
+            current_data["profile_line"] = second_dropdown_options[0]
+            # print(current_data)
+            return (
+                current_data,
+                dash.no_update,
+                second_dropdown_options,
+                second_dropdown_options[0],
+            )
+
+        # if the profile line dropdown was used
+        elif triggered_id == "survey-line-dropdown":
+            current_data["profile_line"] = profile_dropdown_selection
+            # print(current_data)
+
+            return current_data, dash.no_update, dash.no_update, profile_dropdown_selection
+
+        else:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
 
 @callback(
     Output("example-map", "figure"),
     Input("selected-value-storage", "data"),
     State("zoom-level-store", "data"),
-    prevent_initial_call=True,
+    prevent_initial_call=False,
 )
 def update_map(selection, zoom_level):
     """Function controls the re-loading of the map. Takes in the value store which contaions two values, selected surevy
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevent profile lines. The selected profile line is then used isolate and style to show which one is selected
     to the user."""
-    if selection:
-        set_survey_unit = selection["survey_unit"]
-    else:
-        set_survey_unit = '6aSU12'
 
 
+    set_survey_unit = selection['survey_unit']
+    print(set_survey_unit)
+    # load data in
+
+    # All shapefile loaded into the database should not be promoted to multi
+    engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+
+    # Connect to the database using the engine
+    conn = engine.connect()
+
+    # Import point (survey unit) spatial data as GeoDataFrame
+    query = "SELECT * FROM survey_units"  # Modify this query according to your table
+    gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
+    gdf = gdf.to_crs(epsg=4326)
+    # Extract latitude and longitude from the geometry column
+    gdf["lat"] = gdf["wkb_geometry"].y
+    gdf["long"] = gdf["wkb_geometry"].x
+    gdf["size"] = 15
+
+
+    # Set the color of the selected survey unit to red
+    gdf["color"] = ''
+    gdf['color'] = gdf['color'].astype(str)
+    gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
+    gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
 
     set_profile_line = selection["profile_line"]
 
@@ -4363,6 +4409,7 @@ def update_map(selection, zoom_level):
     selected_point = updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit].iloc[0]
     center_lat = selected_point["lat"]
     center_lon = selected_point["long"]
+
     # Update the map
     updated_scatter_trace = px.scatter_mapbox(
         updated_gdf,
@@ -4370,6 +4417,8 @@ def update_map(selection, zoom_level):
         lon="long",
         hover_name="sur_unit",
         hover_data=["sur_unit"],
+        custom_data=['sur_unit'],
+
         color="color",  # Use the 'color' column to specify point colors
         color_discrete_sequence=["#4459c2", "#eb05c4"],  # Define colors for the legend
         center={
@@ -4382,6 +4431,11 @@ def update_map(selection, zoom_level):
         size_max=12,
     )
 
+    #updated_scatter_trace.update_traces( hovertemplate=f"<b>{set_survey_unit}<b>" ,hoverinfo='none')
+
+
+
+
     query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
     lines_gdf = gpd.GeoDataFrame.from_postgis(
         query_profile_lines, conn, geom_col="wkb_geometry"
@@ -4389,11 +4443,18 @@ def update_map(selection, zoom_level):
     lines_gdf = lines_gdf.to_crs(epsg=4326)
     lines_gdf["type"] = "line"
 
-    # Extract individual WKT strings and create LineString geometries
-    line_data = gpd.GeoDataFrame(
-        {"geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")]}
 
-    )
+    # Extract individual WKT strings and create LineString geometries and get selected fields for popup
+    line_data = gpd.GeoDataFrame(
+        {'profile': lines_gdf['regional_n'],
+         "baseline": lines_gdf['baseline'],
+         "interim": lines_gdf['interim'],
+         "post_storm": lines_gdf['post_storm'],
+         "strategy": lines_gdf['strategy'],
+         "survey_unit": lines_gdf['surveyunit'],
+         "geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")],
+         }
+     )
 
     # adding each WKT string as trace to the fig as a trace
     line_traces = []
@@ -4401,6 +4462,21 @@ def update_map(selection, zoom_level):
         line = row["geometry"]
         latitudes = [coord[1] for coord in line.coords]
         longitudes = [coord[0] for coord in line.coords]
+
+        #Get the survey_unit value for this row
+        profile_line_id = row['profile']
+        baseline = row['baseline']
+        interim = row['interim']
+        post_storm = row['post_storm']
+        strategy = row['strategy']
+        survey_unit= row['survey_unit']
+
+        # Format the popup data
+        custom_data = f"Profile Line ID: {profile_line_id}" \
+                      f"<br>Interim: {interim.title()}" \
+                      f"<br>Baseline: {baseline.title()}" \
+                      f"<br>Post Storm: {post_storm.title()}" \
+                      f"<br>Strategy: {strategy.title().replace('_', ' ')}"
 
         # Get the survey_unit value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
@@ -4412,12 +4488,13 @@ def update_map(selection, zoom_level):
             colour = "#246673"
             width = 5
 
-        # Add the LineString trace to the map
+        # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
         trace = px.line_mapbox(
             line_data,
             lat=latitudes,
             lon=longitudes,
-            hover_name=[profile_line_id] * len(latitudes),
+            hover_name=[custom_data] * len(latitudes),
+
         )
 
         # Update the marker color
@@ -4442,10 +4519,12 @@ def update_map(selection, zoom_level):
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
     fig.update_traces(showlegend=False)
 
+    # check if the initial call triggered the callback, if initial we set intial load values
+
     fig.update_layout(
         mapbox={
             "center": {"lat": center_lat, "lon": center_lon},
-            "zoom": 13,
+            "zoom": 14,
         }
     )
 

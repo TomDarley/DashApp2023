@@ -2,7 +2,8 @@ import dash
 from dash import html, callback, Input, Output, State
 from apps import scatter_plot
 from apps import error_bar_plot
-from apps import mapbox
+#from apps import mapbox
+from apps import map_box_2
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
@@ -35,23 +36,27 @@ layout = html.Div(
                                 [
                                     dbc.CardBody(
                                         [
-                                            html.H6(
-                                                "Survey Unit:",
-                                                className="card-title",
-                                                style={
-                                                    "color": "blue",
-                                                    "margin-bottom": "5px",
-                                                },
-                                            ),
+                                            #html.H6(
+                                            #    "Survey Unit Name:",
+                                            #    className="card-title",
+                                            #    style={
+                                            #        "color": "blue",
+                                            #        "margin-bottom": "5px",
+                                            #    },
+                                            #),
+
                                             html.Div("6aSU12", id="survey_unit_card"),
+
+
                                         ]
                                     )
                                 ],
                                 style={
                                     "margin": "10px",
-                                    "border-radius": "10px",
+                                    "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'
                                 },
-                            ),
+
+                        ),
                             dbc.Card(
                                 [
                                     dbc.CardBody(
@@ -68,7 +73,8 @@ layout = html.Div(
                                         ]
                                     )
                                 ],
-                                style={"margin": "10px", "border-radius": "10px"},
+                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'}
+,
                             ),
                             dbc.Card(
                                 [
@@ -86,7 +92,7 @@ layout = html.Div(
                                         ]
                                     )
                                 ],
-                                style={"margin": "10px", "border-radius": "10px"},
+                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'},
                             ),
                             dbc.Card(
                                 [
@@ -104,7 +110,7 @@ layout = html.Div(
                                         ]
                                     )
                                 ],
-                                style={"margin": "10px", "border-radius": "10px"},
+                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'},
                             ),
                             dbc.Card(
                                 [
@@ -143,6 +149,7 @@ layout = html.Div(
                                     "margin": "10px",
                                     "position": "block",
                                     "border-radius": "10px",
+                                    'box-shadow': '5px 5px 5px lightblue'
                                 },
                             ),
                         ]
@@ -158,9 +165,9 @@ layout = html.Div(
                 dbc.Col(
                     html.Div(
                         [
-                            mapbox.layout,
+                            map_box_2.layout,
                         ],
-                        style={"margin-top": "10px", "height": "60vh"},
+                        style={"margin-top": "10px", "height": "60vh","border-radius": "10px", "overflow": "hidden"},
                     ),
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
@@ -175,7 +182,7 @@ layout = html.Div(
                     ),
                     style={
                         "margin-top": "10px",
-                        "height": "100%",
+                        "height": "100%","border-radius": "10px", "overflow": "hidden"
                     },
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
@@ -249,17 +256,23 @@ layout = html.Div(
 
 
 @callback(
+
     Output("survey_unit_card", "children"),
+
     Input("survey-unit-dropdown", "value"),
     State("survey-unit-dropdown", "options"),
+
 )
 def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
     """Callback populates the survey unit CPA card with the current selected survey unit"""
+
     if current_sur_unit:
         label = [
             x["label"] for x in current_sur_unit_state if x["value"] == current_sur_unit
         ]
-        return label
+
+        label = label[0].split("-")[1].strip()
+        return label  # Apply the className "fade-in-element" to initially hide the element
 
 
 @callback(

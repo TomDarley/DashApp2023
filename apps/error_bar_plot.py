@@ -17,7 +17,7 @@ layout = html.Div(
             id="error_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -25,7 +25,7 @@ layout = html.Div(
             id="error_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
         ),
         # adding info and max view modals (the popups)
         dbc.Modal(
@@ -65,6 +65,7 @@ layout = html.Div(
         "margin-top": "20px",
         "margin-right": "20px",
         "buffer-right": "20px",
+        "border-radius": "10px", "overflow": "hidden"
     },
 )
 

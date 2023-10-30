@@ -191,7 +191,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
         new_list += color_names[-first_last:]  # Take the last element from the original list
 
-        print(new_list)
 
         return new_list
 
@@ -345,10 +344,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             )
         )
 
-        # style the first, second and last trace
-        # Access the first trace and modify its line display style
-        f=fig.data
-        print(fig.data)
 
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(

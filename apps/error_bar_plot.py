@@ -107,19 +107,32 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         {"Index": most_recent_values.index, "Value": most_recent_values}
     )
 
+
+
     # Add a red scatter point for the most recent values
     for _, row in most_recent_info.iterrows():
+
         popup_text = f"Latest Survey: {latest_date}"
         scatter_trace = go.Scatter(
             x=[row["Index"]],
             y=[row["Value"]],
             mode="markers",
-            text=popup_text,
+            #text=popup_text,
             marker=dict(color="red", size=10),
             showlegend=False,
+            customdata=[[[row["Index"]],[round(row["Value"],2)]]],
+
+
+
         )
 
         fig.add_trace(scatter_trace)
+
+    # Format the label shown in the hover
+    fig.update_traces(
+        hovertemplate="<b>Profile ID:</b> %{customdata[0]}<br>" +
+                      "<b>CPA:</b> %{customdata[1]}<extra></extra>"  # Include <extra></extra> to remove the legend
+    )
 
     # Modify the box plot traces to show custom error bars
     for profile in df.index:

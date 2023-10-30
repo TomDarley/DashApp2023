@@ -4283,15 +4283,18 @@ def set_selected_survey_unit(
 
     else:
 
-        print(click_data)
+        #print(click_data)
         # have to work out which method (dropdown/map click) fired the app callback, do this with ctx
         triggered_id = ctx.triggered_id
 
         # if the map triggered the callback
         if triggered_id == "example-map":
+
             # then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
             if click_data is not None:
-                if len(click_data.get("points", [])[0].get("hovertext")) >50:
+
+                # Line data has the key hovertext in the clickdata, points have customdata
+                if 'hovertext' in click_data.get("points", [])[0].keys():
                     line = True
                 else:
                     line = False
@@ -4495,6 +4498,7 @@ def update_map(selection, zoom_level):
             lat=latitudes,
             lon=longitudes,
             hover_name=[custom_data] * len(latitudes),
+
 
         )
 

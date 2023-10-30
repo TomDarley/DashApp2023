@@ -368,12 +368,10 @@ def make_scatter_plot(selected_survey_unit):
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
-    # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
+
+    # Format the trend line hover data to show nothing, the order of this call matters
     fig.update_traces(None),
     fig.update_traces(hoverinfo='none')
-
-
-
 
     # Serialize the figure to JSON
     serialized_fig = fig.to_json()

@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
-
+import seaborn as sns
 
 layout = html.Div(
     [
@@ -104,6 +104,7 @@ layout = html.Div(
     allow_duplicate=True,
 )
 def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d):
+
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
 
@@ -133,75 +134,68 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         if item not in date_order:
             date_order.append(item)
 
-    # Define a color scale that scales on the number of profiles
-    color_scale = [
-        "#00f6ff",
-        "#4cf0f5",
-        "#69eaec",
-        "#78e5e4",
-        "#85e1dd",
-        "#90dcd6",
-        "#9ad8cf",
-        "#a3d3c8",
-        "#a8d0c4",
-        "#adcdc0",
-        "#b1cabb",
-        "#b5c7b7",
-        "#b9c4b3",
-        "#bdc1ae",
-        "#c1beaa",
-        "#c4bba6",
-        "#c7b8a1",
-        "#cbb59d",
-        "#cdb299",
-        "#d0af94",
-        "#d3ab90",
-        "#d7a68a",
-        "#dba183",
-        "#de9c7c",
-        "#e19776",
-        "#e5906d",
-        "#e88a66",
-        "#eb835e",
-        "#ef7b55",
-        "#f2704a",
-        "#f5653e",
-        "#f85833",
-        "#fa4a27",
-        "#fc381a",
-        "#fe1f0a",
-    ]
-
     custom_color_mapping = {}
 
-    interval = len(color_scale) // len(date_order)
-
-    # Manually set the line colors based on the color scale
-    # for i, date in enumerate(date_order):
-    #    color_index = i * interval
-    #    custom_color_mapping.update({date: color_scale[color_index]})
-
     def generate_custom_colors(num_colors):
-        # Define a list of color names
-        color_names = [
-            "#000b5c",
-            "#003494",
-            "#005abf",
-            "#007fd2",
-            "#00a2ca",
-            "#00c4a8",
-            "#00e471",
-            "#00ff02",
-        ]
 
-        # Repeat the color names as needed to match the desired number of colors
-        custom_colors = color_names * (num_colors // len(color_names))
+        """Function generates color ramp dynamically based on the number of lines that need to be plottted"""
 
-        # Add any remaining colors
-        custom_colors += color_names[: num_colors % len(color_names)]
+        def generate_color_gradient(start_color, end_color, steps):
+            """Funtion generates a list of hex of step length"""
 
-        return custom_colors
+            # Extract RGB components from the start and end colors
+            start_R, start_G, start_B = start_color
+            end_R, end_G, end_B = end_color
 
+            # Calculate the step size for each color channel
+            delta_R = (end_R - start_R) / steps
+            delta_G = (end_G - start_G) / steps
+            delta_B = (end_B - start_B) / steps
+
+            # Generate the color ramp
+            colors = []
+            for step in range(steps):
+                # Interpolate RGB values for each step
+                R = int(start_R + (delta_R * step))
+                G = int(start_G + (delta_G * step))
+                B = int(start_B + (delta_B * step))
+
+                # Convert RGB values to hex and append to the colors list
+                color_hex = f"#{R:02x}{G:02x}{B:02x}"
+                colors.append(color_hex)
+
+            return colors
+
+        # Generate a list of color names
+        start_color = (191, 0, 255)  # Light blue - RGB values
+        end_color = (153, 214, 255)
+        color_names = generate_color_gradient(start_color, end_color, len(dates))
+
+
+        # Calculate the number of elements to be taken from the original list
+        first_last = 1  # Number of elements to take from the start and end of the list
+        middle_count = len(color_names) - 2  # Number of elements excluding the first and last elements
+
+        # Calculate the number of elements for the new list
+        num_elements_new_list = first_last * 2 + min(middle_count, num_colors - 2)
+
+        # Calculate the step size to evenly space the elements from the middle part of the list
+        step = middle_count // (num_elements_new_list - first_last * 2)
+
+        # Create a new list based on the criteria
+        new_list = color_names[:first_last]  # Take the first element from the original list
+
+        # Calculate elements for the middle part
+        for i in range(first_last, num_elements_new_list - first_last):
+            new_list.append(color_names[i * step])
+
+        new_list += color_names[-first_last:]  # Take the last element from the original list
+
+        print(new_list)
+
+        return new_list
+
+    # map each generated color to each date, used to color each profile
     num_colors = len(date_order)
     custom_color_list = generate_custom_colors(num_colors)
     for i, date in enumerate(date_order):
@@ -234,6 +228,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         master_profile_elevation.append(last)
 
     if selection == "3D":
+
         # create 3D plot
         surface_elevation = []
         for x in range(len(topo_df["chainage"])):
@@ -245,9 +240,25 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             y="date",
             z="elevation_od",
             color="date",
+            custom_data= ['date', 'chainage', 'elevation_od'],
             category_orders={"date": date_order},
             color_discrete_map=custom_color_mapping,
+
         )
+
+        # Changing the style of the three profiles initially loaded
+        fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(width=3))
+        fig.update_traces(selector=dict(name=fig.data[previous_trace_date].name), line=dict(width=3))
+        fig.update_traces(selector=dict(name=fig.data[newest_trace_date].name),
+                          line=dict(color='green', width=3))
+
+        # Format the label shown in the hover
+        fig.update_traces(
+            hovertemplate="<b>Date:</b> %{customdata[0]}<br>" +
+                          "<b>Chainage:</b> %{customdata[1]}<br>" +
+                          "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
+        )
+
 
         # Set custom axis labels
         fig.update_layout(
@@ -278,8 +289,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 name="Master Profile",
                 colorscale=custom_color_scale,
                 showscale=False,
+                hoverinfo='none',
+                hovertemplate=None
             )
         )
+
 
         fig.update_layout(
             legend=dict(
@@ -301,7 +315,20 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             color_discrete_map=custom_color_mapping,
             template="seaborn",
             category_orders={"date": date_order},
+            custom_data=['date', 'chainage', 'elevation_od'],
 
+        )
+
+        # Changing the style of the three profiles initially loaded
+        fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(width=3, dash='solid'))
+        fig.update_traces(selector=dict(name=fig.data[previous_trace_date].name), line=dict(color = 'blue',width=3, dash='solid'))
+        fig.update_traces(selector=dict(name=fig.data[ newest_trace_date].name), line=dict(color = 'green', width=3, dash='solid'))
+
+        # Format the label shown in the hover
+        fig.update_traces(
+            hovertemplate="<b>Date:</b> %{customdata[0]}<br>" +
+                          "<b>Chainage:</b> %{customdata[1]}<br>" +
+                          "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
         )
 
         # logic to initially show only the profiles we want
@@ -317,6 +344,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
             )
         )
+
+        # style the first, second and last trace
+        # Access the first trace and modify its line display style
+        f=fig.data
+        print(fig.data)
 
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(

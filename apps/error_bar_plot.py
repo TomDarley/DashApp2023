@@ -30,7 +30,7 @@ layout = html.Div(
         # adding info and max view modals (the popups)
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Error Bar Magic")),
+                dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
                 dbc.ModalBody("This is a nice chart!"),
                 dbc.ModalFooter(
                     dbc.Button(
@@ -44,7 +44,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Error Bar Plot")),
+                dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
                 dbc.ModalBody(
                     dcc.Graph(id="error_plot_model", style={"height": "90vh"})
                 ),  ## might not work

@@ -20,8 +20,9 @@
         position: absolute;
         z-index: 9;
         border-radius: 10px;
-        top: 65vh; /* Adjust the top position for smaller screens */
+        top: 70vh; /* Adjust the top position for smaller screens */
         left: 0px; /* Adjust the left position for smaller screens */
+
     }
 }
 

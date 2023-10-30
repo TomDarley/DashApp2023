@@ -126,7 +126,7 @@ layout = html.Div(
                                                         "value": "cpa",
                                                     },
                                                     {
-                                                        "label": " Line Plot ",
+                                                        "label": " CSA Plot ",
                                                         "value": "line_plot",
                                                     },
                                                     {
@@ -271,7 +271,7 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
             x["label"] for x in current_sur_unit_state if x["value"] == current_sur_unit
         ]
 
-        label = label[0].split("-")[1].strip()
+        label = label[0].split(" -")[1].strip()
         return label  # Apply the className "fade-in-element" to initially hide the element
 
 

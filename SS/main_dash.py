@@ -2,7 +2,7 @@ import dash
 from dash import html
 from apps import scatter_plot
 from apps import error_bar_plot
-from apps import mapbox
+from SS import mapbox
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc

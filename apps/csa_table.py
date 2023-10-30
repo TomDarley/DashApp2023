@@ -174,14 +174,15 @@ layout = html.Div(
                                     )
                                 ],
                                 style={
-                                    "margin-right": "0px",
+
                                     "border-radius": "10px",
                                     "width": "100%",
                                 },
                             ),
                         ]
                     ),
-                    style={"align": "center"},
+                    style={ "padding": "0", "margin-left": "25px", "width": "100%","margin-right": "0px", 'buffer':"0px", "padding-left": "0px"},
+
                 ),
                 dbc.Col(
                     html.Div(
@@ -240,11 +241,15 @@ layout = html.Div(
                                 },
                             ),
                         ]
-                    ),
+                    ),style={ "padding": "0", "margin-left": "8px", "width": "100%","margin-right": "10px", "padding-left": "20px"},
+
+
                 ),
             ],
             style={"margin-right": "0px"},
             align="start",
+
+
         )
     ]
 )

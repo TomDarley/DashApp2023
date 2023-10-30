@@ -267,23 +267,23 @@ layout = html.Div(
                                 html.Div(
                                     [
                                         csa_table.layout,
-                                    ]
+                                    ],
                                 ),
-                                width={"size": 3, "offset": 6},
+                                width={"size": 3, "offset": 6}
                             ),
                         ]
                     ),
                 ],
                 style={
                     "display": "flex",
-                    "flex-wrap": "wrap",
+                    "flex-wrap": "wrap"
                 },  # Use flexbox to control the layout
             ),
             fluid=True,  # Set fluid to True for a full-width container
             style={
                 "width": "100%",
                 "text-align": "center",
-                "margin-right": "150px",
+                "margin-right": "150px"
             },
         )
     ]

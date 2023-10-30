@@ -198,9 +198,18 @@ def make_scatter_plot(selected_survey_unit):
     highest_year = row_with_max_value[0]
     highest_values = row_with_max_value[1]
 
+
+
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
     )
+
+    # varible holding dates not converted used in the hover data
+    normal_dates =list(chart_ready_df["index1"])
+    normal_dates= [date.strftime('%Y-%m-%d') for date in normal_dates]
+
+
+
     month_list = []
     for i in chart_ready_df["index1"]:
         month = i.month
@@ -292,6 +301,12 @@ def make_scatter_plot(selected_survey_unit):
     global found_percentage
     found_percentage = percentage
 
+    # add the normal date format back to the dataframe to be used in the hover data
+    chart_ready_df['date'] = normal_dates
+
+    # round the CPA values to 2 decimal places, makes hover data look better
+    chart_ready_df['Sum'] = chart_ready_df['Sum'].round(2)
+
     # Create the scatter plot using Plotly Express
     fig = px.scatter(
         chart_ready_df,
@@ -299,8 +314,16 @@ def make_scatter_plot(selected_survey_unit):
         y="Sum",
         color="season",
         symbol="season",
+        custom_data=['date', 'Sum'],
         # height=550,
         template="seaborn",
+    )
+
+    # Format the label shown in the hover
+    fig.update_traces(
+        hovertemplate="<b>Date:</b> %{customdata[0]}<br>" +  # Access 'date' from custom data
+                      "<b>CPA:</b> %{customdata[1]}<br>"  # Access 'Sum' from custom data
+
     )
 
     # Update x-axis tick labels
@@ -345,6 +368,12 @@ def make_scatter_plot(selected_survey_unit):
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
+    # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
+    fig.update_traces(None),
+    fig.update_traces(hoverinfo='none')
+
+
+
 
     # Serialize the figure to JSON
     serialized_fig = fig.to_json()

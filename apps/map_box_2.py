@@ -4402,8 +4402,8 @@ def update_map(selection, zoom_level):
     updated_gdf["color"] = ''
 
     # Set the color of the selected survey unit to red
-    updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
-    updated_gdf.loc[updated_gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
+    updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit, "color"] = "#4459c2" # This will set the label shown
+    updated_gdf.loc[updated_gdf["sur_unit"] != set_survey_unit, "color"] = "#eb05c4"
 
     # Extract the coordinates of the selected survey unit
     selected_point = updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit].iloc[0]
@@ -4415,12 +4415,12 @@ def update_map(selection, zoom_level):
         updated_gdf,
         lat="lat",
         lon="long",
+
         hover_name="sur_unit",
         hover_data=["sur_unit"],
         custom_data=['sur_unit'],
-
         color="color",  # Use the 'color' column to specify point colors
-        color_discrete_sequence=["#4459c2", "#eb05c4"],  # Define colors for the legend
+        color_discrete_sequence=["#4459c2", "#eb05c4"],  # Define colors for the legend, these are also the colors used
         center={
             "lat": center_lat,
             "lon": center_lon,
@@ -4429,11 +4429,12 @@ def update_map(selection, zoom_level):
         # height=690,
         size="size",
         size_max=12,
+
     )
 
-    #updated_scatter_trace.update_traces( hovertemplate=f"<b>{set_survey_unit}<b>" ,hoverinfo='none')
-
-
+    # Format the label shown, must have the <extra></extra> to remove the color being shown
+    updated_scatter_trace.update_traces(hovertemplate=f"<b>{set_survey_unit}<b><extra></extra>", hovertext='sur_unit'),
+    updated_scatter_trace.update_traces(hoverinfo='none')
 
 
     query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
@@ -4504,6 +4505,7 @@ def update_map(selection, zoom_level):
 
         # Add the modified trace to the figure
         # updated_fig.add_trace(trace.data[0])
+
     fig = go.Figure()  # Set the map center to the selected point)
     # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
 

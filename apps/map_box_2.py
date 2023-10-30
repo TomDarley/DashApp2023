@@ -4498,6 +4498,10 @@ def update_map(selection, zoom_level):
 
         )
 
+        # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
+        trace.update_traces(hovertemplate=f"<b>{custom_data}<b><extra></extra>"),
+        trace.update_traces(hoverinfo='none')
+
         # Update the marker color
         trace.update_traces(line=dict(color=colour, width=width))
 

@@ -78,9 +78,11 @@ layout = html.Div(
     State("survey-unit-dropdown", "value"),
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
+
+    #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
-    #df = pd.read_json(cpa_df)
     df = df.drop("Sum", axis=0)
+
     # Melt the DataFrame to long format
     melted_df = df.melt(
         ignore_index=False, var_name="Date", value_name="Value"

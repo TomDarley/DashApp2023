@@ -268,9 +268,9 @@ layout = html.Div(
     [Input("selected-df-storage", "data")],
 )
 def make_csa_table(selected_csa_data):
-    # load in the csa table from the store, set in the scatter plot app
+
+    #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(selected_csa_data))
-    #df = pd.read_json(selected_csa_data)
     df = df.drop(df.index[-1])
 
     # ranges used to decide the survey type

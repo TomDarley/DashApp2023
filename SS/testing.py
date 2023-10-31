@@ -6,7 +6,7 @@ import numpy as np
 
 
 selected_sur_unit  = '6aSU12'
-selected_profile  = '6a01613'
+selected_profile  = '6a01624'
 # All shapefile loaded into the database should not be promoted to multi
 engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
 # Connect to the database using the engine
@@ -22,8 +22,8 @@ unique_dates = list(topo_df['date'].unique())
 print(unique_dates)
 
 
-min_chainage = 194
-max_chainage = 409
+min_chainage = 0
+max_chainage = 1000
 merge_df = pd.DataFrame()
 
 generated_chainage = list(range(min_chainage, max_chainage, 1))
@@ -51,6 +51,7 @@ count =0
 for df in survey_dfs:
     merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
     merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
+    merge_df = merge_df.drop_duplicates(subset=['chainage'])
     merge_df[f"elevation_od_{count}"]= merge_df[f"elevation_od_{count}"].interpolate(method='polynomial', order=5,
     limit_area = 'inside', limit = 2)
     count+=1
@@ -83,10 +84,10 @@ fig = px.line(
             #custom_data=['date', 'chainage', 'elevation_od'],)
 )
 
-check_df  = topo_df.loc[topo_df['date'] =='2021-06-24']
-#trace = go.Scatter(x=check_df['chainage'], y=check_df['elevation_od'], mode='lines', name='Check Data')
-trace = go.Scatter(x=topo_df['chainage'], y=topo_df['elevation_od'], mode='markers', name='Check Data')
-fig.add_trace(trace)
+#check_df  = topo_df.loc[topo_df['date'] =='2021-06-24']
+##trace = go.Scatter(x=check_df['chainage'], y=check_df['elevation_od'], mode='lines', name='Check Data')
+#trace = go.Scatter(x=topo_df['chainage'], y=topo_df['elevation_od'], mode='markers', name='Check Data')
+#fig.add_trace(trace)
 
 
 

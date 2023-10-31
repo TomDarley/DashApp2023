@@ -394,6 +394,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         count = 0
         for df in survey_dfs:
             merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
+            merge_df = merge_df.drop_duplicates(subset=['chainage'])
             merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
             merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='polynomial',
                                                                                               order=5,

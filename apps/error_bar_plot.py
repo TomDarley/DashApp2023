@@ -4,7 +4,7 @@ from dash import html, dcc, callback, Input, Output, State
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-
+from io import StringIO
 
 layout = html.Div(
     [
@@ -78,7 +78,8 @@ layout = html.Div(
     State("survey-unit-dropdown", "value"),
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
-    df = pd.read_json(cpa_df)
+    df = pd.read_json(StringIO(cpa_df))
+    #df = pd.read_json(cpa_df)
     df = df.drop("Sum", axis=0)
     # Melt the DataFrame to long format
     melted_df = df.melt(

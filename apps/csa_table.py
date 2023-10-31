@@ -2,6 +2,7 @@ from dash import Output, Input, html, callback, dash_table
 import pandas as pd
 from datetime import datetime
 import dash_bootstrap_components as dbc
+from io import StringIO
 
 style_data_conditional = [
     {
@@ -268,7 +269,8 @@ layout = html.Div(
 )
 def make_csa_table(selected_csa_data):
     # load in the csa table from the store, set in the scatter plot app
-    df = pd.read_json(selected_csa_data)
+    df = pd.read_json(StringIO(selected_csa_data))
+    #df = pd.read_json(selected_csa_data)
     df = df.drop(df.index[-1])
 
     # ranges used to decide the survey type

@@ -358,6 +358,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         )
     elif selection == 'Range':
 
+        topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
+
         min_chainage = master_profile_chainage[0]
         max_chainage = master_profile_chainage[-1]
         min_chainage = float(min_chainage)
@@ -387,7 +389,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             survey_dfs.append(df_filter)  # Append the merged result to the list
 
         # Print or utilize survey_dfs if required
-        print(survey_dfs)
+        #print(survey_dfs)
 
         count = 0
         for df in survey_dfs:
@@ -396,11 +398,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='polynomial',
                                                                                               order=5,
                                                                                               limit_area='inside',
-                                                                                              limit=5)
+                                                                                              limit=2)
             count += 1
-
+        merge_df= merge_df.drop_duplicates(subset=['chainage']) # bug duplicates are being made for chainage!!!
         merge_df = merge_df.set_index('chainage')
-        max_ele = merge_df.max(axis=1,skipna=True)
+        max_ele = merge_df.max(axis=1)
         average_ele = merge_df.mean(axis=1,skipna=True)
         min_ele = merge_df.min(axis=1,skipna=True)
         merge_df['Max Elevation'] = max_ele

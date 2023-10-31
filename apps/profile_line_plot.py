@@ -117,7 +117,7 @@ layout = html.Div(
 def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range):
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
-    print(trigger)
+
     if trigger:
         if trigger == "3D_plot.n_clicks":
             selection = "3D"
@@ -358,58 +358,75 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         )
     elif selection == 'Range':
 
-        df = topo_df
-        chainageMIN = int(min(df['chainage']))
+        min_chainage = master_profile_chainage[0]
+        max_chainage = master_profile_chainage[-1]
+        min_chainage = float(min_chainage)
+        max_chainage = float(max_chainage)
 
-        chainageMAX = int(max(df['chainage']))
+        min_chainage= int(min_chainage)
+        max_chainage = int(max_chainage) +50
+        merge_df = pd.DataFrame()
 
-        newChainage = np.arange(chainageMIN, chainageMAX, 1)
 
-        dft = pd.DataFrame()
-        dft["chainage"] = newChainage
-        dft["elevation"] = ""
-        dft["profile"] = ""
+        generated_chainage = list(range(min_chainage, max_chainage, 1))
+        merge_df['chainage'] = generated_chainage
+        merge_df['chainage'] = merge_df['chainage'].astype(int)
 
-        unique_dates = df['date'].unique()
+        survey_dfs = []  # Assuming this list is supposed to store the results of the merge
 
-        normalised_data = []
+        unique_dates = topo_df['date'].unique()  # Assuming unique_dates is derived from topo_df
+
         for date in unique_dates:
-            df1 = df.loc[df['date'] == date]
-            df1 = df1[['elevation_od', 'chainage']]
-            df1['chainage'] = df1['chainage'].astype(int)
-            # merge the data frame to new df with total range chainage
-            df5 = pd.merge(dft, df1, how='left', right_on='chainage', left_on='chainage')
-            df5["Interpolated_Elevation"] = df5["elevation_od"].interpolate(method='polynomial', order=2,
-                                                                           limit_area='inside')
-            normalised_data.append(df5)
+            df_filter = topo_df.loc[topo_df['date'] == date].copy()
 
-        masterDF = pd.DataFrame()
-        masterDF["chainage"] = normalised_data[0]["chainage"]
+            # Round the chainage values
+            df_filter['chainage'] = df_filter['chainage'].round(0).astype(int)
+
+            df_filter = df_filter[['chainage', 'elevation_od']]
+
+            survey_dfs.append(df_filter)  # Append the merged result to the list
+
+        # Print or utilize survey_dfs if required
+        print(survey_dfs)
 
         count = 0
-        for year in unique_dates:
-            title = year
-            masterDF[title] = normalised_data[count]["Interpolated_Elevation"]
+        for df in survey_dfs:
+            merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
+            merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
+            merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='polynomial',
+                                                                                              order=5,
+                                                                                              limit_area='inside',
+                                                                                              limit=5)
             count += 1
-        masterDF = masterDF.set_index("chainage")
-        masterDF["MaxElevation"] = masterDF.max(axis=1)
-        masterDF["MinElevation"] = masterDF.min(axis=1)
-        masterDF["Average_Elevation"] = masterDF.mean(axis=1)
-        #data_to_plot = masterDF[["chainage","MaxElevation", "MinElevation", "Average_Elevation"]]
-#
-        #fig = px.line(
-        #    data_to_plot,
-        #    #x="chainage",
-        #    #y="elevation_od",
-        #    #color="date",
-        #    #color_discrete_map=custom_color_mapping,
-        #    #template="seaborn",
-        #    #category_orders={"date": date_order},
-        #    #custom_data=['date', 'chainage', 'elevation_od'],
-#
-        #)
-        #return fig
-        pass
+
+        merge_df = merge_df.set_index('chainage')
+        max_ele = merge_df.max(axis=1,skipna=True)
+        average_ele = merge_df.mean(axis=1,skipna=True)
+        min_ele = merge_df.min(axis=1,skipna=True)
+        merge_df['Max Elevation'] = max_ele
+        merge_df['Mean Elevation'] = average_ele
+        merge_df['Min Elevation'] = min_ele
+        merge_df = merge_df.reset_index()
+        print(merge_df)
+        fig = px.line(
+            merge_df,
+            x="chainage",
+            y=[ "Min Elevation", "Mean Elevation","Max Elevation"],
+            # color="date",
+            # color_discrete_map=custom_color_mapping,
+            template="seaborn",
+            # category_orders={"date": date_order},
+            # custom_data=['date', 'chainage', 'elevation_od'],)
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=master_profile_chainage,
+                y=master_profile_elevation,
+                line=dict(color="red", width=5, dash="dash"),
+                name="Master Profile",
+            )
+        )
 
 
 

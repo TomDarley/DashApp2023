@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
-import seaborn as sns
+import numpy as np
 
 layout = html.Div(
     [
@@ -24,7 +24,7 @@ layout = html.Div(
             id="line_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px", "border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -32,7 +32,7 @@ layout = html.Div(
             id="line_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px", "border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="bi bi-badge-3d")],
@@ -40,7 +40,7 @@ layout = html.Div(
             id="3D_plot",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "60px","border-radius": "5px"},
+            style={"position": "absolute", "top": "1%", "left": "60px", "border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="bi bi-badge-sd")],
@@ -48,8 +48,18 @@ layout = html.Div(
             id="2D_plot",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "8px","border-radius": "5px"},
+            style={"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px"},
         ),
+
+        dbc.Button(
+            [html.Span(className="bi bi-graph-down")],
+            size="md",
+            id="Range_plot",
+            n_clicks=0,
+            className="mr-3",
+            style={"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"},
+        ),
+
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
@@ -100,18 +110,23 @@ layout = html.Div(
     Input("survey-line-dropdown", "value"),
     Input("3D_plot", "n_clicks"),
     Input("2D_plot", "n_clicks"),
+    Input("Range_plot", "n_clicks"),
     prevent_initial_call=False,
     allow_duplicate=True,
 )
-def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d):
-
+def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range):
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
-
-    if trigger == "3D_plot.n_clicks":
-        selection = "3D"
-    elif trigger == "2D_ploy_n_clicks":
-        selection = "2D"
+    print(trigger)
+    if trigger:
+        if trigger == "3D_plot.n_clicks":
+            selection = "3D"
+        elif trigger == "2D_plot.n_clicks":
+            selection = "2D"
+        elif trigger == 'Range_plot.n_clicks':
+            selection = "Range"
+        else:
+            selection = "2D"
     else:
         selection = "2D"
 
@@ -171,7 +186,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         end_color = (153, 214, 255)
         color_names = generate_color_gradient(start_color, end_color, len(dates))
 
-
         # Calculate the number of elements to be taken from the original list
         first_last = 1  # Number of elements to take from the start and end of the list
         middle_count = len(color_names) - 2  # Number of elements excluding the first and last elements
@@ -190,7 +204,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             new_list.append(color_names[i * step])
 
         new_list += color_names[-first_last:]  # Take the last element from the original list
-
 
         return new_list
 
@@ -239,7 +252,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             y="date",
             z="elevation_od",
             color="date",
-            custom_data= ['date', 'chainage', 'elevation_od'],
+            custom_data=['date', 'chainage', 'elevation_od'],
             category_orders={"date": date_order},
             color_discrete_map=custom_color_mapping,
 
@@ -257,7 +270,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                           "<b>Chainage:</b> %{customdata[1]}<br>" +
                           "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
         )
-
 
         # Set custom axis labels
         fig.update_layout(
@@ -293,7 +305,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             )
         )
 
-
         fig.update_layout(
             legend=dict(
                 orientation="v",  # Horizontal orientation
@@ -304,7 +315,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             )
         )
 
-    else:
+    elif selection == '2D':
         # Create a 2D line plot
         fig = px.line(
             topo_df,
@@ -319,9 +330,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         )
 
         # Changing the style of the three profiles initially loaded
-        fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(width=3, dash='solid'))
-        fig.update_traces(selector=dict(name=fig.data[previous_trace_date].name), line=dict(color = 'blue',width=3, dash='solid'))
-        fig.update_traces(selector=dict(name=fig.data[ newest_trace_date].name), line=dict(color = 'green', width=3, dash='solid'))
+        fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(color='brown', width=3, dash='solid'))
+        fig.update_traces(selector=dict(name=fig.data[previous_trace_date].name),
+                          line=dict(color='blue', width=3, dash='solid'))
+        fig.update_traces(selector=dict(name=fig.data[newest_trace_date].name),
+                          line=dict(color='green', width=3, dash='solid'))
 
         # Format the label shown in the hover
         fig.update_traces(
@@ -343,6 +356,61 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
             )
         )
+    elif selection == 'Range':
+
+        df = topo_df
+        chainageMIN = int(min(df['chainage']))
+
+        chainageMAX = int(max(df['chainage']))
+
+        newChainage = np.arange(chainageMIN, chainageMAX, 1)
+
+        dft = pd.DataFrame()
+        dft["chainage"] = newChainage
+        dft["elevation"] = ""
+        dft["profile"] = ""
+
+        unique_dates = df['date'].unique()
+
+        normalised_data = []
+        for date in unique_dates:
+            df1 = df.loc[df['date'] == date]
+            df1 = df1[['elevation_od', 'chainage']]
+            df1['chainage'] = df1['chainage'].astype(int)
+            # merge the data frame to new df with total range chainage
+            df5 = pd.merge(dft, df1, how='left', right_on='chainage', left_on='chainage')
+            df5["Interpolated_Elevation"] = df5["elevation_od"].interpolate(method='polynomial', order=2,
+                                                                           limit_area='inside')
+            normalised_data.append(df5)
+
+        masterDF = pd.DataFrame()
+        masterDF["chainage"] = normalised_data[0]["chainage"]
+
+        count = 0
+        for year in unique_dates:
+            title = year
+            masterDF[title] = normalised_data[count]["Interpolated_Elevation"]
+            count += 1
+        masterDF = masterDF.set_index("chainage")
+        masterDF["MaxElevation"] = masterDF.max(axis=1)
+        masterDF["MinElevation"] = masterDF.min(axis=1)
+        masterDF["Average_Elevation"] = masterDF.mean(axis=1)
+        #data_to_plot = masterDF[["chainage","MaxElevation", "MinElevation", "Average_Elevation"]]
+#
+        #fig = px.line(
+        #    data_to_plot,
+        #    #x="chainage",
+        #    #y="elevation_od",
+        #    #color="date",
+        #    #color_discrete_map=custom_color_mapping,
+        #    #template="seaborn",
+        #    #category_orders={"date": date_order},
+        #    #custom_data=['date', 'chainage', 'elevation_od'],
+#
+        #)
+        #return fig
+        pass
+
 
 
     # Customize x and y axis fonts and sizes

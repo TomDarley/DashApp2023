@@ -238,6 +238,17 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         master_profile_chainage.append(first)
         master_profile_elevation.append(last)
 
+    min_chainage = master_profile_chainage[0]
+    max_chainage = master_profile_chainage[-1]
+    min_chainage = float(min_chainage)
+    max_chainage = float(max_chainage)
+
+    min_chainage = int(min_chainage)
+    max_chainage = int(max_chainage) + 50
+    merge_df = pd.DataFrame()
+
+    topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
+
     if selection == "3D":
 
         # create 3D plot

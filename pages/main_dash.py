@@ -14,6 +14,13 @@ import plotly.graph_objs as go
 from datetime import datetime
 from dash.exceptions import PreventUpdate
 
+import base64
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.pagesizes import A4, landscape
+import io
+import plotly.io as pio
 
 # register the page with dash giving url path
 dash.register_page(__name__, path="/main_dash")
@@ -137,10 +144,12 @@ layout = html.Div(
                                                 value=[],
                                             ),
                                             dbc.Button(
-                                                "Download Charts",
+                                                "Generate Report",
                                                 id="download-charts-button",
                                                 n_clicks=0,
                                                 size="sm",
+                                                style={"border-radius": "10px"}
+
                                             ),
                                         ]
                                     )
@@ -335,11 +344,12 @@ def update_highest_cpa_card(highest_data, highest_year):
     State("scatter_chart", "data"),
     State("error_chart", "data"),
     State("line_chart", "data"),
+    State("survey_unit_card", "children"),
     allow_duplicate=True,
     prevent_initial_call=True,
 )
 def get_selected_charts(
-    n_clicks, chart_selection, scatter_chart, error_chart, line_chart
+    n_clicks, chart_selection, scatter_chart, error_chart, line_chart, sur_unit_card
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -425,7 +435,63 @@ def get_selected_charts(
             for i in range(len(error_figure.data)):
                 subplot.add_trace(error_figure.data[i], row=row, col=1)
 
-        # Save the subplot as an image
-        img_bytes = subplot.to_image(format="png")
 
-    return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")
+
+        def to_pdf():
+
+            # Set the desired width and height for the image within the PDF
+            width, height = A4[1] - 100, A4[0] - 100  # Adjust these values as needed
+
+            buffer = io.BytesIO()
+            c = canvas.Canvas(buffer, pagesize=landscape(A4))
+            c.drawString(50, 50, f"{sur_unit_card}!")
+            c.showPage()  # Create a new page
+
+
+
+            if "cpa" in chart_selection:
+
+                cpa_figure_data = scatter_chart.get("cpa")
+                cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
+                img_bytes = pio.to_image(cpa_figure, format='png')
+                img_io = io.BytesIO(img_bytes)
+                img_reader = ImageReader(img_io)
+                c.drawImage(img_reader, 50, 50, width=width, height=height)
+                c.showPage()
+                
+            if "line_plot" in chart_selection:
+
+
+                line_figure_data = line_chart.get("line_plot")
+                line_figure = go.Figure(json.loads(line_figure_data))
+                img_bytes = pio.to_image(line_figure, format='png')
+                img_io = io.BytesIO(img_bytes)
+                img_reader = ImageReader(img_io)
+                c.drawImage(img_reader, 50, 50, width=width, height=height,)
+                c.showPage()
+                
+            if "box_plot" in chart_selection:
+
+                error_figure_data = error_chart.get("error_plot")
+                error_figure = go.Figure(json.loads(error_figure_data))
+                img_bytes = pio.to_image(error_figure, format='png')
+                img_io = io.BytesIO(img_bytes)
+                img_reader = ImageReader(img_io)
+                c.drawImage(img_reader, 50, 50, width=width, height=height)
+                c.showPage()
+
+            c.save()  # Save the file
+            buffer.seek(0)
+            return buffer.getvalue()
+
+        pdf_bytes = to_pdf()
+        print(type(pdf_bytes))
+
+
+
+        # Save the subplot as an image
+        #img_bytes = subplot.to_image(format="png")
+
+
+    return subplot, dcc.send_bytes(pdf_bytes, filename='test.pdf')
+    #return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")

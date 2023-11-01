@@ -101,7 +101,6 @@ layout = html.Div(
     },
 )
 
-
 @callback(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
@@ -430,7 +429,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 name="Master Profile",
             )
         )
-
 
 
     # Customize x and y axis fonts and sizes

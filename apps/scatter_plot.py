@@ -37,7 +37,7 @@ layout = html.Div(
                     id="scatter_plot",
                     style={
                         "width": "100%",
-                        "height": "60vh",
+                        "height": "60vh", # this will make it bigger
                     },
                     config={"responsive": True},
                 ),

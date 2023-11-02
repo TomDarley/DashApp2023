@@ -4228,11 +4228,12 @@ layout = html.Div(
                     ],
                 )
             ],
-            style={"width": "350px", "background-color": "#ebf5ff", "border-radius": "10px"},
-            id="drop_down_card",
+            style={"width": "350px", "background-color": "#ebf5ff", "border-radius": "10px", },
+            id="drop_down_card"
         ),
     ],
     style={"height": "100%"},
+    id = "mapbox_div"
 )
 
 

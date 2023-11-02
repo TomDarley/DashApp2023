@@ -87,7 +87,7 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Highest Recorded CPA:",
+                                                "Highest CPA:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -105,7 +105,7 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Lowest Recorded CPA:",
+                                                "Lowest CPA:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -141,6 +141,8 @@ layout = html.Div(
                                                     },
                                                 ],
                                                 value=[],
+                                                #inline=True,
+
                                             ),
                                             dbc.Button(
                                                 "Generate Report",
@@ -169,12 +171,18 @@ layout = html.Div(
                     xl={"size": 2, "offset": 0},
                     xxl={"size": 2, "offset": 0},
                     align="start",
+                    style={"max-height": "60vh","overflow-y": "auto"} # this overides row alignment
+
+
+
+
                 ),
                 dbc.Col(
                     html.Div(
                         [
                             map_box_2.layout,
                         ],
+                        id = "main_dash_map_div",
                         style={"margin-top": "10px", "height": "60vh","border-radius": "10px", "overflow": "hidden"},
                     ),
                     xs={"size": 12, "offset": 0},
@@ -201,7 +209,7 @@ layout = html.Div(
                 ),
             ],
             align="start",
-            style={},
+            style={}
         ),
         dbc.Row(
             [
@@ -264,6 +272,9 @@ layout = html.Div(
             ],
             align="start",
             style={'margin-right': '00px'}
+
+
+
         ),
     ]
 )

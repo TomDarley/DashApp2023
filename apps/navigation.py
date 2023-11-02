@@ -20,11 +20,11 @@ navbar = html.Div(
                 [
                     dbc.NavbarSimple(
                         children=[
-                            dbc.NavItem(
-                                dbc.NavLink(
-                                    "Home", href="/home", style=custom_navlink_style
-                                )
-                            ),
+                            #dbc.NavItem(
+                            #    dbc.NavLink(
+                            #        "Home", href="/home", style=custom_navlink_style
+                            #    )
+                            #),
                             dbc.NavItem(
                                 dbc.NavLink(
                                     "Dash",

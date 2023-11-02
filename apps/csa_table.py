@@ -169,6 +169,8 @@ layout = html.Div(
                                                     },
                                                 ],
                                                 style_data_conditional=style_data_conditional,
+                                                style_table={'overflowX': 'auto'},
+
                                             ),
                                         ],
                                         style={"width": "100%"},
@@ -230,6 +232,7 @@ layout = html.Div(
                                                     },
                                                 ],
                                                 style_data_conditional=style_data_conditional,
+                                                style_table={'overflowX': 'auto'},
                                             ),
                                         ],
                                         style={},

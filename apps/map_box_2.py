@@ -4436,7 +4436,7 @@ def update_map(selection, zoom_level):
     )
 
     # Format the label shown, must have the <extra></extra> to remove the color being shown
-    updated_scatter_trace.update_traces(hovertemplate=f"<b>{set_survey_unit}<b><extra></extra>", hovertext='sur_unit'),
+    updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}</b><extra></extra>"),
     updated_scatter_trace.update_traces(hoverinfo='none')
 
 

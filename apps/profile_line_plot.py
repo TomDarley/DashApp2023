@@ -409,7 +409,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='polynomial',
                                                                                               order=5,
                                                                                               limit_area='inside',
-                                                                                              limit=2)
+                                                                                              limit=5)
             count += 1
         merge_df= merge_df.drop_duplicates(subset=['chainage']) # bug duplicates are being made for chainage!!!
         merge_df = merge_df.set_index('chainage')

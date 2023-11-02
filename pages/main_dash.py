@@ -13,14 +13,20 @@ import json
 import plotly.graph_objs as go
 from datetime import datetime
 from dash.exceptions import PreventUpdate
-
+import sqlalchemy
 import base64
 
+import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4, landscape, portrait
+from reportlab.lib.styles import getSampleStyleSheet
 import io
 import plotly.io as pio
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
 
 # register the page with dash giving url path
 dash.register_page(__name__, path="/main_dash")
@@ -345,11 +351,23 @@ def update_highest_cpa_card(highest_data, highest_year):
     State("error_chart", "data"),
     State("line_chart", "data"),
     State("survey_unit_card", "children"),
+    State("survey-unit-dropdown", "value"),
+    State("trend_card", "children"),
+    State("highest_card", "children"),
+    State("lowest_card", "children"),
+    State("highest_recorded_year", "data"), # these need switching they are the values not the dates
+    State("lowest_recorded_year", "data"),
+
+
+
+
+
     allow_duplicate=True,
     prevent_initial_call=True,
 )
 def get_selected_charts(
-    n_clicks, chart_selection, scatter_chart, error_chart, line_chart, sur_unit_card
+    n_clicks, chart_selection, scatter_chart, error_chart, line_chart,
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -439,48 +457,122 @@ def get_selected_charts(
 
         def to_pdf():
 
-            # Set the desired width and height for the image within the PDF
-            width, height = A4[1] - 100, A4[0] - 100  # Adjust these values as needed
+            # Get the proforma text from the database
+            engine = sqlalchemy.create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+            survey_unit = current_survey_unit
+            query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
+            df = pd.read_sql_query(query, engine)
+            proforma_text = list(df['proforma'])[0]
 
-            buffer = io.BytesIO()
-            c = canvas.Canvas(buffer, pagesize=landscape(A4))
-            c.drawString(50, 50, f"{sur_unit_card}!")
-            c.showPage()  # Create a new page
+            # Generate the current state paragraph trend, highest, lowest
+            cal_trend = trend['props']['children']
+            cal_highest = highest_date['props']['children']
+            cal_lowest = lowest_date['props']['children']
+            cal_highest_val = f"{round(highest_val, 2)} (m²)"
+            cal_lowest_val = f"{round(lowest_val, 2)} (m²)"
+
+            cal_trend = cal_trend.lower()
+            state_text  = f"Analysis of the Combined Profile Area (CPA) indicates that {survey_unit} is {cal_trend}." \
+                          f"The highest recorded CPA was recorded on {cal_highest} at {cal_highest_val} and the lowest" \
+                          f" CPA recorded on {cal_lowest} at {cal_lowest_val}"
+
+
+            # Create a stylesheet for text wrapping
+            styles = getSampleStyleSheet()
+            style = styles["Normal"]
+
+            # Set the desired width for text wrapping
+            text_width = A4[0] - 100  # Adjust as needed this higher number makes the right margin larger
+
+            # Create a PDF document
+            buffer = io.BytesIO() # in ram storage
+
+
+            # Set the font and size
 
 
 
+            # Create a canvas
+            c = canvas.Canvas(buffer, pagesize=portrait(A4))
+
+            width, height = A4[1] - 300, A4[0] - 300  # Adjust these values as needed
+
+            # Create a ParagraphStyle for text wrapping
+            wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, wordWrap='CJK')
+
+            # Create a flowable paragraph
+            proforma_paragraph = Paragraph(proforma_text, wrapped_style)
+            proforma_paragraph2 = Paragraph(state_text, wrapped_style)
+
+            # Add the Title
+            c.drawCentredString(A4[0] / 2, 780, f"{survey_unit}-{sur_unit_card}!")
+
+            # Add the proforma paragraph to the canvas
+            proforma_paragraph.wrapOn(c, text_width, A4[1])
+            proforma_paragraph.drawOn(c, 50, 680)
+
+            # Add the stats paragraph
+            proforma_paragraph2.wrapOn(c, text_width, A4[1])
+            proforma_paragraph2.drawOn(c, 50, 630)
+
+            # logic to define the first chosen plot:
+            charts_selected = []
             if "cpa" in chart_selection:
-
-                cpa_figure_data = scatter_chart.get("cpa")
-                cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
-                img_bytes = pio.to_image(cpa_figure, format='png')
-                img_io = io.BytesIO(img_bytes)
-                img_reader = ImageReader(img_io)
-                c.drawImage(img_reader, 50, 50, width=width, height=height)
-                c.showPage()
-                
+                charts_selected.append('cpa')
             if "line_plot" in chart_selection:
-
-
-                line_figure_data = line_chart.get("line_plot")
-                line_figure = go.Figure(json.loads(line_figure_data))
-                img_bytes = pio.to_image(line_figure, format='png')
-                img_io = io.BytesIO(img_bytes)
-                img_reader = ImageReader(img_io)
-                c.drawImage(img_reader, 50, 50, width=width, height=height,)
-                c.showPage()
-                
+                charts_selected.append('line_plot')
             if "box_plot" in chart_selection:
+                charts_selected.append('box_plot')
 
-                error_figure_data = error_chart.get("error_plot")
-                error_figure = go.Figure(json.loads(error_figure_data))
-                img_bytes = pio.to_image(error_figure, format='png')
-                img_io = io.BytesIO(img_bytes)
-                img_reader = ImageReader(img_io)
-                c.drawImage(img_reader, 50, 50, width=width, height=height)
-                c.showPage()
+            for index, item in enumerate(charts_selected):
 
-            c.save()  # Save the file
+                if item == "cpa":
+                    cpa_figure_data = scatter_chart.get("cpa")
+                    cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
+                    img_bytes = pio.to_image(cpa_figure, format='png')
+                    img_io = io.BytesIO(img_bytes)
+                    img_reader = ImageReader(img_io)
+                    c.drawImage(img_reader, 20, 300, width=width, height=height)
+                    c.showPage()
+
+                if item == "line_plot" :
+                    line_figure_data = line_chart.get("line_plot")
+                    line_figure = go.Figure(json.loads(line_figure_data))
+                    img_bytes = pio.to_image(line_figure, format='png')
+                    img_io = io.BytesIO(img_bytes)
+                    img_reader = ImageReader(img_io)
+
+                    if index == 0:
+                        c.drawImage(img_reader, 20, 300, width=width, height=height, )
+                        c.showPage()
+
+                    elif index == 1:
+                        c.drawImage(img_reader, 20, 450, width=width, height=height, )
+                    else:
+                        c.drawImage(img_reader, 20, 50, width=width, height=height, )
+
+                if item == "box_plot":
+                    error_figure_data = error_chart.get("error_plot")
+                    error_figure = go.Figure(json.loads(error_figure_data))
+                    img_bytes = pio.to_image(error_figure, format='png')
+                    img_io = io.BytesIO(img_bytes)
+                    img_reader = ImageReader(img_io)
+
+                    if index == 0:
+                        c.drawImage(img_reader, 20, 300, width=width, height=height, )
+                        c.showPage()
+
+                    elif index == 1:
+                        c.drawImage(img_reader, 20, 450, width=width, height=height, )
+                    else:
+                        c.drawImage(img_reader, 20, 50, width=width, height=height, )
+
+
+
+
+            # Save the PDF file
+            c.save()
+
             buffer.seek(0)
             return buffer.getvalue()
 

@@ -38,7 +38,7 @@ layout = html.Div(
             id="generated_charts",
             data={"cpa": None, "line_plot": None, "error_plot": None},
         ),
-        dcc.Graph(id="hidden-chart", style={"display": "none"}),
+
         dcc.Download(id="download"),
         dbc.Row(
             [
@@ -49,14 +49,7 @@ layout = html.Div(
                                 [
                                     dbc.CardBody(
                                         [
-                                            #html.H6(
-                                            #    "Survey Unit Name:",
-                                            #    className="card-title",
-                                            #    style={
-                                            #        "color": "blue",
-                                            #        "margin-bottom": "5px",
-                                            #    },
-                                            #),
+
 
                                             html.Div("6aSU12", id="survey_unit_card"),
 
@@ -343,7 +336,7 @@ def update_highest_cpa_card(highest_data, highest_year):
 
 
 @callback(
-    Output("hidden-chart", "figure"),
+
     Output("download", "data"),
     Input("download-charts-button", "n_clicks"),
     State("download-check-list", "value"),
@@ -374,84 +367,9 @@ def get_selected_charts(
     if n_clicks is None:
         raise PreventUpdate
 
-    # dict that stores the order of the selected maps to be downloaded
-    order_map = {}
-
-    # generate the right number of subplots based on user selection:
-    rows = 0
-    titles = []
-    row_heights = []
-    if "cpa" in chart_selection:
-        rows += 1
-        titles.append("Combined Profile Area")
-        row_heights.append(0.4)
-        order_map.update({"cpa": [rows]})
-    if "line_plot" in chart_selection:
-        rows += 1
-        titles.append("Cross-Sectional Line Plot")
-        row_heights.append(0.3)
-        order_map.update({"line_plot": [rows]})
-    if "box_plot" in chart_selection:
-        rows += 1
-        titles.append("CPA Box Plot")
-        row_heights.append(0.3)
-        order_map.update({"error_plot": [rows]})
-
-    subplot = make_subplots(
-        rows=rows,
-        cols=1,
-        subplot_titles=titles,
-        row_heights=row_heights,
-        shared_xaxes=False,
-    )
-
-    if rows == 1:
-        subplot.update_layout(height=800, width=2000)
-    elif rows == 2:
-        subplot.update_layout(height=1500, width=2000)
-    elif rows == 3:
-        subplot.update_layout(height=2000, width=2000)
-
     if n_clicks is None:
         return dash.no_update
     else:
-        if "cpa" in chart_selection:
-            cpa_figure_data = scatter_chart.get("cpa")
-            cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
-
-            # Update the x-axis formatting for the subplot to display dates
-            row = order_map.get("cpa")
-
-            for i in range(len(cpa_figure.data)):
-                trace = cpa_figure.data[i]
-                numeric_dates = trace.x
-
-                # Convert numeric dates to datetime objects
-                datetime_dates = [
-                    datetime.utcfromtimestamp(date * 24 * 60 * 60)
-                    for date in numeric_dates
-                ]
-
-                # Format datetime dates as text using strftime (adjust the format as needed)
-                formatted_dates = [date.strftime("%Y-%m-%d") for date in datetime_dates]
-                trace.x = formatted_dates
-                subplot.add_trace(trace, row=row, col=1)
-
-        if "line_plot" in chart_selection:
-            line_figure_data = line_chart.get("line_plot")
-            line_figure = go.Figure(json.loads(line_figure_data))
-            row = order_map.get("line_plot")
-
-            for i in range(len(line_figure.data)):
-                subplot.add_trace(line_figure.data[i], row=row, col=1)
-
-        if "box_plot" in chart_selection:
-            error_figure_data = error_chart.get("error_plot")
-            error_figure = go.Figure(json.loads(error_figure_data))
-            row = order_map.get("error_plot")
-
-            for i in range(len(error_figure.data)):
-                subplot.add_trace(error_figure.data[i], row=row, col=1)
 
 
 
@@ -585,5 +503,5 @@ def get_selected_charts(
         #img_bytes = subplot.to_image(format="png")
 
 
-    return subplot, dcc.send_bytes(pdf_bytes, filename='test.pdf')
+    return  dcc.send_bytes(pdf_bytes, filename='test.pdf')
     #return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")

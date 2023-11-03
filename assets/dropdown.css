@@ -1,30 +1,3 @@
 /* Default styles for larger screens */
 
-#drop_down_card {
-    position: absolute;
-    top: 90px;
-    z-index: 9;
-    width: 300px;
-    border-radius: 5px;
-    background-color: #f7fafa;
-    margin-left: 10px;
-    width: 250px;
-
-
-
-}
-
-/* Media query for screens with a maximum width of 500 pixels */
-@media screen and (max-width: 990px) {
-    #drop_down_card {
-        position: absolute;
-        z-index: 9;
-        border-radius: 10px;
-        top: 70vh; /* Adjust the top position for smaller screens */
-        left: 0px; /* Adjust the left position for smaller screens */
-
-
-    }
-}
-
 

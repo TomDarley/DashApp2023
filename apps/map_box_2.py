@@ -9,6 +9,7 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
 
+
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3626,132 +3627,8 @@ unit_to_options = {
 INITIAL_LOAD_SURVEY_UNIT = '6aSU12'
 INITIAL_LOAD_PROFILE_LINE = '6a01613'
 
-## All shapefile loaded into the database should not be promoted to multi
-#engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
-#
-## Connect to the database using the engine
-#conn = engine.connect()
-#
-## Import point (survey unit) spatial data as GeoDataFrame
-#query = "SELECT * FROM survey_units"  # Modify this query according to your table
-#gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
-#gdf = gdf.to_crs(epsg=4326)
-## Extract latitude and longitude from the geometry column
-#gdf["lat"] = gdf["wkb_geometry"].y
-#gdf["long"] = gdf["wkb_geometry"].x
-#gdf["size"] = 15
-#lon = gdf["wkb_geometry"]
-#
-#set_survey_unit = "6aSU12"
-#set_profile_line = "6a01613"
-#
-## Set the color of the selected survey unit to red
-#gdf["color"] = ''
-#gdf['color'] = gdf['color'].astype(str)
-#gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
-#gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
-#
-## Extract the coordinates of the selected survey unit
-#selected_point = gdf.loc[gdf["sur_unit"] == set_survey_unit].iloc[0]
-#center_lat = selected_point["lat"]
-#center_lon = selected_point["long"]
-#
-## Get the line data from the database
-#query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '6aSU12'"  # Modify this query according to your table
-#lines_gdf = gpd.GeoDataFrame.from_postgis(
-#    query_profile_lines, conn, geom_col="wkb_geometry"
-#)
-#lines_gdf = lines_gdf.to_crs(epsg=4326)
-#lines_gdf["type"] = "line"
-#
-## Extract individual WKT strings and create LineString geometries and get selected fields for popup
-#line_data = gpd.GeoDataFrame(
-#    {'profile': lines_gdf['regional_n'],
-#     "baseline": lines_gdf['baseline'],
-#     "interim": lines_gdf['interim'],
-#     "post_storm": lines_gdf['post_storm'],
-#     "strategy": lines_gdf['strategy'],
-#     "geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")],
-#     }
-#)
-#
-#scatter_trace = px.scatter_mapbox(
-#    gdf,
-#    lat="lat",
-#    lon="long",
-#    hover_name="sur_unit",
-#    hover_data=["sur_unit"],
-#    color_discrete_sequence=["#4459c2", "#eb05c4"],
-#    zoom=7,
-#    size="size",
-#    color="color",
-#    size_max=18,
-#
-#)
-#
-## adding each WKT string as trace to the fig as a trace
-#line_traces = []
-#for i, row in line_data.iterrows():
-#    line = row["geometry"]
-#    latitudes = [coord[1] for coord in line.coords]
-#    longitudes = [coord[0] for coord in line.coords]
-#
-#    # Get the survey_unit value for this row
-#    profile_line_id = row['profile']
-#    baseline = row['baseline']
-#    interim = row['interim']
-#    post_storm = row['post_storm']
-#    strategy = row['strategy']
-#
-#    # Format the popup data
-#    custom_data = f"Profile Line ID: {profile_line_id}" \
-#                  f"<br>Interim: {interim.title()}" \
-#                  f"<br>Baseline: {baseline.title()}" \
-#                  f"<br>Post Storm: {post_storm.title()}" \
-#                  f"<br>Strategy: {strategy.title().replace('_', ' ')}"
-#
-#    if set_profile_line == profile_line_id:
-#        colour = "#e8d90c"
-#        width = 8
-#    else:
-#        colour = "#246673"
-#        width = 5
-#
-#    # Add the LineString trace to the map
-#    trace = px.line_mapbox(
-#        line_data,
-#        lat=latitudes,
-#        lon=longitudes,
-#        # hover_name=[custom_data] * len(latitudes),
-#
-#    )
-#
-#    # trace.update_traces(
-#    #    hoverinfo='none',
-#    # )
-#
-#    # Update the marker color
-#    trace.update_traces(line=dict(color=colour, width=width))
-#    line_traces.append(trace)
-#
 fig = go.Figure()
-#for i in range(len(line_traces)):
-#    fig.add_trace(line_traces[i].data[0])
-#
-## Add the scatter trace to the figure
-#fig.add_traces(scatter_trace.data)
-#
-#fig.update_layout(mapbox_style="open-street-map")
-## this removes white space around the map
-#fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-#fig.update_traces(showlegend=False)
-#
-#fig.update_layout(
-#    mapbox={
-#        "center": {"lat": center_lat, "lon": center_lon},
-#        "zoom": 6,
-#    }
-#)
+
 
 layout = html.Div(
     children=[
@@ -3764,475 +3641,459 @@ layout = html.Div(
         dcc.Graph(
             id="example-map",
             figure=fig,
-            style={
-                "position": "relative",
-                "width": "100%",
-                "height": "100%",  # Adjust the height as needed
-                "display": "block",
-            },
+
         ),
-        dbc.Card(
-            [
-                dbc.CardBody(
-                    [
-                        html.H6(
-                            "  Survey Unit:",
-                            className="card-title",
-                            style={"color": "blue", "margin-bottom": "10px"},
-                        ),
-                        dcc.Dropdown(
-                            options=[
-                                {"label": "6aSU10  -  Sidmouth", "value": "6aSU10"},
-                                {
-                                    "label": "6aSU12  -  Budleigh Salterton (East)",
-                                    "value": "6aSU12",
-                                },
-                                {
-                                    "label": "6aSU13  -  Budleigh Salterton",
-                                    "value": "6aSU13",
-                                },
-                                {"label": "6aSU16-1  -  Exmouth", "value": "6aSU16-1"},
-                                {"label": "6aSU2  -  Chesil Beach", "value": "6aSU2"},
-                                {
-                                    "label": "6aSU3-2  -  West Bexington",
-                                    "value": "6aSU3-2",
-                                },
-                                {"label": "6aSU3-3  -  The Hive", "value": "6aSU3-3"},
-                                {
-                                    "label": "6aSU3-5  -  Burton Freshwater",
-                                    "value": "6aSU3-5",
-                                },
-                                {"label": "6aSU4  -  West Bay", "value": "6aSU4"},
-                                {"label": "6aSU5-2  -  Seatown", "value": "6aSU5-2"},
-                                {"label": "6aSU5-4  -  Charmouth", "value": "6aSU5-4"},
-                                {
-                                    "label": "6aSU6-1  -  Lyme Regis (Broad Ledge)",
-                                    "value": "6aSU6-1",
-                                },
-                                {"label": "6aSU6-2  -  Lyme Regis", "value": "6aSU6-2"},
-                                {"label": "6aSU7-1  -  The Cobb", "value": "6aSU7-1"},
-                                {
-                                    "label": "6aSU8-1  -  Seaton (Devon)",
-                                    "value": "6aSU8-1",
-                                },
-                                {
-                                    "label": "6bSU16-3  -  Dawlish Warren",
-                                    "value": "6bSU16-3",
-                                },
-                                {"label": "6bSU17  -  Dawlish", "value": "6bSU17"},
-                                {
-                                    "label": "6bSU18-1  -  Teignmouth",
-                                    "value": "6bSU18-1",
-                                },
-                                {
-                                    "label": "6bSU18-2  -  Teign Estuary",
-                                    "value": "6bSU18-2",
-                                },
-                                {
-                                    "label": "6bSU20-1  -  Oddicombe",
-                                    "value": "6bSU20-1",
-                                },
-                                {"label": "6bSU21-2  -  Meadfoot", "value": "6bSU21-2"},
-                                {
-                                    "label": "6bSU21-4  -  Torquay and Livermead",
-                                    "value": "6bSU21-4",
-                                },
-                                {"label": "6bSU21-5  -  Paignton", "value": "6bSU21-5"},
-                                {
-                                    "label": "6bSU21-6  -  Goodrington Sands",
-                                    "value": "6bSU21-6",
-                                },
-                                {
-                                    "label": "6bSU21-8  -  Broadsands",
-                                    "value": "6bSU21-8",
-                                },
-                                {
-                                    "label": "6bSU25-2  -  Blackpool Sands",
-                                    "value": "6bSU25-2",
-                                },
-                                {
-                                    "label": "6bSU26-1  -  Slapton Sands",
-                                    "value": "6bSU26-1",
-                                },
-                                {"label": "6bSU26-2  -  Beesands", "value": "6bSU26-2"},
-                                {
-                                    "label": "6bSU26-3  -  Hallsands",
-                                    "value": "6bSU26-3",
-                                },
-                                {"label": "6cSU28  -  Salcombe", "value": "6cSU28"},
-                                {
-                                    "label": "6cSU30-2  -  Hope Cove",
-                                    "value": "6cSU30-2",
-                                },
-                                {
-                                    "label": "6cSU30-4  -  Thurlestone",
-                                    "value": "6cSU30-4",
-                                },
-                                {"label": "6cSU31-1  -  Bantham", "value": "6cSU31-1"},
-                                {
-                                    "label": "6cSU31-2  -  Bigbury-on-Sea",
-                                    "value": "6cSU31-2",
-                                },
-                                {
-                                    "label": "6cSU31-3  -  Challaborough",
-                                    "value": "6cSU31-3",
-                                },
-                                {"label": "6cSU33  -  Wembury", "value": "6cSU33"},
-                                {
-                                    "label": "6cSU38  -  Kingsand & Cawsand",
-                                    "value": "6cSU38",
-                                },
-                                {
-                                    "label": "6d6D1-4  -  Seaton (Cornwall) & Downderry",
-                                    "value": "6d6D1-4",
-                                },
-                                {"label": "6d6D1-6  -  Looe", "value": "6d6D1-6"},
-                                {"label": "6d6D1-8  -  Talland", "value": "6d6D1-8"},
-                                {
-                                    "label": "6d6D2-13  -  Pentewan Sands",
-                                    "value": "6d6D2-13",
-                                },
-                                {
-                                    "label": "6d6D2-15  -  Portmellon Beach",
-                                    "value": "6d6D2-15",
-                                },
-                                {
-                                    "label": "6d6D2-17  -  Gorran Haven",
-                                    "value": "6d6D2-17",
-                                },
-                                {"label": "6d6D2-4  -  Par Sands", "value": "6d6D2-4"},
-                                {
-                                    "label": "6d6D2-7  -  Carlyon Bay",
-                                    "value": "6d6D2-7",
-                                },
-                                {
-                                    "label": "6d6D3-10  -  Carne Beach",
-                                    "value": "6d6D3-10",
-                                },
-                                {
-                                    "label": "6d6D3-12  -  Portscatho",
-                                    "value": "6d6D3-12",
-                                },
-                                {
-                                    "label": "6d6D3-2  -  Hemmick Beach",
-                                    "value": "6d6D3-2",
-                                },
-                                {
-                                    "label": "6d6D3-4  -  Porthluney Cove",
-                                    "value": "6d6D3-4",
-                                },
-                                {
-                                    "label": "6d6D3-6  -  Portholland",
-                                    "value": "6d6D3-6",
-                                },
-                                {
-                                    "label": "6d6D5-10  -  Porthallow",
-                                    "value": "6d6D5-10",
-                                },
-                                {
-                                    "label": "6d6D5-11  -  Porthoustock",
-                                    "value": "6d6D5-11",
-                                },
-                                {"label": "6d6D5-12  -  Coverack", "value": "6d6D5-12"},
-                                {
-                                    "label": "6d6D5-14  -  Kennack Sands (East)",
-                                    "value": "6d6D5-14",
-                                },
-                                {
-                                    "label": "6d6D5-15  -  Kennack Sands (West)",
-                                    "value": "6d6D5-15",
-                                },
-                                {"label": "6d6D5-17  -  Cadgwith", "value": "6d6D5-17"},
-                                {"label": "6d6D5-2  -  Swanpool", "value": "6d6D5-2"},
-                                {"label": "6d6D5-4  -  Maenporth", "value": "6d6D5-4"},
-                                {"label": "6eA4-2  -  The Bar", "value": "6eA4-2"},
-                                {"label": "6eA8-1  -  Periglis", "value": "6eA8-1"},
-                                {"label": "6eA8-2  -  Porth Coose", "value": "6eA8-2"},
-                                {"label": "6eA8-4  -  Porth Killer", "value": "6eA8-4"},
-                                {"label": "6eB1-1  -  Great Porth", "value": "6eB1-1"},
-                                {
-                                    "label": "6eB1-2  -  Sinking Porth",
-                                    "value": "6eB1-2",
-                                },
-                                {
-                                    "label": "6eB1-4  -  Great Popplestones",
-                                    "value": "6eB1-4",
-                                },
-                                {
-                                    "label": "6eB1-5  -  Little Popplestones",
-                                    "value": "6eB1-5",
-                                },
-                                {
-                                    "label": "6eB2-2  -  Kitchen Porth",
-                                    "value": "6eB2-2",
-                                },
-                                {"label": "6eB3-1  -  The Town", "value": "6eB3-1"},
-                                {
-                                    "label": "6eB3-2 & 6eB3-3  -  Green Bay",
-                                    "value": "6eB3-2 & 6eB3-3",
-                                },
-                                {"label": "6eB4  -  Rushy Bay", "value": "6eB4"},
-                                {"label": "6eM12  -  Old Town", "value": "6eM12"},
-                                {"label": "6eM1-3  -  Hugh Town", "value": "6eM1-3"},
-                                {"label": "6eM1-4  -  Hugh Town", "value": "6eM1-4"},
-                                {"label": "6eM15  -  Porthcressa", "value": "6eM15"},
-                                {"label": "6eM2  -  Porth Mellon", "value": "6eM2"},
-                                {"label": "6eM3  -  Thomas' Porth", "value": "6eM3"},
-                                {"label": "6eM4  -  Porth Loo", "value": "6eM4"},
-                                {"label": "6eM5  -  Bar Point", "value": "6eM5"},
-                                {"label": "6eM6  -  Pelistry", "value": "6eM6"},
-                                {"label": "6eM7  -  Porth Hellick", "value": "6eM7"},
-                                {"label": "6eM9  -  Porth Minnick", "value": "6eM9"},
-                                {"label": "6eN1  -  Bab's Carn", "value": "6eN1"},
-                                {"label": "6eN2  -  St Martin's Bay", "value": "6eN2"},
-                                {"label": "6eN3  -  Higher Town Bay", "value": "6eN3"},
-                                {
-                                    "label": "6eN4  -  St Martin's Flats",
-                                    "value": "6eN4",
-                                },
-                                {"label": "6eSU10-1  -  Marazion", "value": "6eSU10-1"},
-                                {
-                                    "label": "6eSU10-2  -  Mounts Bay",
-                                    "value": "6eSU10-2",
-                                },
-                                {"label": "6eSU11  -  Newlyn", "value": "6eSU11"},
-                                {"label": "6eSU3-2  -  Mullion", "value": "6eSU3-2"},
-                                {"label": "6eSU3-4  -  Poldhu", "value": "6eSU3-4"},
-                                {
-                                    "label": "6eSU3-6  -  Church Cove",
-                                    "value": "6eSU3-6",
-                                },
-                                {
-                                    "label": "6eSU4-3  -  Gunwalloe Cove",
-                                    "value": "6eSU4-3",
-                                },
-                                {"label": "6eSU4-4  -  Loe Bar", "value": "6eSU4-4"},
-                                {
-                                    "label": "6eSU4-5  -  Porthleven Sands",
-                                    "value": "6eSU4-5",
-                                },
-                                {"label": "6eSU4-6  -  Porthleven", "value": "6eSU4-6"},
-                                {"label": "6eSU6-2  -  Praa Sands", "value": "6eSU6-2"},
-                                {
-                                    "label": "6eSU8-2  -  Perran Sands",
-                                    "value": "6eSU8-2",
-                                },
-                                {
-                                    "label": "6eSU9-2  -  Little London",
-                                    "value": "6eSU9-2",
-                                },
-                                {"label": "6eT1  -  New Grimsby", "value": "6eT1"},
-                                {"label": "6eT3-2  -  Old Grimsby", "value": "6eT3-2"},
-                                {"label": "6eT4  -  Borough Beach", "value": "6eT4"},
-                                {"label": "6eT5  -  Pentle Bay", "value": "6eT5"},
-                                {"label": "6eT6  -  Appletree Bay", "value": "6eT6"},
-                                {"label": "6eT7  -  New Grimsby", "value": "6eT7"},
-                                {
-                                    "label": "7a7A1-2  -  Sennen Cove",
-                                    "value": "7a7A1-2",
-                                },
-                                {
-                                    "label": "7a7A2-2  -  Porthmeor Beach",
-                                    "value": "7a7A2-2",
-                                },
-                                {
-                                    "label": "7a7A2-3  -  Porth Gwidden",
-                                    "value": "7a7A2-3",
-                                },
-                                {"label": "7a7A2-4  -  St Ives", "value": "7a7A2-4"},
-                                {"label": "7a7A2-5  -  Carbis Bay", "value": "7a7A2-5"},
-                                {
-                                    "label": "7a7A2-6  -  Hayle Estuary",
-                                    "value": "7a7A2-6",
-                                },
-                                {
-                                    "label": "7a7A2-7  -  Hayle Estuary to Godrevy Point",
-                                    "value": "7a7A2-7",
-                                },
-                                {
-                                    "label": "7a7A3-13  -  Crantock Beach",
-                                    "value": "7a7A3-13",
-                                },
-                                {
-                                    "label": "7a7A3-15  -  Fistral Beach",
-                                    "value": "7a7A3-15",
-                                },
-                                {
-                                    "label": "7a7A3-17  -  Newquay to Porth (Towan)",
-                                    "value": "7a7A3-17",
-                                },
-                                {
-                                    "label": "7a7A3-18  -  Watergate Bay",
-                                    "value": "7a7A3-18",
-                                },
-                                {"label": "7a7A3-19  -  Trenance", "value": "7a7A3-19"},
-                                {"label": "7a7A3-2  -  Portreath", "value": "7a7A3-2"},
-                                {
-                                    "label": "7a7A3-21  -  Porthcothan",
-                                    "value": "7a7A3-21",
-                                },
-                                {
-                                    "label": "7a7A3-23  -  Treyarnon & Constantine",
-                                    "value": "7a7A3-23",
-                                },
-                                {
-                                    "label": "7a7A3-4  -  Porth Towan",
-                                    "value": "7a7A3-4",
-                                },
-                                {
-                                    "label": "7a7A3-8  -  Perranporth",
-                                    "value": "7a7A3-8",
-                                },
-                                {
-                                    "label": "7a7A3-9  -  Perranporth Sands",
-                                    "value": "7a7A3-9",
-                                },
-                                {"label": "7b7B1-2  -  Harlyn", "value": "7b7B1-2"},
-                                {"label": "7b7B1-8  -  Polzeath", "value": "7b7B1-8"},
-                                {"label": "7b7B2-4  -  Port Isaac", "value": "7b7B2-4"},
-                                {"label": "7b7B3-1  -  Black Rock", "value": "7b7B3-1"},
-                                {
-                                    "label": "7b7B3-2  -  Widemouth Sand",
-                                    "value": "7b7B3-2",
-                                },
-                                {"label": "7b7B3-4  -  Bude", "value": "7b7B3-4"},
-                                {"label": "7cINST2  -  Instow", "value": "7cINST2"},
-                                {
-                                    "label": "7cSAUN1  -  Crow Point to Saunton Sands",
-                                    "value": "7cSAUN1",
-                                },
-                                {
-                                    "label": "7cWEST2  -  Westward Ho!",
-                                    "value": "7cWEST2",
-                                },
-                                {
-                                    "label": "7dBURN2  -  Burnham-on-sea",
-                                    "value": "7dBURN2",
-                                },
-                                {
-                                    "label": "7dBURN3  -  Berrow Dunes",
-                                    "value": "7dBURN3",
-                                },
-                                {
-                                    "label": "7dBURN4-A  -  Brean Village (South)",
-                                    "value": "7dBURN4-A",
-                                },
-                                {
-                                    "label": "7dBURN4-B  -  Brean Village (North)",
-                                    "value": "7dBURN4-B",
-                                },
-                                {"label": "7dLILS2  -  Lilstock", "value": "7dLILS2"},
-                                {
-                                    "label": "7dMINE1  -  Culver Cliff to Minehead",
-                                    "value": "7dMINE1",
-                                },
-                                {
-                                    "label": "7dMINE2  -  Minehead Harbour to Warren Point",
-                                    "value": "7dMINE2",
-                                },
-                                {"label": "7dMINE3  -  The Warren", "value": "7dMINE3"},
-                                {
-                                    "label": "7dMINE3b  -  The Warren",
-                                    "value": "7dMINE3b",
-                                },
-                                {
-                                    "label": "7dMINE4  -  Dunster Beach Holiday Park",
-                                    "value": "7dMINE4",
-                                },
-                                {"label": "7dMINE5  -  Ker Moor", "value": "7dMINE5"},
-                                {"label": "7dMINE5b  -  Ker Moor", "value": "7dMINE5b"},
-                                {
-                                    "label": "7dMINE6  -  Blue Anchor",
-                                    "value": "7dMINE6",
-                                },
-                                {
-                                    "label": "7dPARR2  -  Hinkley Point to Stolford",
-                                    "value": "7dPARR2",
-                                },
-                                {"label": "7dPARR3  -  Steart", "value": "7dPARR3"},
-                                {"label": "7dPARR3b  -  Steart", "value": "7dPARR3b"},
-                                {"label": "7dPARR3c  -  Steart", "value": "7dPARR3c"},
-                                {
-                                    "label": "7dPORL1  -  Gore Point to Porlock Weir",
-                                    "value": "7dPORL1",
-                                },
-                                {
-                                    "label": "7dPORL2  -  Porlock Weir",
-                                    "value": "7dPORL2",
-                                },
-                                {
-                                    "label": "7dPORL3  -  Porlockford to Hurlstone Point",
-                                    "value": "7dPORL3",
-                                },
-                                {"label": "7eSANB1  -  Sand Bay", "value": "7eSANB1"},
-                                {"label": "7eSANB1b  -  Sand Bay", "value": "7eSANB1b"},
-                                {
-                                    "label": "7eSU15-1  -  Severn Beach",
-                                    "value": "7eSU15-1",
-                                },
-                                {
-                                    "label": "7eSU15-2  -  Avonmouth",
-                                    "value": "7eSU15-2",
-                                },
-                                {
-                                    "label": "7eSU17-2  -  Portishead",
-                                    "value": "7eSU17-2",
-                                },
-                                {"label": "7eSU17-5  -  Clevedon", "value": "7eSU17-5"},
-                                {
-                                    "label": "7eWSM1  -  Weston-super-Mare",
-                                    "value": "7eWSM1",
-                                },
-                                {
-                                    "label": "7eWSM2  -  Weston-super-Mare",
-                                    "value": "7eWSM2",
-                                },
-                            ],
-                            value="6aSU12",
-                            id="survey-unit-dropdown",
-                            style={
-                                "font-size": "14px",
-                                "color": "black",
-                                "width": "300px",
-                            },
-                        ),
-                        html.H6(
-                            "Profile Line:",
-                            className="card-title",
-                            style={
-                                "color": "blue",
-                            },
-                        ),
-                        dcc.Dropdown(
-                            options=[{'label': "6a01613",'value': "6a01613"},
-                                     {'label': "6a01614",'value': "6a01614"},
-                                     {'label': "6a01615",'value': "6a01615"},
-                                     {'label': "6a01616",'value': "6a01616"},
-                                     {'label': "6a01617",'value': "6a01617"},
-                                     {'label': "6a01618",'value': "6a01618"},
-                                     {'label': "6a01619",'value': "6a01619"},
-                                     {'label': "6a01620",'value': "6a01620"},
-                                     {'label': "6a01621",'value': "6a01621"},
-                                     {'label': "6a01622",'value': "6a01622"},
-                                     {'label': "6a01623",'value': "6a01623"},
-                                     {'label': "6a01624",'value': "6a01624"}],
-                            value="6a01613",
-                            id="survey-line-dropdown",
-                            style={
-                                "font-size": "14px",
-                                "color": "black",
-                                "width": "300px",
-                                "margin": "1px",
-                            },
-                        ),
-                    ],
-                )
-            ],
-            style={"width": "350px", "background-color": "#ebf5ff", "border-radius": "10px", },
-            id="drop_down_card"
-        ),
+        #dbc.Card(
+        #    [
+        #        dbc.CardBody(
+        #            [
+        #                #html.H6(
+        #                #    "  Survey Unit:",
+        #                #    id="drop_down_card-title",
+##
+        #                #),
+        #                dcc.Dropdown(
+        #                    options=[
+        #                        {"label": "6aSU10  -  Sidmouth", "value": "6aSU10"},
+        #                        {
+        #                            "label": "6aSU12  -  Budleigh Salterton (East)",
+        #                            "value": "6aSU12",
+        #                        },
+        #                        {
+        #                            "label": "6aSU13  -  Budleigh Salterton",
+        #                            "value": "6aSU13",
+        #                        },
+        #                        {"label": "6aSU16-1  -  Exmouth", "value": "6aSU16-1"},
+        #                        {"label": "6aSU2  -  Chesil Beach", "value": "6aSU2"},
+        #                        {
+        #                            "label": "6aSU3-2  -  West Bexington",
+        #                            "value": "6aSU3-2",
+        #                        },
+        #                        {"label": "6aSU3-3  -  The Hive", "value": "6aSU3-3"},
+        #                        {
+        #                            "label": "6aSU3-5  -  Burton Freshwater",
+        #                            "value": "6aSU3-5",
+        #                        },
+        #                        {"label": "6aSU4  -  West Bay", "value": "6aSU4"},
+        #                        {"label": "6aSU5-2  -  Seatown", "value": "6aSU5-2"},
+        #                        {"label": "6aSU5-4  -  Charmouth", "value": "6aSU5-4"},
+        #                        {
+        #                            "label": "6aSU6-1  -  Lyme Regis (Broad Ledge)",
+        #                            "value": "6aSU6-1",
+        #                        },
+        #                        {"label": "6aSU6-2  -  Lyme Regis", "value": "6aSU6-2"},
+        #                        {"label": "6aSU7-1  -  The Cobb", "value": "6aSU7-1"},
+        #                        {
+        #                            "label": "6aSU8-1  -  Seaton (Devon)",
+        #                            "value": "6aSU8-1",
+        #                        },
+        #                        {
+        #                            "label": "6bSU16-3  -  Dawlish Warren",
+        #                            "value": "6bSU16-3",
+        #                        },
+        #                        {"label": "6bSU17  -  Dawlish", "value": "6bSU17"},
+        #                        {
+        #                            "label": "6bSU18-1  -  Teignmouth",
+        #                            "value": "6bSU18-1",
+        #                        },
+        #                        {
+        #                            "label": "6bSU18-2  -  Teign Estuary",
+        #                            "value": "6bSU18-2",
+        #                        },
+        #                        {
+        #                            "label": "6bSU20-1  -  Oddicombe",
+        #                            "value": "6bSU20-1",
+        #                        },
+        #                        {"label": "6bSU21-2  -  Meadfoot", "value": "6bSU21-2"},
+        #                        {
+        #                            "label": "6bSU21-4  -  Torquay and Livermead",
+        #                            "value": "6bSU21-4",
+        #                        },
+        #                        {"label": "6bSU21-5  -  Paignton", "value": "6bSU21-5"},
+        #                        {
+        #                            "label": "6bSU21-6  -  Goodrington Sands",
+        #                            "value": "6bSU21-6",
+        #                        },
+        #                        {
+        #                            "label": "6bSU21-8  -  Broadsands",
+        #                            "value": "6bSU21-8",
+        #                        },
+        #                        {
+        #                            "label": "6bSU25-2  -  Blackpool Sands",
+        #                            "value": "6bSU25-2",
+        #                        },
+        #                        {
+        #                            "label": "6bSU26-1  -  Slapton Sands",
+        #                            "value": "6bSU26-1",
+        #                        },
+        #                        {"label": "6bSU26-2  -  Beesands", "value": "6bSU26-2"},
+        #                        {
+        #                            "label": "6bSU26-3  -  Hallsands",
+        #                            "value": "6bSU26-3",
+        #                        },
+        #                        {"label": "6cSU28  -  Salcombe", "value": "6cSU28"},
+        #                        {
+        #                            "label": "6cSU30-2  -  Hope Cove",
+        #                            "value": "6cSU30-2",
+        #                        },
+        #                        {
+        #                            "label": "6cSU30-4  -  Thurlestone",
+        #                            "value": "6cSU30-4",
+        #                        },
+        #                        {"label": "6cSU31-1  -  Bantham", "value": "6cSU31-1"},
+        #                        {
+        #                            "label": "6cSU31-2  -  Bigbury-on-Sea",
+        #                            "value": "6cSU31-2",
+        #                        },
+        #                        {
+        #                            "label": "6cSU31-3  -  Challaborough",
+        #                            "value": "6cSU31-3",
+        #                        },
+        #                        {"label": "6cSU33  -  Wembury", "value": "6cSU33"},
+        #                        {
+        #                            "label": "6cSU38  -  Kingsand & Cawsand",
+        #                            "value": "6cSU38",
+        #                        },
+        #                        {
+        #                            "label": "6d6D1-4  -  Seaton (Cornwall) & Downderry",
+        #                            "value": "6d6D1-4",
+        #                        },
+        #                        {"label": "6d6D1-6  -  Looe", "value": "6d6D1-6"},
+        #                        {"label": "6d6D1-8  -  Talland", "value": "6d6D1-8"},
+        #                        {
+        #                            "label": "6d6D2-13  -  Pentewan Sands",
+        #                            "value": "6d6D2-13",
+        #                        },
+        #                        {
+        #                            "label": "6d6D2-15  -  Portmellon Beach",
+        #                            "value": "6d6D2-15",
+        #                        },
+        #                        {
+        #                            "label": "6d6D2-17  -  Gorran Haven",
+        #                            "value": "6d6D2-17",
+        #                        },
+        #                        {"label": "6d6D2-4  -  Par Sands", "value": "6d6D2-4"},
+        #                        {
+        #                            "label": "6d6D2-7  -  Carlyon Bay",
+        #                            "value": "6d6D2-7",
+        #                        },
+        #                        {
+        #                            "label": "6d6D3-10  -  Carne Beach",
+        #                            "value": "6d6D3-10",
+        #                        },
+        #                        {
+        #                            "label": "6d6D3-12  -  Portscatho",
+        #                            "value": "6d6D3-12",
+        #                        },
+        #                        {
+        #                            "label": "6d6D3-2  -  Hemmick Beach",
+        #                            "value": "6d6D3-2",
+        #                        },
+        #                        {
+        #                            "label": "6d6D3-4  -  Porthluney Cove",
+        #                            "value": "6d6D3-4",
+        #                        },
+        #                        {
+        #                            "label": "6d6D3-6  -  Portholland",
+        #                            "value": "6d6D3-6",
+        #                        },
+        #                        {
+        #                            "label": "6d6D5-10  -  Porthallow",
+        #                            "value": "6d6D5-10",
+        #                        },
+        #                        {
+        #                            "label": "6d6D5-11  -  Porthoustock",
+        #                            "value": "6d6D5-11",
+        #                        },
+        #                        {"label": "6d6D5-12  -  Coverack", "value": "6d6D5-12"},
+        #                        {
+        #                            "label": "6d6D5-14  -  Kennack Sands (East)",
+        #                            "value": "6d6D5-14",
+        #                        },
+        #                        {
+        #                            "label": "6d6D5-15  -  Kennack Sands (West)",
+        #                            "value": "6d6D5-15",
+        #                        },
+        #                        {"label": "6d6D5-17  -  Cadgwith", "value": "6d6D5-17"},
+        #                        {"label": "6d6D5-2  -  Swanpool", "value": "6d6D5-2"},
+        #                        {"label": "6d6D5-4  -  Maenporth", "value": "6d6D5-4"},
+        #                        {"label": "6eA4-2  -  The Bar", "value": "6eA4-2"},
+        #                        {"label": "6eA8-1  -  Periglis", "value": "6eA8-1"},
+        #                        {"label": "6eA8-2  -  Porth Coose", "value": "6eA8-2"},
+        #                        {"label": "6eA8-4  -  Porth Killer", "value": "6eA8-4"},
+        #                        {"label": "6eB1-1  -  Great Porth", "value": "6eB1-1"},
+        #                        {
+        #                            "label": "6eB1-2  -  Sinking Porth",
+        #                            "value": "6eB1-2",
+        #                        },
+        #                        {
+        #                            "label": "6eB1-4  -  Great Popplestones",
+        #                            "value": "6eB1-4",
+        #                        },
+        #                        {
+        #                            "label": "6eB1-5  -  Little Popplestones",
+        #                            "value": "6eB1-5",
+        #                        },
+        #                        {
+        #                            "label": "6eB2-2  -  Kitchen Porth",
+        #                            "value": "6eB2-2",
+        #                        },
+        #                        {"label": "6eB3-1  -  The Town", "value": "6eB3-1"},
+        #                        {
+        #                            "label": "6eB3-2 & 6eB3-3  -  Green Bay",
+        #                            "value": "6eB3-2 & 6eB3-3",
+        #                        },
+        #                        {"label": "6eB4  -  Rushy Bay", "value": "6eB4"},
+        #                        {"label": "6eM12  -  Old Town", "value": "6eM12"},
+        #                        {"label": "6eM1-3  -  Hugh Town", "value": "6eM1-3"},
+        #                        {"label": "6eM1-4  -  Hugh Town", "value": "6eM1-4"},
+        #                        {"label": "6eM15  -  Porthcressa", "value": "6eM15"},
+        #                        {"label": "6eM2  -  Porth Mellon", "value": "6eM2"},
+        #                        {"label": "6eM3  -  Thomas' Porth", "value": "6eM3"},
+        #                        {"label": "6eM4  -  Porth Loo", "value": "6eM4"},
+        #                        {"label": "6eM5  -  Bar Point", "value": "6eM5"},
+        #                        {"label": "6eM6  -  Pelistry", "value": "6eM6"},
+        #                        {"label": "6eM7  -  Porth Hellick", "value": "6eM7"},
+        #                        {"label": "6eM9  -  Porth Minnick", "value": "6eM9"},
+        #                        {"label": "6eN1  -  Bab's Carn", "value": "6eN1"},
+        #                        {"label": "6eN2  -  St Martin's Bay", "value": "6eN2"},
+        #                        {"label": "6eN3  -  Higher Town Bay", "value": "6eN3"},
+        #                        {
+        #                            "label": "6eN4  -  St Martin's Flats",
+        #                            "value": "6eN4",
+        #                        },
+        #                        {"label": "6eSU10-1  -  Marazion", "value": "6eSU10-1"},
+        #                        {
+        #                            "label": "6eSU10-2  -  Mounts Bay",
+        #                            "value": "6eSU10-2",
+        #                        },
+        #                        {"label": "6eSU11  -  Newlyn", "value": "6eSU11"},
+        #                        {"label": "6eSU3-2  -  Mullion", "value": "6eSU3-2"},
+        #                        {"label": "6eSU3-4  -  Poldhu", "value": "6eSU3-4"},
+        #                        {
+        #                            "label": "6eSU3-6  -  Church Cove",
+        #                            "value": "6eSU3-6",
+        #                        },
+        #                        {
+        #                            "label": "6eSU4-3  -  Gunwalloe Cove",
+        #                            "value": "6eSU4-3",
+        #                        },
+        #                        {"label": "6eSU4-4  -  Loe Bar", "value": "6eSU4-4"},
+        #                        {
+        #                            "label": "6eSU4-5  -  Porthleven Sands",
+        #                            "value": "6eSU4-5",
+        #                        },
+        #                        {"label": "6eSU4-6  -  Porthleven", "value": "6eSU4-6"},
+        #                        {"label": "6eSU6-2  -  Praa Sands", "value": "6eSU6-2"},
+        #                        {
+        #                            "label": "6eSU8-2  -  Perran Sands",
+        #                            "value": "6eSU8-2",
+        #                        },
+        #                        {
+        #                            "label": "6eSU9-2  -  Little London",
+        #                            "value": "6eSU9-2",
+        #                        },
+        #                        {"label": "6eT1  -  New Grimsby", "value": "6eT1"},
+        #                        {"label": "6eT3-2  -  Old Grimsby", "value": "6eT3-2"},
+        #                        {"label": "6eT4  -  Borough Beach", "value": "6eT4"},
+        #                        {"label": "6eT5  -  Pentle Bay", "value": "6eT5"},
+        #                        {"label": "6eT6  -  Appletree Bay", "value": "6eT6"},
+        #                        {"label": "6eT7  -  New Grimsby", "value": "6eT7"},
+        #                        {
+        #                            "label": "7a7A1-2  -  Sennen Cove",
+        #                            "value": "7a7A1-2",
+        #                        },
+        #                        {
+        #                            "label": "7a7A2-2  -  Porthmeor Beach",
+        #                            "value": "7a7A2-2",
+        #                        },
+        #                        {
+        #                            "label": "7a7A2-3  -  Porth Gwidden",
+        #                            "value": "7a7A2-3",
+        #                        },
+        #                        {"label": "7a7A2-4  -  St Ives", "value": "7a7A2-4"},
+        #                        {"label": "7a7A2-5  -  Carbis Bay", "value": "7a7A2-5"},
+        #                        {
+        #                            "label": "7a7A2-6  -  Hayle Estuary",
+        #                            "value": "7a7A2-6",
+        #                        },
+        #                        {
+        #                            "label": "7a7A2-7  -  Hayle Estuary to Godrevy Point",
+        #                            "value": "7a7A2-7",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-13  -  Crantock Beach",
+        #                            "value": "7a7A3-13",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-15  -  Fistral Beach",
+        #                            "value": "7a7A3-15",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-17  -  Newquay to Porth (Towan)",
+        #                            "value": "7a7A3-17",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-18  -  Watergate Bay",
+        #                            "value": "7a7A3-18",
+        #                        },
+        #                        {"label": "7a7A3-19  -  Trenance", "value": "7a7A3-19"},
+        #                        {"label": "7a7A3-2  -  Portreath", "value": "7a7A3-2"},
+        #                        {
+        #                            "label": "7a7A3-21  -  Porthcothan",
+        #                            "value": "7a7A3-21",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-23  -  Treyarnon & Constantine",
+        #                            "value": "7a7A3-23",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-4  -  Porth Towan",
+        #                            "value": "7a7A3-4",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-8  -  Perranporth",
+        #                            "value": "7a7A3-8",
+        #                        },
+        #                        {
+        #                            "label": "7a7A3-9  -  Perranporth Sands",
+        #                            "value": "7a7A3-9",
+        #                        },
+        #                        {"label": "7b7B1-2  -  Harlyn", "value": "7b7B1-2"},
+        #                        {"label": "7b7B1-8  -  Polzeath", "value": "7b7B1-8"},
+        #                        {"label": "7b7B2-4  -  Port Isaac", "value": "7b7B2-4"},
+        #                        {"label": "7b7B3-1  -  Black Rock", "value": "7b7B3-1"},
+        #                        {
+        #                            "label": "7b7B3-2  -  Widemouth Sand",
+        #                            "value": "7b7B3-2",
+        #                        },
+        #                        {"label": "7b7B3-4  -  Bude", "value": "7b7B3-4"},
+        #                        {"label": "7cINST2  -  Instow", "value": "7cINST2"},
+        #                        {
+        #                            "label": "7cSAUN1  -  Crow Point to Saunton Sands",
+        #                            "value": "7cSAUN1",
+        #                        },
+        #                        {
+        #                            "label": "7cWEST2  -  Westward Ho!",
+        #                            "value": "7cWEST2",
+        #                        },
+        #                        {
+        #                            "label": "7dBURN2  -  Burnham-on-sea",
+        #                            "value": "7dBURN2",
+        #                        },
+        #                        {
+        #                            "label": "7dBURN3  -  Berrow Dunes",
+        #                            "value": "7dBURN3",
+        #                        },
+        #                        {
+        #                            "label": "7dBURN4-A  -  Brean Village (South)",
+        #                            "value": "7dBURN4-A",
+        #                        },
+        #                        {
+        #                            "label": "7dBURN4-B  -  Brean Village (North)",
+        #                            "value": "7dBURN4-B",
+        #                        },
+        #                        {"label": "7dLILS2  -  Lilstock", "value": "7dLILS2"},
+        #                        {
+        #                            "label": "7dMINE1  -  Culver Cliff to Minehead",
+        #                            "value": "7dMINE1",
+        #                        },
+        #                        {
+        #                            "label": "7dMINE2  -  Minehead Harbour to Warren Point",
+        #                            "value": "7dMINE2",
+        #                        },
+        #                        {"label": "7dMINE3  -  The Warren", "value": "7dMINE3"},
+        #                        {
+        #                            "label": "7dMINE3b  -  The Warren",
+        #                            "value": "7dMINE3b",
+        #                        },
+        #                        {
+        #                            "label": "7dMINE4  -  Dunster Beach Holiday Park",
+        #                            "value": "7dMINE4",
+        #                        },
+        #                        {"label": "7dMINE5  -  Ker Moor", "value": "7dMINE5"},
+        #                        {"label": "7dMINE5b  -  Ker Moor", "value": "7dMINE5b"},
+        #                        {
+        #                            "label": "7dMINE6  -  Blue Anchor",
+        #                            "value": "7dMINE6",
+        #                        },
+        #                        {
+        #                            "label": "7dPARR2  -  Hinkley Point to Stolford",
+        #                            "value": "7dPARR2",
+        #                        },
+        #                        {"label": "7dPARR3  -  Steart", "value": "7dPARR3"},
+        #                        {"label": "7dPARR3b  -  Steart", "value": "7dPARR3b"},
+        #                        {"label": "7dPARR3c  -  Steart", "value": "7dPARR3c"},
+        #                        {
+        #                            "label": "7dPORL1  -  Gore Point to Porlock Weir",
+        #                            "value": "7dPORL1",
+        #                        },
+        #                        {
+        #                            "label": "7dPORL2  -  Porlock Weir",
+        #                            "value": "7dPORL2",
+        #                        },
+        #                        {
+        #                            "label": "7dPORL3  -  Porlockford to Hurlstone Point",
+        #                            "value": "7dPORL3",
+        #                        },
+        #                        {"label": "7eSANB1  -  Sand Bay", "value": "7eSANB1"},
+        #                        {"label": "7eSANB1b  -  Sand Bay", "value": "7eSANB1b"},
+        #                        {
+        #                            "label": "7eSU15-1  -  Severn Beach",
+        #                            "value": "7eSU15-1",
+        #                        },
+        #                        {
+        #                            "label": "7eSU15-2  -  Avonmouth",
+        #                            "value": "7eSU15-2",
+        #                        },
+        #                        {
+        #                            "label": "7eSU17-2  -  Portishead",
+        #                            "value": "7eSU17-2",
+        #                        },
+        #                        {"label": "7eSU17-5  -  Clevedon", "value": "7eSU17-5"},
+        #                        {
+        #                            "label": "7eWSM1  -  Weston-super-Mare",
+        #                            "value": "7eWSM1",
+        #                        },
+        #                        {
+        #                            "label": "7eWSM2  -  Weston-super-Mare",
+        #                            "value": "7eWSM2",
+        #                        },
+        #                    ],
+        #                    value="6aSU12",
+        #                    id="survey-unit-dropdown",
+#
+        #                ),
+        #                #html.H6(
+        #                #    "Profile Line:",
+        #                #    id="drop_down_card-title",
+##
+        #                #),
+        #                dcc.Dropdown(
+        #                    options=[{'label': "6a01613",'value': "6a01613"},
+        #                             {'label': "6a01614",'value': "6a01614"},
+        #                             {'label': "6a01615",'value': "6a01615"},
+        #                             {'label': "6a01616",'value': "6a01616"},
+        #                             {'label': "6a01617",'value': "6a01617"},
+        #                             {'label': "6a01618",'value': "6a01618"},
+        #                             {'label': "6a01619",'value': "6a01619"},
+        #                             {'label': "6a01620",'value': "6a01620"},
+        #                             {'label': "6a01621",'value': "6a01621"},
+        #                             {'label': "6a01622",'value': "6a01622"},
+        #                             {'label': "6a01623",'value': "6a01623"},
+        #                             {'label': "6a01624",'value': "6a01624"}],
+        #                    value="6a01613",
+        #                    id="survey-line-dropdown",
+#
+        #                ),
+        #            ],
+        #        )
+        #    ],
+#
+        #    id="drop_down_card"
+        #),
     ],
-    style={"height": "100%"},
+
     id = "mapbox_div"
 )
 
@@ -4288,14 +4149,19 @@ def set_selected_survey_unit(
         # have to work out which method (dropdown/map click) fired the app callback, do this with ctx
         triggered_id = ctx.triggered_id
 
+        # Get a list of all survey units this is then used to decide if the click data is a point or line
+        survey_units = unit_to_options.keys()
+
         # if the map triggered the callback
         if triggered_id == "example-map":
 
             # then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
             if click_data is not None:
 
+                click_data_hovertext = click_data['points'][0]['hovertext']
+
                 # Line data has the key hovertext in the clickdata, points have customdata
-                if 'hovertext' in click_data.get("points", [])[0].keys():
+                if click_data_hovertext not in survey_units:
                     line = True
                 else:
                     line = False

@@ -1,0 +1,78 @@
+
+/* Default dcc.graph style */
+#example-map  {
+     position: relative;
+     width: 100%;
+     height: 100%;
+     display: block;
+}
+
+/* Default div that holds the map and the dropdown card */
+#mapbox_div  {
+     height: 100%;
+}
+
+/* Default div on main page that holds the map div */
+#main_dash_map_div {
+     height: 100%;
+     margin-top: 10px;
+     height: 60vh;
+     border-radius: 10px;
+     overflow: hidden;
+}
+
+
+/* Default card style for the dropdown */
+#drop_down_card {
+
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    background-color: #d4f7ff;
+
+
+}
+/* Default H6 style for the dropdown titles */
+#drop_down_card-title{
+    color: blue;
+    margin: 0px 10px 10px 0px;
+    font-weight: bold;
+
+}
+
+/* Default card style for the survey unit dropdown inside the card */
+#survey-unit-dropdown{
+    font-size: 13px;
+    font-weight: bold;
+    color: blue;
+    width: 100%;
+    border-radius: 10px;
+
+
+}
+
+/* Default card style for the survey line dropdown inside the card */
+#survey-line-dropdown{
+      font-size: 13px;
+      font-weight: bold;
+      color: blue;
+      width: 100%;
+      margin-top: 5px;
+      border-radius: 10px;
+}
+
+
+
+/* Default card style for the dropdown width settings */
+@media screen and (max-width: 990px) {
+    #drop_down_card {
+        position: relative;
+        z-index: 9;
+        border-radius: 10px;
+        /* top: 70vh; /* Adjust the top position for smaller screens */
+        /* left: 0px; /* Adjust the left position for smaller screens */
+
+
+    }
+}
+

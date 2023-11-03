@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import plotly.graph_objs as go
 import sqlalchemy
 import base64
+import seaborn as sns
 
 # delete this
 image_path = r"media/NERD.jpeg"
@@ -316,7 +317,7 @@ def make_scatter_plot(selected_survey_unit):
         symbol="season",
         custom_data=['date', 'Sum'],
         # height=550,
-        template="seaborn",
+        template="plotly",
     )
 
     # Format the label shown in the hover

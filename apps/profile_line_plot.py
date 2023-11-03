@@ -333,7 +333,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             y="elevation_od",
             color="date",
             color_discrete_map=custom_color_mapping,
-            template="seaborn",
+            template="plotly",
             category_orders={"date": date_order},
             custom_data=['date', 'chainage', 'elevation_od'],
 
@@ -427,7 +427,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             y=[ "Min Elevation", "Mean Elevation","Max Elevation"],
             # color="date",
             # color_discrete_map=custom_color_mapping,
-            template="seaborn",
+            template="plotly",
             # category_orders={"date": date_order},
             # custom_data=['date', 'chainage', 'elevation_od'],)
         )

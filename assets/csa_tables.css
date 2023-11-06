@@ -1,0 +1,52 @@
+#main_dash_csa_tables{
+    margin-bottom: 20px;
+    margin-top: 10px;
+
+}
+
+#csa_table_row{ display: flex;
+    justify-content: space-between;
+}
+
+#spr_spr_card_body{
+    width: 100%;
+
+
+}
+#spr_spr_card{
+    border-radius: 10px;
+    width: 100%;
+
+}
+#spr_spr_col{
+    width: 100%;
+
+}
+
+#base_spr_card_body{
+     width: 100%;
+
+}
+#base_spr_card{
+    border-radius: 10px;
+    width: 100%;
+
+
+
+}
+
+#base_spr_col{
+
+    width: 100%;
+    margin-right: 20px; /* This is the one to add margin to*/
+
+}
+
+@media screen and (min-width: 0px) and (max-width:950px) {
+    #base_spr_col,#spr_spr_col {
+    margin: 10px;
+
+    }
+
+
+}

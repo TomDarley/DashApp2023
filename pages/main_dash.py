@@ -691,9 +691,10 @@ layout = html.Div(
                     lg={"size": 5, "offset": 0},
                     xl={"size": 5, "offset": 0},
                     xxl={"size": 5, "offset": 0},
+
                 ),
             ],
-            align="start",
+
             id ='main_dash_error_bar_div'
         ),
         dbc.Row(
@@ -706,7 +707,7 @@ layout = html.Div(
                     lg={"size": 2, "offset": 0},
                     xl={"size": 2, "offset": 0},
                     xxl={"size": 2, "offset": 0},
-                    align="center",
+
                     #style={'padding-right': '50px'}
 
                 ),
@@ -717,13 +718,15 @@ layout = html.Div(
                     md={"size": 12, "offset": 0},
                     lg={"size": 10, "offset": 0},
                     xl={"size": 10, "offset": 0},
-                    xxl={"size": 10, "offset": 0}, style={'margin-bottom': '20px','margin-top': '10px'},
-                    align='center'
+                    xxl={"size": 10, "offset": 0},
+
+                    id = 'main_dash_csa_tables'
 
                 ),
             ],
-            align="start",
-            style={'margin-right': '00px'}
+
+
+
 
 
 

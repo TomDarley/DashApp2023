@@ -77,7 +77,6 @@
     }
 }
 
-
 /* ERROR BAR PLOT CSS */
 
 #main_dash_error_bar_div {
@@ -102,7 +101,7 @@
 @media screen and (min-width: 0px) and (max-width:950px) {
     #error_bar_plot_div{
         position: relative;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
         margin-top: 10px;
         margin-right: 20px;
         margin-left: 10px;

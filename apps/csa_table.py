@@ -173,18 +173,18 @@ layout = html.Div(
 
                                             ),
                                         ],
-                                        style={"width": "100%"},
+
+                                        id = 'spr_spr_card_body'
                                     )
                                 ],
-                                style={
+                                id='spr_spr_card',
 
-                                    "border-radius": "10px",
-                                    "width": "100%",
-                                },
                             ),
                         ]
                     ),
-                    style={ "padding": "0", "margin-left": "25px", "width": "100%","margin-right": "0px", 'buffer':"0px", "padding-left": "0px"},
+                    id='spr_spr_col',
+
+
 
                 ),
                 dbc.Col(
@@ -235,26 +235,30 @@ layout = html.Div(
                                                 style_table={'overflowX': 'auto'},
                                             ),
                                         ],
-                                        style={},
+                                        id = 'base_spr_card_body',
+
                                     )
                                 ],
-                                style={
-                                    "margin-left": "0px",
-                                    "border-radius": "10px",
-                                    "width": "100%",
-                                },
+                                id='base_spr_card',
+
                             ),
                         ]
-                    ),style={ "padding": "0", "margin-left": "8px", "width": "100%","margin-right": "10px", "padding-left": "20px"},
+                    ),
+                    id='base_spr_col',
+
+
+
 
 
                 ),
             ],
-            style={"margin-right": "0px"},
-            align="start",
 
 
-        )
+            id = 'csa_table_row',
+
+
+        ),
+
     ]
 )
 

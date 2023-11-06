@@ -137,7 +137,6 @@ def make_scatter_plot(selected_survey_unit):
     if selected_survey_unit is None:
         raise PreventUpdate
 
-    current_year = datetime.now().year
     survey_unit = selected_survey_unit
     # print(survey_unit)
 
@@ -296,15 +295,6 @@ def make_scatter_plot(selected_survey_unit):
         state = "Erosion Rate"
     else:
         state = "Accretion Rate"
-
-    global found_state
-    found_state = state
-
-    global found_acreation_levels
-    found_acreation_levels = round(accretion_levels, 1)
-
-    global found_percentage
-    found_percentage = percentage
 
     # add the normal date format back to the dataframe to be used in the hover data
     chart_ready_df['date'] = normal_dates

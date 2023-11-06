@@ -9,7 +9,8 @@ from io import StringIO
 layout = html.Div(
     [
         dcc.Store(id="error_chart"),
-        dcc.Graph(id="error_plot", style={"width": "100%", "height": "50vh"}),
+        dcc.Graph(id="error_plot",
+                  ),
         # adding info and max view buttons
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -59,14 +60,8 @@ layout = html.Div(
             fullscreen=True,
         ),
     ],
-    style={
-        "position": "relative",
-        "margin-bottom": "10px",
-        "margin-top": "20px",
-        "margin-right": "20px",
-        "buffer-right": "20px",
-        "border-radius": "10px", "overflow": "hidden"
-    },
+
+    id= 'error_bar_plot_div'
 )
 
 

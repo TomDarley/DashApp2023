@@ -23,7 +23,7 @@
 
 #survey_unit_card {
     background-color: #f7d32f;
-    margin: 10px;
+    margin: 10px 10px 20px 10px;
     border-radius: 10px;
     box-shadow: 5px 5px 5px lightblue;
     text-align: center;
@@ -48,7 +48,7 @@
         /* Specific style for #survey_unit_card within the same media query */
         font-size: 20px;
         background-color: #f7d32f;
-        margin: 10px;
+        margin: 10px 10px 20px 10px;
         border-radius: 10px;
         box-shadow: 5px 5px 5px lightblue;
         text-align: center;
@@ -73,7 +73,7 @@
         /* Specific style for #survey_unit_card within the same media query */
         font-size: 15px;
         background-color: #f7d32f;
-        margin: 10px;
+        margin: 10px 10px 20px 10px;
         border-radius: 10px;
         box-shadow: 5px 5px 5px lightblue;
         text-align: center;
@@ -100,7 +100,7 @@
         /* Specific style for #survey_unit_card within the same media query */
         font-size: 20px;
         background-color: #f7d32f,
-        margin: 10px;
+        margin: 10px 10px 20px 10px;
         border-radius: 10px;
         box-shadow: 5px 5px 5px lightblue;
         text-align: center;

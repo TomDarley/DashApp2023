@@ -12,11 +12,7 @@ layout = html.Div(
         dcc.Store(id="line_chart"),
         dcc.Graph(
             id="line_plot",
-            style={
-                "width": "100%",
-                "height": "50vh",
-                "margin-left": "0px",
-            },
+
         ),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -91,15 +87,9 @@ layout = html.Div(
             fullscreen=True,
         ),
     ],
-    style={
-        "position": "relative",
-        "margin-bottom": "10px",
-        "margin-top": "20px",
-        "margin-right": "0px",
-        "border-radius": "10px", "overflow": "hidden"
-
-    },
+    id='line_plot_div'
 )
+
 
 @callback(
     Output("line_plot", "figure"),
@@ -375,10 +365,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         min_chainage = float(min_chainage)
         max_chainage = float(max_chainage)
 
-        min_chainage= int(min_chainage)
-        max_chainage = int(max_chainage) +50
+        min_chainage = int(min_chainage)
+        max_chainage = int(max_chainage) + 50
         merge_df = pd.DataFrame()
-
 
         generated_chainage = list(range(min_chainage, max_chainage, 1))
         merge_df['chainage'] = generated_chainage
@@ -399,7 +388,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             survey_dfs.append(df_filter)  # Append the merged result to the list
 
         # Print or utilize survey_dfs if required
-        #print(survey_dfs)
+        # print(survey_dfs)
 
         count = 0
         for df in survey_dfs:
@@ -411,11 +400,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                                                                                               limit_area='inside',
                                                                                               limit=5)
             count += 1
-        merge_df= merge_df.drop_duplicates(subset=['chainage']) # bug duplicates are being made for chainage!!!
+        merge_df = merge_df.drop_duplicates(subset=['chainage'])  # bug duplicates are being made for chainage!!!
         merge_df = merge_df.set_index('chainage')
         max_ele = merge_df.max(axis=1)
-        average_ele = merge_df.mean(axis=1,skipna=True)
-        min_ele = merge_df.min(axis=1,skipna=True)
+        average_ele = merge_df.mean(axis=1, skipna=True)
+        min_ele = merge_df.min(axis=1, skipna=True)
         merge_df['Max Elevation'] = max_ele
         merge_df['Mean Elevation'] = average_ele
         merge_df['Min Elevation'] = min_ele
@@ -424,7 +413,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         fig = px.line(
             merge_df,
             x="chainage",
-            y=[ "Min Elevation", "Mean Elevation","Max Elevation"],
+            y=["Min Elevation", "Mean Elevation", "Max Elevation"],
             # color="date",
             # color_discrete_map=custom_color_mapping,
             template="plotly",
@@ -440,7 +429,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 name="Master Profile",
             )
         )
-
 
     # Customize x and y axis fonts and sizes
     fig.update_xaxes(

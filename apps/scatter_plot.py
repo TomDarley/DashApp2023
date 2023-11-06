@@ -42,7 +42,8 @@ layout = html.Div(
                     },
                     config={"responsive": True},
                 ),
-            ],style={"border-radius": "10px", "overflow": "hidden"}
+            ],id = 'scatter_plot_card',
+
         ),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -109,11 +110,8 @@ layout = html.Div(
             fullscreen=True,
         ),
     ],
-    style={
-        "position": "relative",
-        "height": "100%",
-        "margin-right": "20px",
-    },  # Set the position of the containing div to relative
+    id = 'scatter_plot_div',
+
 )
 
 

@@ -627,7 +627,7 @@ layout = html.Div(
                     xl={"size": 2, "offset": 0},
                     xxl={"size": 2, "offset": 0},
                     align="start",
-                    #style={"max-height": "60vh",} # this overides row alignment
+
 
                 ),
                 dbc.Col(
@@ -649,10 +649,8 @@ layout = html.Div(
                     html.Div(
                         scatter_plot.layout,
                     ),
-                    style={
-                        "margin-top": "10px",
-                        "height": "100%","border-radius": "10px", "overflow": "hidden"
-                    },
+                    id = 'main_dash_scatter_div',
+
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
                     md={"size": 12, "offset": 0},
@@ -662,7 +660,6 @@ layout = html.Div(
                 ),
             ],
             align="start",
-            style={}
         ),
         dbc.Row(
             [
@@ -684,6 +681,7 @@ layout = html.Div(
                     lg={"size": 5, "offset": 0},
                     xl={"size": 5, "offset": 0},
                     xxl={"size": 5, "offset": 0},
+                    id='main_dash_line_div',
                 ),
                 dbc.Col(
                     html.Div(error_bar_plot.layout),
@@ -696,6 +694,7 @@ layout = html.Div(
                 ),
             ],
             align="start",
+            id ='main_dash_error_bar_div'
         ),
         dbc.Row(
             [

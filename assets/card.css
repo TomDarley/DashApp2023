@@ -1,110 +1,194 @@
+/*All cards div css, this is the col that holds all the cards */
 
+#all_cards_div {
+    max-height: 60vh;
+}
+@media screen and (min-width: 0px) and (max-width:950px) {
+    #all_cards_div {
+         max-height: 40vh;
+         overflow: auto;
+    }
+}
 
 /* Default font size for larger screens */
+#trend_card_div, #highest_card_div, #lowest_card_div {
+    font-size: 15px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    color: black;
+    text-align: left;
+    font-weight: bold;
+}
+
 #survey_unit_card {
-    font-size: 15px; /* Adjust this to your base font size */
-}
+    background-color: #f7d32f;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    text-align: center;
+    font-weight: bold;}
+
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
 @media screen and (min-width: 0px) and (max-width:950px) {
+   #trend_card_div, #highest_card_div, #lowest_card_div  {
+        font-size: 20px;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        color:black;
+        text-align: left;
+        font-weight:bold;
+
+        /* Adjust font size for smaller screens */
+    }
+
     #survey_unit_card {
-        font-size: 20px; /* Adjust font size for smaller screens */
+        /* Specific style for #survey_unit_card within the same media query */
+        font-size: 20px;
+        background-color: #f7d32f;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        text-align: center;
+        font-weight: bold;/* Different font size for survey_unit_card */
+        /* Other specific styles for survey_unit_card */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
 @media screen and (min-width: 950px) and (max-width: 1300px) {
+    #survey_unit_card,#trend_card_div,#highest_card_div,#lowest_card_div {
+        font-size: 15px;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        color:black;
+        text-align: left;
+        font-weight:bold;/* Adjust font size for screens in this range */
+    }
+
     #survey_unit_card {
-        font-size: 15px; /* Adjust font size for screens in this range */
+        /* Specific style for #survey_unit_card within the same media query */
+        font-size: 15px;
+        background-color: #f7d32f;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        text-align: center;
+        font-weight: bold;
+        /* Different font size for survey_unit_card */
+        /* Other specific styles for survey_unit_card */
     }
 }
 
 /* Media query for screens between 1801px and 2000px wide */
 @media screen and (min-width: 1300px) and (max-width: 10000px) {
+
+    #trend_card_div,#highest_card_div,#lowest_card_div {
+        font-size: 20px;
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        color:black;
+        text-align: left;
+        font-weight:bold;/* Adjust font size for screens in this range */
+    }
+
     #survey_unit_card {
-        font-size: 20px; /* Adjust font size for screens in this range */
+        /* Specific style for #survey_unit_card within the same media query */
+        font-size: 20px;
+        background-color: #f7d32f,
+        margin: 10px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        text-align: center;
+        font-weight: bold;/* Different font size for survey_unit_card */
+        /* Other specific styles for survey_unit_card */
     }
 }
 }
 
-/* Default font size for larger screens */
-#trend_card {
-    font-size: 20px; /* Adjust this to your base font size */
+/* THE DROP DOWN CARD AND ITS COMPONENTS:
+
+/* Default card style for the dropdown */
+#drop_down_card {
+
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    background-color: #d4f7ff;
+
+
 }
+
+/* Default H6 style for the dropdown titles */
+#drop_down_card-title{
+    color: blue;
+    margin: 0px 10px 10px 0px;
+    font-weight: bold;
+
+}
+
+/* Default card style for the survey unit dropdown inside the card */
+#survey-unit-dropdown{
+    font-size: 13px;
+    font-weight: bold;
+    color: blue;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    background-color: #d4f7ff;
+
+
+}
+
+/* Default card style for the survey line dropdown inside the card */
+#survey-line-dropdown{
+      font-size: 13px;
+      font-weight: bold;
+      color: blue;
+      width: 100%;
+      margin-top: 5px;
+      border-radius: 10px;
+       border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    background-color: #d4f7ff;
+}
+
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
 @media screen and (min-width: 0px) and (max-width:950px) {
-    #trend_card {
-        font-size: 20px; /* Adjust font size for smaller screens */
+    #drop_down_card {
+        font-size: 20px;
+         border-radius: 10px;
+         box-shadow: 5px 5px 5px lightblue;
+         background-color: #d4f7ff;
+         margin: 10px;/* Adjust font size for smaller screens */
     }
 }
 
 /* Media query for screens between 801px and 1800px wide */
 @media screen and (min-width: 950px) and (max-width: 1300px) {
-    #trend_card {
-        font-size: 15px; /* Adjust font size for screens in this range */
+    #drop_down_card {
+        font-size: 15px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        background-color: #d4f7ff;
+        margin: 10px;/* Adjust font size for screens in this range */
     }
 }
+
 
 /* Media query for screens between 1801px and 2000px wide */
 @media screen and (min-width: 1300px) and (max-width: 10000px) {
-    #trend_card {
-        font-size: 20px; /* Adjust font size for screens in this range */
-    }
-}
-}
-
-
-/* Default font size for larger screens */
-#highest_card {
-    font-size: 20px; /* Adjust this to your base font size */
-}
-
-/* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width:950px) {
-    #highest_card {
-        font-size: 20px; /* Adjust font size for smaller screens */
-    }
-}
-
-/* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 950px) and (max-width: 1300px) {
-    #highest_card {
-        font-size: 15px; /* Adjust font size for screens in this range */
-    }
-}
-
-/* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1300px) and (max-width: 10000px) {
-    #highest_card {
-        font-size: 20px; /* Adjust font size for screens in this range */
-    }
-}
-}
-
-/* Default font size for larger screens */
-#lowest_card {
-    font-size: 20px; /* Adjust this to your base font size */
-}
-
-/* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width:950px) {
-    #lowest_card {
-        font-size: 20px; /* Adjust font size for smaller screens */
-    }
-}
-
-/* Media query for screens between 801px and 1800px wide */
-@media screen and (min-width: 950px) and (max-width: 1300px) {
-    #lowest_card {
-        font-size: 15px; /* Adjust font size for screens in this range */
-    }
-}
-
-/* Media query for screens between 1801px and 2000px wide */
-@media screen and (min-width: 1300px) and (max-width: 10000px) {
-    #lowest_card {
-        font-size: 20px; /* Adjust font size for screens in this range */
+    #drop_down_card {
+        font-size: 20px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+        background-color: #d4f7ff;
+        margin: 10px;/* Adjust font size for screens in this range */
     }
 }
 }

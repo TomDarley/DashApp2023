@@ -51,16 +51,14 @@ layout = html.Div(
                                         [
 
 
-                                            html.Div("6aSU12", id="survey_unit_card"),
+                                            html.Div("6aSU12", ),
 
 
                                         ]
                                     )
                                 ],
-                                style={
-                                    "margin": "10px",
-                                    "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue','background-color': '#f7d32f', 'color': 'black', 'text-align':'center', 'font-weight':'bold'
-                                },
+                                id="survey_unit_card",
+
 
                         ),
                         dbc.Card(
@@ -527,9 +525,8 @@ layout = html.Div(
                                             html.Div("----", id="trend_card"),
                                         ]
                                     )
-                                ],
-                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue', }
-,
+                                ],id= 'trend_card_div',
+
                             ),
                             dbc.Card(
                                 [
@@ -548,8 +545,8 @@ layout = html.Div(
                                             html.Div("----", id="highest_card"),
                                         ]
                                     )
-                                ],
-                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'},
+                                ],id = 'highest_card_div'
+
                             ),
                             dbc.Card(
                                 [
@@ -567,8 +564,8 @@ layout = html.Div(
                                             html.Div("----", id="lowest_card"),
                                         ]
                                     )
-                                ],
-                                style={"margin": "10px", "border-radius": "10px",'box-shadow': '5px 5px 5px lightblue'},
+                                ],id = 'lowest_card_div',
+
                             ),
                             dbc.Card(
                                 [
@@ -622,7 +619,7 @@ layout = html.Div(
                                 },
                             ),
                         ]
-                    ),
+                    ), id = 'all_cards_div',
                     xs={"size": 12, "offset": 0, "overflow-y": "auto"},
                     sm={"size": 12, "offset": 0, "overflow-y": "auto"},
                     md={"size": 12, "offset": 0},
@@ -630,7 +627,7 @@ layout = html.Div(
                     xl={"size": 2, "offset": 0},
                     xxl={"size": 2, "offset": 0},
                     align="start",
-                    style={"max-height": "60vh",} # this overides row alignment
+                    #style={"max-height": "60vh",} # this overides row alignment
 
                 ),
                 dbc.Col(

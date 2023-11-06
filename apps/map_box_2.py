@@ -8,7 +8,7 @@ from shapely.wkt import loads
 import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
-
+from dash.exceptions import PreventUpdate
 
 unit_to_options = {
     "6aSU10": [
@@ -3661,6 +3661,7 @@ layout = html.Div(
     ),  # current data, the object holding the selected values
     Input("survey-line-dropdown", "value"),
     prevent_initial_call=False,
+
 )
 def set_selected_survey_unit(
         selected_value, click_data, current_data, profile_dropdown_selection
@@ -3672,6 +3673,9 @@ def set_selected_survey_unit(
     The function aswell as storing the selected data, updates the dropdown values. If the map survey unit is clicked
     the dropdown will update with the selected survey unit value. Same for the profile lines. This also works in reverse
     , if dropdown is used only the data store is updated."""
+
+    if selected_value is None or profile_dropdown_selection is None:
+        raise PreventUpdate
 
     # check if the initial call triggered the callback, if initial we set intial load values
     ctx = dash.callback_context
@@ -3790,7 +3794,7 @@ def update_map(selection, zoom_level):
 
 
     set_survey_unit = selection['survey_unit']
-    print(set_survey_unit)
+    #print(set_survey_unit)
     # load data in
 
     # All shapefile loaded into the database should not be promoted to multi

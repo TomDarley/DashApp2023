@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
 import numpy as np
+from dash.exceptions import PreventUpdate
 
 layout = html.Div(
     [
@@ -106,6 +107,10 @@ layout = html.Div(
 def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range):
     # check if a chart mode button has been selected, use it to render the correct chart mode
     trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
+
+    if selected_sur_unit is None or selected_profile is None:
+        raise PreventUpdate
+
 
     if trigger:
         if trigger == "3D_plot.n_clicks":
@@ -234,7 +239,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     max_chainage = float(max_chainage)
 
     min_chainage = int(min_chainage)
-    max_chainage = int(max_chainage) + 50
+    max_chainage = int(max_chainage) + 200
     merge_df = pd.DataFrame()
 
     topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
@@ -409,7 +414,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         merge_df['Mean Elevation'] = average_ele
         merge_df['Min Elevation'] = min_ele
         merge_df = merge_df.reset_index()
-        print(merge_df)
+        #print(merge_df)
         fig = px.line(
             merge_df,
             x="chainage",

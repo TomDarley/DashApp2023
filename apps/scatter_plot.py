@@ -11,6 +11,8 @@ import plotly.graph_objs as go
 import sqlalchemy
 import base64
 import seaborn as sns
+from dash.exceptions import PreventUpdate
+
 
 # delete this
 image_path = r"media/NERD.jpeg"
@@ -131,6 +133,10 @@ layout = html.Div(
     allow_duplicate=True,
 )
 def make_scatter_plot(selected_survey_unit):
+
+    if selected_survey_unit is None:
+        raise PreventUpdate
+
     current_year = datetime.now().year
     survey_unit = selected_survey_unit
     # print(survey_unit)

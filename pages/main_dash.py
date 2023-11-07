@@ -28,9 +28,8 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 
-# register the page with dash giving url path
-dash.register_page(__name__, path="/main_dash")
 
+dash.register_page(__name__, path="/main_dash")
 # define the layout of the main page
 layout = html.Div(
     [

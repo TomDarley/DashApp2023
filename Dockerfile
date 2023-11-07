@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 RUN pip uninstall --yes werkzeug
 RUN pip install -v https://github.com/pallets/werkzeug/archive/refs/tags/2.0.3.tar.gz
 
-COPY ./display_dash.py /code/display_dash.py
+COPY . . /
 
-CMD ["python","display_dash.py
+CMD gunicorn -b 0.0.0.0:80 app:server

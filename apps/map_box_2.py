@@ -10,6 +10,8 @@ import numpy as np
 import plotly.graph_objects as go
 from dash.exceptions import PreventUpdate
 
+from shapely.geometry import LineString, Polygon
+
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3637,6 +3639,7 @@ layout = html.Div(
             id="selected-value-storage",
             data={"survey_unit": None, "profile_line": None},
         ),
+        dcc.Store(id ='multi-select-data'),
         dcc.Location(id="url", refresh=False),  # Add a Location component
         dcc.Graph(
             id="example-map",
@@ -3673,6 +3676,8 @@ def set_selected_survey_unit(
     The function aswell as storing the selected data, updates the dropdown values. If the map survey unit is clicked
     the dropdown will update with the selected survey unit value. Same for the profile lines. This also works in reverse
     , if dropdown is used only the data store is updated."""
+
+
 
     if selected_value is None or profile_dropdown_selection is None:
         raise PreventUpdate
@@ -3784,9 +3789,10 @@ def set_selected_survey_unit(
     Output("example-map", "figure"),
     Input("selected-value-storage", "data"),
     State("zoom-level-store", "data"),
+    Input('multi-select-data', 'data'),
     prevent_initial_call=False,
 )
-def update_map(selection, zoom_level):
+def update_map(selection, zoom_level, multi_select):
     """Function controls the re-loading of the map. Takes in the value store which contaions two values, selected surevy
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevent profile lines. The selected profile line is then used isolate and style to show which one is selected
@@ -3886,6 +3892,9 @@ def update_map(selection, zoom_level):
     line_traces = []
     for i, row in line_data.iterrows():
         line = row["geometry"]
+
+
+
         latitudes = [coord[1] for coord in line.coords]
         longitudes = [coord[0] for coord in line.coords]
 
@@ -3904,15 +3913,27 @@ def update_map(selection, zoom_level):
                       f"<br>Post Storm: {post_storm.title()}" \
                       f"<br>Strategy: {strategy.title().replace('_', ' ')}"
 
-        # Get the survey_unit value for this row
+        # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
 
-        if set_profile_line == profile_line_id:
-            colour = "#e8d90c"
-            width = 8
+        # set the colors based on if a multiselect was used
+
+        if multi_select is not None and len(multi_select) >0:
+            if profile_line_id in multi_select:
+                colour = "#e8d90c"
+                width = 8
+            else:
+                colour = "#246673"
+                width = 5
+
         else:
-            colour = "#246673"
-            width = 5
+
+            if set_profile_line == profile_line_id:
+                colour = "#e8d90c"
+                width = 8
+            else:
+                colour = "#246673"
+                width = 5
 
         # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
         trace = px.line_mapbox(
@@ -3920,9 +3941,12 @@ def update_map(selection, zoom_level):
             lat=latitudes,
             lon=longitudes,
             hover_name=[custom_data] * len(latitudes),
+            line_group=[custom_data] * len(latitudes)
+
 
 
         )
+
 
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
         trace.update_traces(hovertemplate=f"<b>{custom_data}<b><extra></extra>"),
@@ -3962,23 +3986,68 @@ def update_map(selection, zoom_level):
 
     return fig
 
-# @app.callback(
-#    Output('zoom-level-store', 'data'),
-#    Input('example-map', 'relayoutData'),
-#    State('zoom-level-store', 'data'),
-#
-# )
-# def update_zoom_level(relayout_data, current_zoom_level):
-#    triggered_id = callback_context.triggered_id
-#
-#    if triggered_id == 'example-map':
-#        try:
-#            user_zoom_level = relayout_data['mapbox.zoom']
-#            if user_zoom_level != current_zoom_level:
-#                current_zoom_level = user_zoom_level
-#                print(current_zoom_level)
-#
-#                return current_zoom_level
-#        except Exception:
-#            return 7
-#
+
+@callback(
+    Output('multi-select-data', 'data'),
+    Input('example-map', 'selectedData'),
+
+    State("survey-unit-dropdown", "value")
+)
+def display_selected_data( selected_data,set_survey_unit):
+    # All shapefile loaded into the database should not be promoted to multi
+    engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+
+    # Connect to the database using the engine
+    conn = engine.connect()
+    query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
+
+    # Modify this query according to your table
+    lines_gdf = gpd.GeoDataFrame.from_postgis(
+        query_profile_lines, conn, geom_col="wkb_geometry"
+    )
+    lines_gdf = lines_gdf.to_crs(epsg=4326)
+
+    print(selected_data)
+
+
+    lines_inside_box =[]
+    if selected_data is not None:
+
+        if 'range' in selected_data.keys():
+
+            box = selected_data['range']['mapbox']
+
+            min_x, min_y = box[0][0], box[0][1]  # Lower left corner
+            max_x, max_y = box[1][0], box[1][1]
+            range_coordinates = [
+                (min_x, min_y),
+                (max_x, min_y),
+                (max_x, max_y),
+                (min_x, max_y),
+                (min_x, min_y)  # Close the ring
+            ]
+            range_polygon = Polygon(range_coordinates)
+
+            for index, row in lines_gdf.iterrows():
+                geometry = row['wkb_geometry']
+                profile = row['profname']
+
+                if geometry.intersects(range_polygon):
+                    print(f"{profile} intersects!!")
+                    lines_inside_box.append(profile)
+
+
+
+
+            if len(lines_inside_box)>0:
+                return lines_inside_box
+        else:
+            return dash.no_update
+
+
+    else:
+        return dash.no_update
+
+
+
+

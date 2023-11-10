@@ -3,7 +3,7 @@ from dash import html, callback, Input, Output, State
 from apps import scatter_plot
 from apps import error_bar_plot
 #from apps import mapbox
-from apps import map_box_2
+from apps import map_box_3
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
@@ -632,7 +632,7 @@ layout = html.Div(
                 dbc.Col(
                     html.Div(
                         [
-                            map_box_2.layout,
+                            map_box_3.layout,
                         ],
                         id = "main_dash_map_div",
 

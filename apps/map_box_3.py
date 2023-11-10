@@ -3639,7 +3639,9 @@ layout = html.Div(
             id="selected-value-storage",
             data={"survey_unit": None, "profile_line": None},
         ),
-        dcc.Store(id ='multi-select-data'),
+
+
+        dcc.Store(id = 'selection_type', data ={'type':None, 'selection_data': None}),
         dcc.Location(id="url", refresh=False),  # Add a Location component
         dcc.Graph(
             id="example-map",
@@ -3652,73 +3654,103 @@ layout = html.Div(
 )
 
 
-@callback(
-    Output("selected-value-storage", "data"),
-    Output("survey-unit-dropdown", "value"),
-    Output("survey-line-dropdown", "options"),
-    Output("survey-line-dropdown", "value"),
-    Input("survey-unit-dropdown", "value"),
-    Input("example-map", "clickData"),
-    State(
-        "selected-value-storage", "data"
-    ),  # current data, the object holding the selected values
-    Input("survey-line-dropdown", "value"),
-    prevent_initial_call=False,
+
+@callback(Output('selection_type', 'data'),
+          Input("example-map", "clickData"),
+          Input('example-map', 'selectedData'),
+          State('selection_type', 'data'),
+          prevent_initial_call = False
+
 
 )
-def set_selected_survey_unit(
-        selected_value, click_data, current_data, profile_dropdown_selection
-):
-    """This function controls the dropdown and map click logic. It stores the current selected values, from
-    either a click event or dropdown selection. This data can then be passed on to the map the update map
-    function which is triggered whenever one of these values is changed.
 
-    The function aswell as storing the selected data, updates the dropdown values. If the map survey unit is clicked
-    the dropdown will update with the selected survey unit value. Same for the profile lines. This also works in reverse
-    , if dropdown is used only the data store is updated."""
+def get_selection_type(click_data, box_selected_data, old_selection_data):
+    if box_selected_data is not None and box_selected_data != old_selection_data.get('selection_data'):
+        if 'range' in box_selected_data.keys():
+            selection_type = 'Multi'
+            new_selection = {'type': selection_type, 'selection_data': box_selected_data}
 
+        # if the box data is the same as the last selection, it will if another one not made we treat it as single
+        elif box_selected_data is not None and box_selected_data == old_selection_data.get('selection_data'):
+            selection_type = 'Single'
+            new_selection = {'type': selection_type, 'selection_data': click_data}
+        else:
+            selection_type = 'Single'
+            new_selection = {'type': selection_type, 'selection_data': click_data}
 
-
-    if selected_value is None or profile_dropdown_selection is None:
-        raise PreventUpdate
-
-    # check if the initial call triggered the callback, if initial we set intial load values
-    ctx = dash.callback_context
-    if not ctx.triggered:
-
-        default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE}
-        default_options= [{'label': "6a01613",'value': "6a01613"},
-                                     {'label': "6a01614",'value': "6a01614"},
-                                     {'label': "6a01615",'value': "6a01615"},
-                                     {'label': "6a01616",'value': "6a01616"},
-                                     {'label': "6a01617",'value': "6a01617"},
-                                     {'label': "6a01618",'value': "6a01618"},
-                                     {'label': "6a01619",'value': "6a01619"},
-                                     {'label': "6a01620",'value': "6a01620"},
-                                     {'label': "6a01621",'value': "6a01621"},
-                                     {'label': "6a01622",'value': "6a01622"},
-                                     {'label': "6a01623",'value': "6a01623"},
-                                     {'label': "6a01624",'value': "6a01624"}]
-
-
-        return default_values_for_store, INITIAL_LOAD_SURVEY_UNIT, default_options, INITIAL_LOAD_PROFILE_LINE
+    elif  box_selected_data is None:
+        selection_type = 'Single'
+        new_selection = {'type': selection_type, 'selection_data': click_data}
 
     else:
+        selection_type = 'Single'
+        new_selection = {'type': selection_type, 'selection_data': click_data}
 
-        #print(click_data)
-        # have to work out which method (dropdown/map click) fired the app callback, do this with ctx
-        triggered_id = ctx.triggered_id
+    return new_selection
 
-        # Get a list of all survey units this is then used to decide if the click data is a point or line
-        survey_units = unit_to_options.keys()
 
-        # if the map triggered the callback
-        if triggered_id == "example-map":
+@callback(
+    Output("selected-value-storage", "data"),  # the dict holding sur_unit and profile line
+    Output("survey-unit-dropdown", "value"), # the current value of the dropdown
+    Output("survey-line-dropdown", "options"), # the current options for the dropdown
+    Output("survey-line-dropdown", "value"), # the current value of the dropdown
 
-            # then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
+    Input('selection_type', 'data'),  # the found selection type used dict type and click or box selected data
+    Input("survey-unit-dropdown", "value"), # dropdown value of the line dropdown
+    Input("survey-line-dropdown", "value"), # dropdown value of the survey_unit dropdown
+
+    Input("example-map", "clickData"),  # click data on the map
+    Input('example-map', 'selectedData'),  # this is the box selected data
+
+    State("selected-value-storage", "data"),  # current data, the object holding the selected values
+    prevent_initial_call=False)
+
+def set_selected_values(selection_type: dict, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, click_data, box_select_data, current_selected_sur_and_prof: dict ):
+    ctx1 = dash.callback_context
+    print(ctx1.triggered_id)
+    if selection_type.get('type') != 'Multi' :
+
+        # if no click data or box select used:
+        ctx = dash.callback_context
+        ctx_id = ctx.triggered_id
+        if ctx_id not in ['example-map', 'survey-line-dropdown','survey-unit-dropdown']:
+            default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT,
+                                        "profile_line": INITIAL_LOAD_PROFILE_LINE}
+            default_options= [{'label': "6a01613",'value': "6a01613"},
+                                         {'label': "6a01614",'value': "6a01614"},
+                                         {'label': "6a01615",'value': "6a01615"},
+                                         {'label': "6a01616",'value': "6a01616"},
+                                         {'label': "6a01617",'value': "6a01617"},
+                                         {'label': "6a01618",'value': "6a01618"},
+                                         {'label': "6a01619",'value': "6a01619"},
+                                         {'label': "6a01620",'value': "6a01620"},
+                                         {'label': "6a01621",'value': "6a01621"},
+                                         {'label': "6a01622",'value': "6a01622"},
+                                         {'label': "6a01623",'value': "6a01623"},
+                                         {'label': "6a01624",'value': "6a01624"}]
+
+
+            selected_value_storage  = default_values_for_store
+            survey_unit_dropdown_val = INITIAL_LOAD_SURVEY_UNIT
+            profile_line_dropdown_options = default_options
+            profile_line_dropdown_val = INITIAL_LOAD_PROFILE_LINE
+
+            return selected_value_storage, survey_unit_dropdown_val, profile_line_dropdown_options,\
+                profile_line_dropdown_val
+
+
+
+
+
+
+        elif ctx.triggered_id == 'example-map':
+
+            survey_units = unit_to_options.keys()
+
+            #then have to work out which feature in the map was clicked, line data has no custom data so hook into that.
             if click_data is not None:
 
-                click_data_hovertext = click_data['points'][0]['hovertext']
+                click_data_hovertext = click_data['points'][0]['hovertext'].split(':')[1].split('<')[0].strip()
 
                 # Line data has the key hovertext in the clickdata, points have customdata
                 if click_data_hovertext not in survey_units:
@@ -3730,75 +3762,131 @@ def set_selected_survey_unit(
                 if not line:
                     clicked_survey_unit = click_data.get("points", [])[0].get("customdata")[0]
                     set_survey_unit = clicked_survey_unit
-                    second_dropdown_options = unit_to_options.get(set_survey_unit, [])
-                    current_data["survey_unit"] = clicked_survey_unit
-                    current_data["profile_line"] = second_dropdown_options[0]
-                    # print(current_data)
+                    profile_dropdown_options = unit_to_options.get(set_survey_unit, [])
+                    current_selected_sur_and_prof["survey_unit"] = set_survey_unit
+                    current_selected_sur_and_prof["profile_line"] = profile_dropdown_options[0]
+
+                    selected_value_storage = current_selected_sur_and_prof
+                    survey_unit_dropdown_val =  set_survey_unit
+                    profile_line_dropdown_options = profile_dropdown_options
+                    profile_line_dropdown_val = profile_dropdown_options[0] # set to the first in the list
+
 
                     return (
-                        current_data,
-                        set_survey_unit,
-                        second_dropdown_options,
-                        second_dropdown_options[0],
+                        selected_value_storage,
+                        survey_unit_dropdown_val,
+                        profile_line_dropdown_options,
+                        profile_line_dropdown_val
                     )
 
                 # if the lines (profile lines) were clicked:
                 elif line:
                     clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[1].replace(" ","")
                     set_profile_line = clicked_profile_line
-                    second_dropdown_options = unit_to_options.get(
-                        current_data["survey_unit"], []
+                    profile_dropdown_options = unit_to_options.get(
+                        current_selected_sur_and_prof["survey_unit"], []
                     )
-                    current_data["profile_line"] = clicked_profile_line
+                    current_selected_sur_and_prof["profile_line"] = set_profile_line
                     # print(current_data)
 
+                    selected_value_storage = current_selected_sur_and_prof
+                    survey_unit_dropdown_val = current_selected_sur_and_prof['survey_unit']
+                    profile_line_dropdown_options = profile_dropdown_options
+                    profile_line_dropdown_val = set_profile_line
+
+
                     return (
-                        current_data,
-                        dash.no_update,
-                        second_dropdown_options,
-                        set_profile_line,
+                        selected_value_storage,
+                        survey_unit_dropdown_val,
+                        profile_line_dropdown_options,
+                        profile_line_dropdown_val
                     )
+        elif   ctx.triggered_id == 'survey-unit-dropdown':
 
-        # if the survey unit dropdown triggered the callback
-        elif triggered_id == "survey-unit-dropdown":
-            set_survey_unit = selected_value
-
-            second_dropdown_options = unit_to_options.get(set_survey_unit, [])
-            current_data["survey_unit"] = set_survey_unit
-            current_data["profile_line"] = second_dropdown_options[0]
-            # print(current_data)
-            return (
-                current_data,
-                dash.no_update,
-                second_dropdown_options,
-                second_dropdown_options[0],
+            set_survey_unit = sur_unit_dropdown_val
+            survey_unit_dropdown_options = unit_to_options.get(set_survey_unit, [])
+            profile_dropdown_options = unit_to_options.get(
+                set_survey_unit, []
             )
 
-        # if the profile line dropdown was used
-        elif triggered_id == "survey-line-dropdown":
-            current_data["profile_line"] = profile_dropdown_selection
+            current_selected_sur_and_prof["survey_unit"] = set_survey_unit
+            current_selected_sur_and_prof["profile_line"] = survey_unit_dropdown_options[0]
             # print(current_data)
 
-            return current_data, dash.no_update, dash.no_update, profile_dropdown_selection
 
-        else:
-            return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+            selected_value_storage = current_selected_sur_and_prof
+            survey_unit_dropdown_val = set_survey_unit
+            profile_line_dropdown_options = profile_dropdown_options
+            profile_line_dropdown_val = profile_dropdown_options[0]
+
+
+            return (
+                selected_value_storage,
+                survey_unit_dropdown_val,
+                profile_line_dropdown_options,
+                profile_line_dropdown_val,
+            )
+
+
+        elif ctx.triggered_id == 'survey-line-dropdown':
+
+            current_selected_sur_and_prof["profile_line"] = prof_line_dropdown_val
+            profile_dropdown_options = unit_to_options.get(
+                current_selected_sur_and_prof["survey_unit"], []
+            )
+            # print(current_data)
+
+            selected_value_storage = current_selected_sur_and_prof
+            survey_unit_dropdown_val = current_selected_sur_and_prof["survey_unit"]
+            profile_line_dropdown_options = profile_dropdown_options
+            profile_line_dropdown_val = prof_line_dropdown_val
+
+            return selected_value_storage,\
+                survey_unit_dropdown_val,\
+                profile_line_dropdown_options,\
+                profile_line_dropdown_val
+
+    elif selection_type.get('type') == 'Multi':
+
+        # if the selection is a multi
+        profile_dropdown_options = unit_to_options.get(
+            current_selected_sur_and_prof["survey_unit"], []
+        )
+
+        selected_value_storage = current_selected_sur_and_prof
+        survey_unit_dropdown_val = current_selected_sur_and_prof["survey_unit"]
+        profile_line_dropdown_options = profile_dropdown_options
+        profile_line_dropdown_val = current_selected_sur_and_prof["profile_line"]
+
+        return selected_value_storage, \
+            survey_unit_dropdown_val, \
+            profile_line_dropdown_options, \
+            profile_line_dropdown_val
+
+    else:
+
+        return dash.no_update, dash.no_update,dash.no_update,dash.no_update
+
+
 
 @callback(
     Output("example-map", "figure"),
     Input("selected-value-storage", "data"),
-    State("zoom-level-store", "data"),
-    Input('multi-select-data', 'data'),
+    Input("selection_type", "data"),
+
+
     prevent_initial_call=False,
 )
-def update_map(selection, zoom_level, multi_select):
+
+def update_map(current_selected_sur_and_prof: dict , selection_type:dict):
+
     """Function controls the re-loading of the map. Takes in the value store which contaions two values, selected surevy
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevent profile lines. The selected profile line is then used isolate and style to show which one is selected
     to the user."""
 
 
-    set_survey_unit = selection['survey_unit']
+    set_survey_unit = current_selected_sur_and_prof['survey_unit']
     #print(set_survey_unit)
     # load data in
 
@@ -3824,7 +3912,7 @@ def update_map(selection, zoom_level, multi_select):
     gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
     gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
 
-    set_profile_line = selection["profile_line"]
+    set_profile_line = current_selected_sur_and_prof["profile_line"]
 
     updated_gdf = gdf.copy()
 
@@ -3855,7 +3943,7 @@ def update_map(selection, zoom_level, multi_select):
             "lat": center_lat,
             "lon": center_lon,
         },  # Set the map center to the selected point
-        zoom=zoom_level,
+        zoom=5,
         # height=690,
         size="size",
         size_max=12,
@@ -3887,6 +3975,34 @@ def update_map(selection, zoom_level, multi_select):
          }
      )
 
+    lines_inside_box = []
+    if selection_type is not None and selection_type.get('type') == 'Multi':
+
+        lines_inside_box = []
+
+        # get the box data from the dict
+        box = selection_type['selection_data']['range']['mapbox']
+
+        min_x, min_y = box[0][0], box[0][1]  # Lower left corner
+        max_x, max_y = box[1][0], box[1][1]
+        range_coordinates = [
+            (min_x, min_y),
+            (max_x, min_y),
+            (max_x, max_y),
+            (min_x, max_y),
+            (min_x, min_y)  # Close the ring
+        ]
+        range_polygon = Polygon(range_coordinates)
+
+        for index, row in lines_gdf.iterrows():
+            geometry = row['wkb_geometry']
+            profile = row['profname']
+
+            if geometry.intersects(range_polygon):
+                print(f"{profile} intersects!!")
+                lines_inside_box.append(profile)
+
+
     # adding each WKT string as trace to the fig as a trace
     line_traces = []
     for i, row in line_data.iterrows():
@@ -3917,8 +4033,9 @@ def update_map(selection, zoom_level, multi_select):
 
         # set the colors based on if a multiselect was used
 
-        if multi_select is not None and len(multi_select) >0:
-            if profile_line_id in multi_select:
+        if selection_type is not None and selection_type.get('type') == 'Multi':
+
+            if profile_line_id in lines_inside_box:
                 colour = "#e8d90c"
                 width = 8
             else:
@@ -3984,69 +4101,4 @@ def update_map(selection, zoom_level, multi_select):
     )
 
     return fig
-
-
-@callback(
-    Output('multi-select-data', 'data'),
-    Input('example-map', 'selectedData'),
-
-    State("survey-unit-dropdown", "value")
-)
-def display_selected_data( selected_data,set_survey_unit):
-    # All shapefile loaded into the database should not be promoted to multi
-    engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
-
-    # Connect to the database using the engine
-    conn = engine.connect()
-    query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
-
-    # Modify this query according to your table
-    lines_gdf = gpd.GeoDataFrame.from_postgis(
-        query_profile_lines, conn, geom_col="wkb_geometry"
-    )
-    lines_gdf = lines_gdf.to_crs(epsg=4326)
-
-    print(selected_data)
-
-
-    lines_inside_box =[]
-    if selected_data is not None:
-
-        if 'range' in selected_data.keys():
-
-            box = selected_data['range']['mapbox']
-
-            min_x, min_y = box[0][0], box[0][1]  # Lower left corner
-            max_x, max_y = box[1][0], box[1][1]
-            range_coordinates = [
-                (min_x, min_y),
-                (max_x, min_y),
-                (max_x, max_y),
-                (min_x, max_y),
-                (min_x, min_y)  # Close the ring
-            ]
-            range_polygon = Polygon(range_coordinates)
-
-            for index, row in lines_gdf.iterrows():
-                geometry = row['wkb_geometry']
-                profile = row['profname']
-
-                if geometry.intersects(range_polygon):
-                    print(f"{profile} intersects!!")
-                    lines_inside_box.append(profile)
-
-
-
-
-            if len(lines_inside_box)>0:
-                return lines_inside_box
-        else:
-            return dash.no_update
-
-
-    else:
-        return dash.no_update
-
-
-
 

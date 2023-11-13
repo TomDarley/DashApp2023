@@ -3643,6 +3643,7 @@ layout = html.Div(
 
 
         dcc.Store(id = 'selection_type', data ={'type':None, 'selection_data': None}),
+        dcc.Store(id = 'multi-select-lines'),
 
         dcc.Location(id="url", refresh=False),  # Add a Location component
         dcc.Graph(
@@ -3661,6 +3662,8 @@ layout = html.Div(
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
+
+
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -3795,13 +3798,27 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             else:
                 return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
+    else:
 
+        if box_selected_data is not None and 'range' in box_selected_data.keys():
+            # print(f"{box_selected_data} - box data")
+            selected_value_result = {
+                "survey_unit": sur_unit_dropdown_val,
+                "profile_line": prof_line_dropdown_val,
+                'multi': True,
+                'box_selected_data': box_selected_data['range']['mapbox']}
+
+            return selected_value_result, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
+
+        else:
+            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
 
 #
 #
 @callback(
     Output("example-map", "figure"),
+    Output('multi-select-lines', 'data'),  # holds if multi select the line ids
     Input("selected-value-storage", "data"),
 
 
@@ -4036,7 +4053,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         }
     )
 
-    return fig
+    return fig, lines_inside_box
 
 #@callback(
 #          Output("survey-unit-dropdown", "value"),

@@ -512,8 +512,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         # Connect to the database using the engine
         conn = engine.connect()
 
-        multi_to_tuple = tuple(multi_lines)
-
         # Load topo data from DB
         topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile IN {multi_lines}".replace("[","(").replace("]",")")  # Modify this query according to your table
         topo_df = pd.read_sql_query(topo_query, conn)
@@ -527,6 +525,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         for item in dates:
             if item not in date_order:
                 date_order.append(item)
+
+
 
         fig = px.line(
 

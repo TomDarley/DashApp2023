@@ -3656,22 +3656,11 @@ layout = html.Div(
 )
 
 
-#@callback(Output('box_selected_data', 'data'),
-#          Input('example-map', 'selectedData'),
-#          State('box_selected_data', 'data'))
-#
-#def set_selectedData(selected_data, box_selected_data):
-#
-#    if selected_data is not None and selected_data != box_selected_data and 'range' in selected_data.keys():
-#        return selected_data
-#    else:
-#        return None
-#
-
 @callback(Output('selected-value-storage', 'data'),
           Output("survey-line-dropdown", "options"),
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
+          Output("example-map", "clickData"),
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -3679,16 +3668,34 @@ layout = html.Div(
           Input("survey-line-dropdown", "value"),
           State('selected-value-storage', 'data'))
 
-def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, old_box_data):
+def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, selected_val_storage):
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
 
-
-    if box_selected_data is None or box_selected_data == old_box_data:
-        multi_same_check = True
+    # setting if a multi select was indeed used and it is different from the last call
+    multi_same_check = True
+    if box_selected_data:
+        if 'range' in box_selected_data.keys():
+            current_box = box_selected_data['range']['mapbox']
+        else:
+            current_box = None
     else:
-        multi_same_check = False
+        current_box = None
 
+    if selected_val_storage:
+        # convert to a dict if not:
+        if isinstance(selected_val_storage, list):
+            fixed_val_storage = selected_val_storage[0]
+        else:
+            fixed_val_storage = selected_val_storage
+
+        if fixed_val_storage['box_selected_data'] is not None:
+            if fixed_val_storage['box_selected_data'] == current_box:
+                multi_same_check = True
+            else:
+                multi_same_check = False
+        else:
+            multi_same_check = True
 
 
 
@@ -3711,7 +3718,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
         selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE, 'multi': False,'box_selected_data': None },
         profile_line_options = default_options
-        return selected_value_result, profile_line_options, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE
+        return selected_value_result, profile_line_options, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None
 
     # survey_unit_dropdown was used set the survey unit, the profile line options and the first line option as the val:
     elif ctx.triggered_id == 'survey-unit-dropdown':
@@ -3724,7 +3731,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
         profile_line_options = survey_unit_dropdown_options
 
-        return selected_value_result, profile_line_options
+        return selected_value_result, profile_line_options, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
     elif ctx.triggered_id == 'survey-line-dropdown':
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
@@ -3733,18 +3740,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'multi': False,
                                  'box_selected_data': None },
 
-        return selected_value_result, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val
+        return selected_value_result, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
         survey_units = unit_to_options.keys()
 
-
-
-
         if click_data is not None :
-
-
-
 
             #print(click_data)
 
@@ -3767,7 +3768,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          'multi': False,
                                          'box_selected_data': None}, prof_line_dropdown_options
 
-                return selected_value_result, prof_line_dropdown_options, clicked_survey_unit, prof_line_dropdown_options[0]
+                return selected_value_result, prof_line_dropdown_options, clicked_survey_unit, prof_line_dropdown_options[0], None
 
 
             # if the lines (profile lines) were clicked:
@@ -3778,7 +3779,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          'multi': False,
                                          'box_selected_data': None}
 
-                return selected_value_result, dash.no_update, sur_unit_dropdown_val, clicked_profile_line
+                return selected_value_result, dash.no_update, sur_unit_dropdown_val, clicked_profile_line, None
 
         else:
 
@@ -3790,10 +3791,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                     'multi': True,
                     'box_selected_data': box_selected_data['range']['mapbox']}
 
-                return selected_value_result, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val
+                return selected_value_result, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
             else:
-                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val
+                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
 
 

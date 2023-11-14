@@ -3777,12 +3777,13 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             # if the lines (profile lines) were clicked:
             elif line:
                 clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[1].replace(" ","")
+                prof_line_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
                 selected_value_result = {"survey_unit":sur_unit_dropdown_val,
                                          "profile_line": clicked_profile_line,
                                          'multi': False,
                                          'box_selected_data': None}
 
-                return selected_value_result, dash.no_update, sur_unit_dropdown_val, clicked_profile_line, None
+                return selected_value_result, prof_line_dropdown_options, sur_unit_dropdown_val, clicked_profile_line, None
 
         else:
 
@@ -3954,6 +3955,8 @@ def update_map(current_selected_sur_and_prof: dict ):
             if geometry.intersects(range_polygon):
                 print(f"{profile} intersects!!")
                 lines_inside_box.append(profile)
+    else:
+        lines_inside_box = []
 
 
     # adding each WKT string as trace to the fig as a trace

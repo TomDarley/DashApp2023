@@ -7,6 +7,9 @@ import plotly.graph_objs as go
 from sqlalchemy import create_engine
 import numpy as np
 from dash.exceptions import PreventUpdate
+from datetime import datetime
+
+current_year = datetime.now().year
 
 layout = html.Div(
     [
@@ -56,6 +59,44 @@ layout = html.Div(
             className="mr-3",
             style={"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"},
         ),
+        html.Div([
+        dcc.Dropdown(
+            options=[
+                {"label": "Spring", "value": "spring"},
+                {"label": "Summer", "value": "summer"},
+                {"label": "Autumn", "value": "autumn"},
+                {"label": "Winter", "value": "winter"}
+            ],
+
+            id = 'month-dropdown',
+            value = 'summer'
+        ),
+
+
+        dcc.Dropdown(
+            options=[
+                {"label": f"{current_year}", "value": f"{current_year}"},
+                {"label": f"{current_year-1}", "value": f"{current_year-1}"},
+                 {"label": f"{current_year-2}", "value": f"{current_year-2}"},
+                  {"label": f"{current_year-3}", "value": f"{current_year-3}"},
+                   {"label": f"{current_year-4}", "value": f"{current_year-4}"},
+                {"label": f"{current_year - 5}", "value": f"{current_year - 5}"},
+                {"label": f"{current_year - 6}", "value": f"{current_year - 6}"},
+                {"label": f"{current_year - 7}", "value": f"{current_year - 7}"},
+                {"label": f"{current_year - 8}", "value": f"{current_year - 8}"},
+                {"label": f"{current_year - 9}", "value": f"{current_year - 9}"},
+                {"label": f"{current_year - 10}", "value": f"{current_year - 10}"},
+
+            ],
+
+            id='year-dropdown',
+            value=f"{current_year}"
+        ),
+
+
+        ],id = 'month_year_dropdown',
+          style= {'display': 'block'}),
+
 
         dbc.Modal(
             [
@@ -96,17 +137,34 @@ layout = html.Div(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
     Output("line_chart", "data"),
+
+    Output("3D_plot", "style"), # use this to turn them off if multi select
+    Output("2D_plot", "style"),
+    Output("Range_plot", "style"),
+
+    Output('month_year_dropdown', 'style'),
+
+
     Input("survey-unit-dropdown", "value"),
     Input("survey-line-dropdown", "value"),
     Input("3D_plot", "n_clicks"),
     Input("2D_plot", "n_clicks"),
     Input("Range_plot", "n_clicks"),
-    State('selected-value-storage', 'data'),
+    Input('selected-value-storage', 'data'),
     State('multi-select-lines', 'data'),
+    Input('month-dropdown', 'value'),
+    Input('year-dropdown', 'value'),
+
+
+
+
+
+
+
     prevent_initial_call=False,
     allow_duplicate=True,
 )
-def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range, selected_val_storage, multi_lines):
+def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range, selected_val_storage, multi_lines, month_dropdown_val, year_dropdown_val):
 
     # convert to dict from list
     if selected_val_storage:
@@ -502,7 +560,13 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         # Update the 'cpa' key in the store's data with the serialized figure
         chart_data = {"line_plot": serialized_fig}
 
-        return fig, fig, chart_data
+        button_3d_style = {"position": "absolute", "top": "1%", "left": "60px", "border-radius": "5px"}
+        button_2d_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px"}
+        button_range_style = {"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"}
+        month_year_dropdown_style = dict(display= 'none')
+
+
+        return fig, fig, chart_data, button_3d_style,button_2d_style,button_range_style, month_year_dropdown_style
     else:
         print(multi_lines)
         # Make the multi-profile line plot here....
@@ -526,15 +590,78 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             if item not in date_order:
                 date_order.append(item)
 
+        years = list(topo_df['year'].unique().astype(int))
+        months = list(topo_df['month'].unique())
+
+        print(year_dropdown_val)
+        print(type(year_dropdown_val))
+
+        print(month_dropdown_val)
+        print(type(month_dropdown_val))
 
 
-        fig = px.line(
+        latest_year = int(year_dropdown_val)
+        default_month = month_dropdown_val
 
-            x=[1,2,3],
-            y=[2,3,4],
+        print(latest_year)
+        spring_range = [1, 2, 3, 4]
+
+        summer_range = [5, 6, 7, 8]
+
+        autumn_range = [9, 10, 11, 12]
+
+        # Function to determine the season based on the month
+        def get_season(month):
+            if month in spring_range:
+                return 'spring'
+            elif month in summer_range:
+                return 'summer'
+            elif month in autumn_range:
+                return 'autumn'
+            else:
+                return 'winter'
+
+        topo_df['season'] = topo_df['month'].apply(get_season)
+        print(years, months)
+
+        filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'] == default_month)]
+        print(filtered_df.columns)
+
+        fig = px.line_3d(
+            filtered_df,
+            x="chainage",
+            y="reg_id",
+            z="elevation_od",
+            color="reg_id",
+            custom_data=['date', 'chainage', 'elevation_od', 'reg_id'],
+            # category_orders={"date": date_order},
+            # color_discrete_map=custom_color_mapping,
 
         )
-        return fig, fig, None
+        # Changing the style of the three profiles initially loaded
+        # Format the label shown in the hover
+        fig.update_traces(
+            hovertemplate="<b>Profile:</b> %{customdata[3]}<br>" + "<b>Date:</b> %{customdata[0]}<br>" +
+                          "<b>Chainage:</b> %{customdata[1]}<br>" +
+                          "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
+        )
+
+        # Set custom axis labels
+        fig.update_layout(
+            scene=dict(
+                xaxis_title="Chainage (m)",
+                yaxis_title="Profile",
+                zaxis_title="Elevation (m)",
+            ),
+            title=f"{latest_year} - {default_month}",
+            title_x=0.5,  # Set the x position of the title to the center
+            title_y=0.05,
+        )
+
+        month_year_dropdown_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px", "width": "200px"}
+
+        no_style = {'display':'none'}
+        return fig, fig, None, no_style, no_style, no_style, month_year_dropdown_style
 
 @callback(
     Output("line_info_model", "is_open"),

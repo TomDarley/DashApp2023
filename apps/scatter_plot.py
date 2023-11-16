@@ -3,14 +3,12 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc, callback, Input, Output, State
 import numpy as np
 import pandas as pd
-from datetime import datetime
 import matplotlib.dates as mdates
 import plotly.express as px
 import statsmodels.api as sm
 import plotly.graph_objs as go
 import sqlalchemy
 import base64
-import seaborn as sns
 from dash.exceptions import PreventUpdate
 
 
@@ -211,8 +209,6 @@ def make_scatter_plot(selected_survey_unit):
     # varible holding dates not converted used in the hover data
     normal_dates =list(chart_ready_df["index1"])
     normal_dates= [date.strftime('%Y-%m-%d') for date in normal_dates]
-
-
 
     month_list = []
     for i in chart_ready_df["index1"]:

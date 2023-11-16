@@ -2,20 +2,15 @@ import dash
 from dash import html, callback, Input, Output, State
 from apps import scatter_plot
 from apps import error_bar_plot
-#from apps import mapbox
 from apps import map_box_3
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
 from dash import dcc
-from plotly.subplots import make_subplots
 import json
 import plotly.graph_objs as go
-from datetime import datetime
 from dash.exceptions import PreventUpdate
 import sqlalchemy
-import base64
-
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
@@ -23,10 +18,9 @@ from reportlab.lib.pagesizes import A4, landscape, portrait
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 import plotly.io as pio
-from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
+
 
 
 dash.register_page(__name__, path="/main_dash")

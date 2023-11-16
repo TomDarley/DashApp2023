@@ -1,15 +1,10 @@
 import dash
-import pandas as pd
-from dash import Output, Input, html, callback, dcc, State, ctx, callback_context
+from dash import Output, Input, html, callback, dcc, State
 from sqlalchemy import create_engine
 import geopandas as gpd
 import plotly.express as px
 from shapely.wkt import loads
-import dash_bootstrap_components as dbc
-import numpy as np
 import plotly.graph_objects as go
-from dash.exceptions import PreventUpdate
-
 from shapely.geometry import LineString, Polygon
 
 unit_to_options = {

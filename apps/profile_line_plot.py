@@ -574,7 +574,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         # Make the multi-profile line plot here....
 
         # All shapefile loaded into the database should not be promoted to multi
-        engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+        engine = create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
         # Connect to the database using the engine
         conn = engine.connect()
 

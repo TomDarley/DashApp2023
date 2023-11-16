@@ -145,7 +145,7 @@ def make_scatter_plot(selected_survey_unit):
         are optional as make_csa_df and get_area functions require different queries"""
 
         engine = sqlalchemy.create_engine(
-            "postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB"
+            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
         )
 
         # Import spatial data as GeoDataFrame

@@ -3828,7 +3828,7 @@ def update_map(current_selected_sur_and_prof: dict ):
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
 
     # All shapefile loaded into the database should not be promoted to multi
-    engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+    engine = create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
 
     # Connect to the database using the engine
     conn = engine.connect()

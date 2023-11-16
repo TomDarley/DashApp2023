@@ -841,7 +841,7 @@ def get_selected_charts(
         def to_pdf():
 
             # Get the proforma text from the database
-            engine = sqlalchemy.create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
+            engine = sqlalchemy.create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
             survey_unit = current_survey_unit
             query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
             df = pd.read_sql_query(query, engine)

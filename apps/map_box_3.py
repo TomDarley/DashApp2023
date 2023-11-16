@@ -6,6 +6,7 @@ import plotly.express as px
 from shapely.wkt import loads
 import plotly.graph_objects as go
 from shapely.geometry import LineString, Polygon
+import psycopg_binary
 
 unit_to_options = {
     "6aSU10": [

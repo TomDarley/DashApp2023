@@ -10,7 +10,7 @@ import plotly.graph_objs as go
 import sqlalchemy
 import base64
 from dash.exceptions import PreventUpdate
-
+import psycopg_binary
 
 # delete this
 image_path = r"media/NERD.jpeg"

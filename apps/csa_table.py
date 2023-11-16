@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import dash_bootstrap_components as dbc
 from io import StringIO
+import psycopg_binary
 
 style_data_conditional = [
     {

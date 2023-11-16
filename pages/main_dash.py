@@ -20,7 +20,7 @@ import io
 import plotly.io as pio
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
-
+import psycopg_binary
 
 
 dash.register_page(__name__, path="/main_dash")

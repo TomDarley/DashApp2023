@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from io import StringIO
+import psycopg_binary
 
 layout = html.Div(
     [

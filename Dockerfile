@@ -1,15 +1,17 @@
-FROM python:3.10.11
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
-WORKDIR /code
+# Set the working directory to /app
+WORKDIR /app
 
-COPY ./requirements.txt /code/requirements.txt
+# Copy the entire project directory into the container at /app
+COPY . /app
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip uninstall --yes werkzeug
-RUN pip install -v https://github.com/pallets/werkzeug/archive/refs/tags/2.0.3.tar.gz
+# Make port 8050 available to the world outside this container
+EXPOSE 8050
 
-COPY . . /
-
-CMD gunicorn -b 0.0.0.0:80 app:server
+# Run app.py when the container launches
+CMD ["python", "DashAppHome_2023/app.py"]

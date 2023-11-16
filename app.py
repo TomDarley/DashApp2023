@@ -23,7 +23,6 @@ app.layout = html.Div(
 
 )
 
-
 print(dash.page_container)
 
 if __name__ == "__main__":

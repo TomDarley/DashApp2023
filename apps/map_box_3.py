@@ -3639,19 +3639,13 @@ layout = html.Div(
             id="selected-value-storage",
             data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data' : None},
         ),
-        #dcc.Store (id= 'box_select_data'), # holds map selectedData
-
-
-        dcc.Store(id = 'selection_type', data ={'type':None, 'selection_data': None}),
         dcc.Store(id = 'multi-select-lines'),
-
         dcc.Location(id="url", refresh=False),  # Add a Location component
         dcc.Graph(
             id="example-map",
             figure=fig,
 
         ),
-
     ],
     id = "mapbox_div"
 )
@@ -3699,8 +3693,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 multi_same_check = False
         else:
             multi_same_check = True
-
-
 
     # handle if nothing selected:
     if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown'] or ctx_id is None:
@@ -3814,35 +3806,26 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         else:
             return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
 
-
-#
-#
 @callback(
     Output("example-map", "figure"),
     Output('multi-select-lines', 'data'),  # holds if multi select the line ids
     Input("selected-value-storage", "data"),
-
-
 
     prevent_initial_call=False,
 )
 
 def update_map(current_selected_sur_and_prof: dict ):
 
-    """Function controls the re-loading of the map. Takes in the value store which contaions two values, selected surevy
+    """Function controls the re-loading of the map. Takes in the value store which contains two values, selected survey
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
-    relevent profile lines. The selected profile line is then used isolate and style to show which one is selected
+    relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
     to the user."""
 
     print(current_selected_sur_and_prof)
     if isinstance(current_selected_sur_and_prof, list):
         current_selected_sur_and_prof = current_selected_sur_and_prof[0]
 
-
-
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
-    #print(set_survey_unit)
-    # load data in
 
     # All shapefile loaded into the database should not be promoted to multi
     engine = create_engine("postgresql://postgres:Plymouth_C0@localhost:5432/Dash_DB")
@@ -3854,11 +3837,11 @@ def update_map(current_selected_sur_and_prof: dict ):
     query = "SELECT * FROM survey_units"  # Modify this query according to your table
     gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
     gdf = gdf.to_crs(epsg=4326)
+
     # Extract latitude and longitude from the geometry column
     gdf["lat"] = gdf["wkb_geometry"].y
     gdf["long"] = gdf["wkb_geometry"].x
     gdf["size"] = 15
-
 
     # Set the color of the selected survey unit to red
     gdf["color"] = ''
@@ -3908,14 +3891,12 @@ def update_map(current_selected_sur_and_prof: dict ):
     updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}</b><extra></extra>"),
     updated_scatter_trace.update_traces(hoverinfo='none')
 
-
     query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
     lines_gdf = gpd.GeoDataFrame.from_postgis(
         query_profile_lines, conn, geom_col="wkb_geometry"
     )
     lines_gdf = lines_gdf.to_crs(epsg=4326)
     lines_gdf["type"] = "line"
-
 
     # Extract individual WKT strings and create LineString geometries and get selected fields for popup
     line_data = gpd.GeoDataFrame(
@@ -3931,8 +3912,6 @@ def update_map(current_selected_sur_and_prof: dict ):
 
     lines_inside_box = []
     if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
-
-
 
         # get the box data from the dict
         box = current_selected_sur_and_prof.get('box_selected_data')
@@ -3958,18 +3937,15 @@ def update_map(current_selected_sur_and_prof: dict ):
     else:
         lines_inside_box = []
 
-
     # adding each WKT string as trace to the fig as a trace
     line_traces = []
     for i, row in line_data.iterrows():
         line = row["geometry"]
 
-
-
         latitudes = [coord[1] for coord in line.coords]
         longitudes = [coord[0] for coord in line.coords]
 
-        #Get the survey_unit value for this row
+        # Get the survey_unit value for this row
         profile_line_id = row['profile']
         baseline = row['baseline']
         interim = row['interim']
@@ -3988,7 +3964,6 @@ def update_map(current_selected_sur_and_prof: dict ):
         profile_line_id = lines_gdf.iloc[i]["profname"]
 
         # set the colors based on if a multiselect was used
-
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
 
             if profile_line_id in lines_inside_box:
@@ -4019,7 +3994,6 @@ def update_map(current_selected_sur_and_prof: dict ):
 
         )
 
-
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
         trace.update_traces(hovertemplate=f"<b>{custom_data}<b><extra></extra>"),
         trace.update_traces(hoverinfo='none')
@@ -4033,8 +4007,8 @@ def update_map(current_selected_sur_and_prof: dict ):
         # updated_fig.add_trace(trace.data[0])
 
     fig = go.Figure()  # Set the map center to the selected point)
-    # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
 
+    # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
     for i in range(len(line_traces)):
         fig.add_trace(line_traces[i].data[0])
 
@@ -4074,9 +4048,7 @@ def update_map(current_selected_sur_and_prof: dict ):
 #            return current_selected_sur_and_prof['survey_unit'], current_selected_sur_and_prof['profile_line']
 #        else:
 #            return dash.no_update
-#
-#
-#
+
 
 
 

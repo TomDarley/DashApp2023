@@ -5,7 +5,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from sqlalchemy import create_engine
-import numpy as np
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 
@@ -69,7 +68,9 @@ layout = html.Div(
             ],
 
             id = 'month-dropdown',
-            value = 'summer'
+            value = 'summer',
+            multi=True
+
         ),
 
 
@@ -90,7 +91,8 @@ layout = html.Div(
             ],
 
             id='year-dropdown',
-            value=f"{current_year}"
+            value=f"{current_year}",
+            multi=True
         ),
 
 
@@ -117,7 +119,7 @@ layout = html.Div(
                 dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
                 dbc.ModalBody(
                     dcc.Graph(id="line_plot_model", style={"height": "100vh"})
-                ),  ## might not work
+                ),
                 dbc.ModalFooter(
                     dbc.Button(
                         "Close", id="line_full_close", className="ms-auto", n_clicks=0
@@ -133,6 +135,8 @@ layout = html.Div(
 )
 
 
+
+
 @callback(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
@@ -143,6 +147,8 @@ layout = html.Div(
     Output("Range_plot", "style"),
 
     Output('month_year_dropdown', 'style'),
+    Output('month-dropdown', 'options'),
+    Output('year-dropdown', 'options'),
 
 
     Input("survey-unit-dropdown", "value"),
@@ -151,20 +157,16 @@ layout = html.Div(
     Input("2D_plot", "n_clicks"),
     Input("Range_plot", "n_clicks"),
     Input('selected-value-storage', 'data'),
-    State('multi-select-lines', 'data'),
+    Input('multi-select-lines', 'data'),
     Input('month-dropdown', 'value'),
     Input('year-dropdown', 'value'),
-
-
-
-
-
-
 
     prevent_initial_call=False,
     allow_duplicate=True,
 )
-def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range, selected_val_storage, multi_lines, month_dropdown_val, year_dropdown_val):
+def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range, selected_val_storage,
+                   multi_lines, month_dropdown_val, year_dropdown_val,
+                   ):
 
     # convert to dict from list
     if selected_val_storage:
@@ -316,7 +318,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
         min_chainage = int(min_chainage)
         max_chainage = int(max_chainage) + 200
-        merge_df = pd.DataFrame()
 
         topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
 
@@ -566,7 +567,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         month_year_dropdown_style = dict(display= 'none')
 
 
-        return fig, fig, chart_data, button_3d_style,button_2d_style,button_range_style, month_year_dropdown_style
+        return fig, fig, chart_data, button_3d_style,button_2d_style,button_range_style, month_year_dropdown_style,\
+            dash.no_update, dash.no_update
     else:
         print(multi_lines)
         # Make the multi-profile line plot here....
@@ -590,25 +592,14 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             if item not in date_order:
                 date_order.append(item)
 
-        years = list(topo_df['year'].unique().astype(int))
-        months = list(topo_df['month'].unique())
 
-        print(year_dropdown_val)
-        print(type(year_dropdown_val))
-
-        print(month_dropdown_val)
-        print(type(month_dropdown_val))
-
-
-        latest_year = int(year_dropdown_val)
-        default_month = month_dropdown_val
-
-        print(latest_year)
         spring_range = [1, 2, 3, 4]
 
         summer_range = [5, 6, 7, 8]
 
         autumn_range = [9, 10, 11, 12]
+
+
 
         # Function to determine the season based on the month
         def get_season(month):
@@ -622,18 +613,51 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 return 'winter'
 
         topo_df['season'] = topo_df['month'].apply(get_season)
+
+        years = sorted(list(topo_df['year'].unique().astype(int)))
+        months = list(topo_df['season'].unique())
+
         print(years, months)
 
-        filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'] == default_month)]
-        print(filtered_df.columns)
+        def make_options(unique_vals: list):
 
+            options = [{'label': str(item), 'value': item} for item in unique_vals]
+            return options
+
+        year_dropdown_options = make_options(years)
+        month_dropdown_options = make_options(months)
+
+        latest_year = year_dropdown_val
+        if isinstance(latest_year, list):
+            latest_year = list([int(x) for x in latest_year])
+        else:
+            latest_year = int(year_dropdown_val)
+
+        latest_month = month_dropdown_val
+
+        if isinstance(latest_year, list) and isinstance(latest_month,list):
+            filtered_df = topo_df[(topo_df['year'].isin(latest_year)) & (topo_df['season'].isin(latest_month))].copy()
+        elif isinstance(latest_year, list) and isinstance(latest_month, str):
+            filtered_df = topo_df[(topo_df['year'].isin(latest_year)) & (topo_df['season'] == latest_month)].copy()
+        elif isinstance(latest_year, int) and isinstance(latest_month, list):
+            filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'].isin(latest_month))].copy()
+        elif isinstance(latest_year, int) and isinstance(latest_month, str):
+            filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'] == latest_month)].copy()
+        else:
+            filtered_df = None
+
+
+        filtered_df['Selected Profiles'] = filtered_df['reg_id'].astype(str) +' : '+filtered_df['date'].astype(str)
+        filtered_df.rename(columns={'date': 'Selected Dates'}, inplace=True)
         fig = px.line_3d(
             filtered_df,
             x="chainage",
             y="reg_id",
             z="elevation_od",
-            color="reg_id",
-            custom_data=['date', 'chainage', 'elevation_od', 'reg_id'],
+            line_group= "Selected Profiles",
+            color="Selected Dates",
+            custom_data=['Selected Dates', 'chainage', 'elevation_od', 'reg_id'],
+            template="plotly",
             # category_orders={"date": date_order},
             # color_discrete_map=custom_color_mapping,
 
@@ -643,7 +667,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         fig.update_traces(
             hovertemplate="<b>Profile:</b> %{customdata[3]}<br>" + "<b>Date:</b> %{customdata[0]}<br>" +
                           "<b>Chainage:</b> %{customdata[1]}<br>" +
-                          "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
+                          "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>",
+            line=dict(width=4)
         )
 
         # Set custom axis labels
@@ -653,15 +678,16 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 yaxis_title="Profile",
                 zaxis_title="Elevation (m)",
             ),
-            title=f"{latest_year} - {default_month}",
+            title=f"{selected_sur_unit}",
             title_x=0.5,  # Set the x position of the title to the center
-            title_y=0.05,
+            title_y=0.95,
+            title_font=dict(color="blue", size=15, family="Arial" ),
         )
 
         month_year_dropdown_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px", "width": "200px"}
 
         no_style = {'display':'none'}
-        return fig, fig, None, no_style, no_style, no_style, month_year_dropdown_style
+        return fig, fig, None, no_style, no_style, no_style, month_year_dropdown_style,  month_dropdown_options,year_dropdown_options,
 
 @callback(
     Output("line_info_model", "is_open"),

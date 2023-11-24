@@ -318,7 +318,7 @@ def make_scatter_plot(selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"{selected_survey_unit}",
+            "text": f"<b>{selected_survey_unit}</b>",
             "y": 0.95,
             "x": 0.5,
             "xanchor": "center",
@@ -354,6 +354,8 @@ def make_scatter_plot(selected_survey_unit):
         ),
         selector=dict(mode="markers"),
     )
+
+
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))

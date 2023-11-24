@@ -54,7 +54,10 @@ def generate_custom_colors(num_colors,dates):
     num_elements_new_list = first_last * 2 + min(middle_count, num_colors - 2)
 
     # Calculate the step size to evenly space the elements from the middle part of the list
-    step = middle_count // (num_elements_new_list - first_last * 2)
+    if middle_count>0:
+        step = middle_count // (num_elements_new_list - first_last * 2)
+    else:
+        step =1
 
     # Create a new list based on the criteria
     new_list = color_names[:first_last]  # Take the first element from the original list
@@ -270,7 +273,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             selection = "2D"
 
         # Load topo  and master profile data from DB
-        # Get the proforma text from the database
         engine = create_engine(
             "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
         conn = engine.connect()
@@ -323,7 +325,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         min_chainage = float(min_chainage)
         max_chainage = float(max_chainage)
 
-        min_chainage = int(min_chainage)
+        min_chainage = int(min_chainage) -200
         max_chainage = int(max_chainage) + 200
 
         topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
@@ -556,10 +558,22 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             ),
             legend_traceorder="reversed",
             legend_title_text=f"",
-            title=f"{selected_profile}",
-            title_font=dict(size=15, family="Helvetica", color="blue"),
+            title={
+                "text": f"<b>{selected_sur_unit}: {selected_profile}</b>",
+                "y": 0.96,
+                "x": 0.5,
+                "xanchor": "center",
+                "yanchor": "top",
+            },
+            title_font=dict(size=15, family="Helvetica"),
             title_x=0.5,
+            font=dict(size=15, color="blue", family="Helvetica"),
+
         )
+
+
+
+
 
         # Add a title to the plot
         # fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
@@ -696,7 +710,12 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         month_year_dropdown_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px", "width": "200px"}
 
         no_style = {'display':'none'}
-        return fig, fig, None, no_style, no_style, no_style, month_year_dropdown_style,  month_dropdown_options,year_dropdown_options,
+        # Update the 'cpa' key in the store's data with the serialized figure
+        # Serialize the figure to JSON
+        serialized_fig = fig.to_json()
+        chart_data = {"line_plot": serialized_fig}
+
+        return fig, fig, chart_data, no_style, no_style, no_style, month_year_dropdown_style,  month_dropdown_options,year_dropdown_options,
 
 @callback(
     Output("line_info_model", "is_open"),

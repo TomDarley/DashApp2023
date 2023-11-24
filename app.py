@@ -15,21 +15,49 @@ app = Dash(
         dbc.icons.BOOTSTRAP
     ],
 )
+# Footer content
+footer = html.Div(
+            className="footer-basic",
+            children=[
+                html.Footer(
+                    children=[
+                        html.Div(
+                            className="social",
+                            children=[
+                                html.A(href="https://www.facebook.com/PlymouthCoastalObservatory/", children=[html.I(className="bi bi-facebook")]),
+                                html.A(href="https://twitter.com/OfficialSWCM", children=[html.I(className="bi bi-twitter")]),
+                                html.A(href="https://www.instagram.com/south.west.coastal.monitoring/", children=[html.I(className="bi bi-instagram")]),
+                                html.A(href="https://www.linkedin.com/company/south-west-coastal-monitoring/", children=[html.I(className="bi bi-linkedin")]),
+                            ],
+                        ),
+                        html.Ul(
+                            className="list-inline",
+                            children=[
+                                html.Li(html.A("Home", href="#")),
+                                html.Li(html.A("About", href="https://southwest.coastalmonitoring.org/about-us/")),
+                                html.Li(html.A("Terms", href="https://southwest.coastalmonitoring.org/terms-and-conditions/")),
+                                html.Li(html.A("Privacy Policy", href="https://southwest.coastalmonitoring.org/privacy-policy/")),
+                            ],
+                        ),
+                        html.P("TDarley Applications © 2023", className="copyright"),
+                    ],
+                ),
+            ]
+
+
+        )
 
 # Set the app layout with the navigation bar, the nav will be inherited by all pages
 app.layout = html.Div(children =
                       [navigation.navbar,
-                       dash.page_container],
-                      #style={'background-image': 'url("assets/abstract-smooth-blue-with-black-vignette-studio-well-use-as-backgroundbusiness-reportdigitalwebsite.jpg")',
-                      #      'background-size': 'cover',
-                      #      'background-repeat': 'no-repeat',
-                      #      'background-position': 'fixed', 'height': '100vh'}
-#
+                       dash.page_container,
+                      ],
 
-                      style ={'background': 'linear-gradient(to bottom right,#031437, #3C68C0)','background-color': 'black'}
+                      style ={'background': 'linear-gradient(to bottom right, #073b73,#7ebbfc)','background-color': 'white'}
 
 )
-
+# Append the footer to the main layout
+app.layout.children.append(footer)
 print("Running Dash App")
 
 

@@ -3637,6 +3637,7 @@ layout = html.Div(
         ),
         dcc.Store(id = 'multi-select-lines'),
         dcc.Location(id="url", refresh=False),  # Add a Location component
+
         dcc.Graph(
             id="example-map",
             figure=fig,

@@ -23,34 +23,35 @@ navbar = html.Div(
                         children=[
                             dbc.NavItem(
                                 dbc.NavLink(
-                                    "Dash",
+                                    "SWCM Dash",
                                     href="/main_dash",
                                     style=custom_navlink_style,
                                 )
                             ),
-                            dbc.NavItem(
-                                dbc.NavLink(
-                                    "Difference Models",
-                                    href="/diff_models",
-                                    style=custom_navlink_style,
-                                )
-                            ),  # add additional pages here
+                            #dbc.NavItem(
+                            #   dbc.NavLink(
+                            #       "Difference Models",
+                            #       href="/diff_models",
+                            #       style=custom_navlink_style,
+                            #   )
+                            #,  # add additional pages here
                         ],
                         brand=html.Img(
                             src=SWCM_LOGO,
                             style={
-                                "height": "40px",
+                                "height": "35px",
                             },
                         ),
                         brand_href="https://southwest.coastalmonitoring.org/",
-                        color="primary",
+                        color="#223055",
                         dark=True,
                         fluid=True,
                         links_left=False,
                         brand_style=custom_navlink_style,
+
                     )
                 ]
             )
-        ]
-    ), style={'margin-bottom':'10px' }
+        ],
+    ), style={'margin-bottom':'10px',  }
 )

@@ -160,7 +160,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"{selected_survey_unit}",
+            "text": f"<b>{selected_survey_unit}</b>",
             "y": 0.96,
             "x": 0.5,
             "xanchor": "center",
@@ -202,6 +202,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         xaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
         yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
     )
+
 
     # Serialize the figure to JSON
     serialized_fig = fig.to_json()

@@ -10,6 +10,8 @@ from io import StringIO
 layout = html.Div(
     [
         dcc.Store(id="error_chart"),
+
+
         dcc.Graph(id="error_plot",
                   ),
         # adding info and max view buttons
@@ -74,6 +76,8 @@ layout = html.Div(
     State("survey-unit-dropdown", "value"),
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
+    print(dash.callback_context.triggered_id)
+
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -164,7 +168,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         },
         title_font=dict(size=15, family="Helvetica"),
         title_x=0.5,
-        yaxis_title={"text": "Combined Profile Area (m²)", "font": {"size": 15}},
+        yaxis_title={"text": "Cross Sectional Profile Area (m²)", "font": {"size": 15}},
         xaxis_title=None,
         legend_title="",
         font=dict(size=15, color="blue", family="Helvetica"),

@@ -10,7 +10,7 @@ import plotly.graph_objs as go
 import sqlalchemy
 import base64
 from dash.exceptions import PreventUpdate
-
+from sqlalchemy import create_engine
 
 # delete this
 image_path = r"media/NERD.jpeg"
@@ -142,16 +142,14 @@ def make_scatter_plot(selected_survey_unit):
         """Establish database connection, make query and return df, both target profile and target date
         are optional as make_csa_df and get_area functions require different queries"""
 
-        engine = sqlalchemy.create_engine(
-            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
-        )
-
+        # Get the proforma text from the database
+        engine = create_engine(
+            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+        conn = engine.connect()
         # Import spatial data as GeoDataFrame
         query = f"SELECT * FROM cpa_table WHERE survey_unit = '{target_survey_unit}'"
-        df = pd.read_sql_query(query, engine)
+        df = pd.read_sql_query(query, conn)
 
-        # Close the engine connection
-        engine.dispose()
         return df
 
     # load data directly from the DB

@@ -10,7 +10,6 @@ from dash import dcc
 import json
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
-import sqlalchemy
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
@@ -20,7 +19,7 @@ import io
 import plotly.io as pio
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
-
+from sqlalchemy import create_engine
 
 dash.register_page(__name__, path="/main_dash")
 # define the layout of the main page
@@ -589,6 +588,8 @@ layout = html.Div(
                                                     },
                                                 ],
                                                 value=[],
+                                                labelStyle={"margin-right": "10px"},
+                                                style = {"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
                                                 #inline=True,
 
                                             ),
@@ -723,9 +724,8 @@ layout = html.Div(
 
 
         ),
-    ]
+    ],
 )
-
 
 @callback(
 
@@ -834,10 +834,14 @@ def get_selected_charts(
         def to_pdf():
 
             # Get the proforma text from the database
-            engine = sqlalchemy.create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+            conn = engine.connect()
+
             survey_unit = current_survey_unit
             query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
-            df = pd.read_sql_query(query, engine)
+            df = pd.read_sql_query(query, conn)
+
             proforma_text = list(df['proforma'])[0]
 
             # Generate the current state paragraph trend, highest, lowest

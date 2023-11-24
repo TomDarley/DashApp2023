@@ -6,7 +6,8 @@ from dash import html
 # Define custom CSS style for navigation links
 custom_navlink_style = {
     "font-size": "18px",
-    "color": "white",  # Adjust the font size as needed
+    "color": "white",
+    ## Adjust the font size as needed
 }
 
 custom_brand_style = {"font-size": "20px", "font-color": "white"}
@@ -51,5 +52,5 @@ navbar = html.Div(
                 ]
             )
         ]
-    ), style={'margin-bottom':'10px'}
+    ), style={'margin-bottom':'10px' }
 )

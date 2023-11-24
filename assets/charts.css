@@ -61,6 +61,7 @@
     margin-right: 0px;
     border-radius: 10px;
     overflow: hidden;
+    background-color: white;
 }
 
 @media screen and (min-width: 0px) and (max-width:950px) {
@@ -72,6 +73,7 @@
     margin-right: 20px;
     border-radius: 10px;
     overflow: hidden;
+    background-color: white;
 
 
     }

@@ -3817,22 +3817,24 @@ def update_map(current_selected_sur_and_prof: dict ):
     relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
     to the user."""
 
-    print(current_selected_sur_and_prof)
+    #print(current_selected_sur_and_prof)
     if isinstance(current_selected_sur_and_prof, list):
         current_selected_sur_and_prof = current_selected_sur_and_prof[0]
 
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
 
-    # All shapefile loaded into the database should not be promoted to multi
-    engine = create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-
-    # Connect to the database using the engine
+    # Get the proforma text from the database
+    engine = create_engine(
+        "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
     conn = engine.connect()
 
-    # Import point (survey unit) spatial data as GeoDataFrame
+    # Import point (survey unit) spatial data as GeoDataFrame, conn is now a global function
     query = "SELECT * FROM survey_units"  # Modify this query according to your table
-    gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
+    gdf = gpd.GeoDataFrame.from_postgis(query,conn, geom_col="wkb_geometry")
+
     gdf = gdf.to_crs(epsg=4326)
+
+
 
     # Extract latitude and longitude from the geometry column
     gdf["lat"] = gdf["wkb_geometry"].y
@@ -3891,6 +3893,7 @@ def update_map(current_selected_sur_and_prof: dict ):
     lines_gdf = gpd.GeoDataFrame.from_postgis(
         query_profile_lines, conn, geom_col="wkb_geometry"
     )
+
     lines_gdf = lines_gdf.to_crs(epsg=4326)
     lines_gdf["type"] = "line"
 
@@ -3928,7 +3931,7 @@ def update_map(current_selected_sur_and_prof: dict ):
             profile = row['profname']
 
             if geometry.intersects(range_polygon):
-                print(f"{profile} intersects!!")
+                #print(f"{profile} intersects!!")
                 lines_inside_box.append(profile)
     else:
         lines_inside_box = []

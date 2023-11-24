@@ -4,19 +4,85 @@ from dash import html, dcc, callback, Input, Output, State
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-from sqlalchemy import create_engine
 from dash.exceptions import PreventUpdate
 from datetime import datetime
-
+import numpy as np
+from sqlalchemy import create_engine
 current_year = datetime.now().year
+
+
+def generate_color_gradient(start_color, end_color, steps):
+    """Funtion generates a list of hex of step length"""
+
+    # Extract RGB components from the start and end colors
+    start_R, start_G, start_B = start_color
+    end_R, end_G, end_B = end_color
+
+    # Calculate the step size for each color channel
+    delta_R = (end_R - start_R) / steps
+    delta_G = (end_G - start_G) / steps
+    delta_B = (end_B - start_B) / steps
+
+    # Generate the color ramp
+    colors = []
+    for step in range(steps):
+        # Interpolate RGB values for each step
+        R = int(start_R + (delta_R * step))
+        G = int(start_G + (delta_G * step))
+        B = int(start_B + (delta_B * step))
+
+        # Convert RGB values to hex and append to the colors list
+        color_hex = f"#{R:02x}{G:02x}{B:02x}"
+        colors.append(color_hex)
+
+    return colors
+
+
+def generate_custom_colors(num_colors,dates):
+    """Function generates color ramp dynamically based on the number of lines that need to be plottted"""
+
+    # Generate a list of color names
+    start_color = (191, 0, 255)  # Light blue - RGB values
+    end_color = (153, 214, 255)
+    color_names = generate_color_gradient(start_color, end_color, len(dates))
+
+    # Calculate the number of elements to be taken from the original list
+    first_last = 1  # Number of elements to take from the start and end of the list
+    middle_count = len(color_names) - 2  # Number of elements excluding the first and last elements
+
+    # Calculate the number of elements for the new list
+    num_elements_new_list = first_last * 2 + min(middle_count, num_colors - 2)
+
+    # Calculate the step size to evenly space the elements from the middle part of the list
+    step = middle_count // (num_elements_new_list - first_last * 2)
+
+    # Create a new list based on the criteria
+    new_list = color_names[:first_last]  # Take the first element from the original list
+
+    # Calculate elements for the middle part
+    for i in range(first_last, num_elements_new_list - first_last):
+        new_list.append(color_names[i * step])
+
+    new_list += color_names[-first_last:]  # Take the last element from the original list
+
+    return new_list
+
 
 layout = html.Div(
     [
         dcc.Store(id="line_chart"),
+
+        dcc.Loading(
+            id="loading-chart",
+            type="circle",
+            children= [
+
         dcc.Graph(
-            id="line_plot",
+            id="line_plot"
 
         ),
+
+            ]),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="md",
@@ -100,6 +166,9 @@ layout = html.Div(
           style= {'display': 'block'}),
 
 
+
+
+
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
@@ -181,8 +250,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     # check if multi selection is enabled
     if fixed_val_storage is not None and fixed_val_storage['multi'] == False:
 
-
-
         # check if a chart mode button has been selected, use it to render the correct chart mode
         trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
 
@@ -202,86 +269,38 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         else:
             selection = "2D"
 
-        # All shapefile loaded into the database should not be promoted to multi
-        engine = create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-        # Connect to the database using the engine
+        # Load topo  and master profile data from DB
+        # Get the proforma text from the database
+        engine = create_engine(
+            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
         conn = engine.connect()
 
-        # Load topo data from DB
         topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
         topo_df = pd.read_sql_query(topo_query, conn)
+
+        master_profile_query = (
+            f"SELECT * FROM master_profiles WHERE profile_id = '{selected_profile}'"
+        )
+
+        mp_df = pd.read_sql_query(master_profile_query, conn)
+        mp_df = mp_df.dropna(axis=1, how="any")
+
+
 
         # must sort the data by chainage for it to display correctly
         topo_df = topo_df.sort_values(by=["chainage"])
 
-        # get a list of survey dates and order them, this list is then used to order the date traces in the legend
-        dates = topo_df["date"].sort_values(ascending=True)
-        date_order = []
-        for item in dates:
-            if item not in date_order:
-                date_order.append(item)
+        # Get unique dates for database data
+        dates = np.unique(topo_df["date"])
+
+        # Sort the dates
+        date_order = sorted(dates)
 
         custom_color_mapping = {}
 
-        def generate_custom_colors(num_colors):
-
-            """Function generates color ramp dynamically based on the number of lines that need to be plottted"""
-
-            def generate_color_gradient(start_color, end_color, steps):
-                """Funtion generates a list of hex of step length"""
-
-                # Extract RGB components from the start and end colors
-                start_R, start_G, start_B = start_color
-                end_R, end_G, end_B = end_color
-
-                # Calculate the step size for each color channel
-                delta_R = (end_R - start_R) / steps
-                delta_G = (end_G - start_G) / steps
-                delta_B = (end_B - start_B) / steps
-
-                # Generate the color ramp
-                colors = []
-                for step in range(steps):
-                    # Interpolate RGB values for each step
-                    R = int(start_R + (delta_R * step))
-                    G = int(start_G + (delta_G * step))
-                    B = int(start_B + (delta_B * step))
-
-                    # Convert RGB values to hex and append to the colors list
-                    color_hex = f"#{R:02x}{G:02x}{B:02x}"
-                    colors.append(color_hex)
-
-                return colors
-
-            # Generate a list of color names
-            start_color = (191, 0, 255)  # Light blue - RGB values
-            end_color = (153, 214, 255)
-            color_names = generate_color_gradient(start_color, end_color, len(dates))
-
-            # Calculate the number of elements to be taken from the original list
-            first_last = 1  # Number of elements to take from the start and end of the list
-            middle_count = len(color_names) - 2  # Number of elements excluding the first and last elements
-
-            # Calculate the number of elements for the new list
-            num_elements_new_list = first_last * 2 + min(middle_count, num_colors - 2)
-
-            # Calculate the step size to evenly space the elements from the middle part of the list
-            step = middle_count // (num_elements_new_list - first_last * 2)
-
-            # Create a new list based on the criteria
-            new_list = color_names[:first_last]  # Take the first element from the original list
-
-            # Calculate elements for the middle part
-            for i in range(first_last, num_elements_new_list - first_last):
-                new_list.append(color_names[i * step])
-
-            new_list += color_names[-first_last:]  # Take the last element from the original list
-
-            return new_list
-
         # map each generated color to each date, used to color each profile
         num_colors = len(date_order)
-        custom_color_list = generate_custom_colors(num_colors)
+        custom_color_list = generate_custom_colors(num_colors,dates)
         for i, date in enumerate(date_order):
             color_index = i
             custom_color_mapping.update({date: custom_color_list[color_index]})
@@ -295,21 +314,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         initial_visible_traces = [first_trace_date, newest_trace_date, previous_trace_date]
 
         # Load master profile data from DB, extract chainage and elevation
-        master_profile_chainage = []
-        master_profile_elevation = []
-
-        master_profile_query = (
-            f"SELECT * FROM master_profiles WHERE profile_id = '{selected_profile}'"
-        )
-        mp_df = pd.read_sql_query(master_profile_query, conn)
-        mp_df = mp_df.dropna(axis=1, how="any")
-
-        for col in mp_df.columns[1:]:
-            mp_df[col] = mp_df[col].str.split(",")
-            first = mp_df[col][0][0]
-            last = mp_df[col][0][-2]
-            master_profile_chainage.append(first)
-            master_profile_elevation.append(last)
+        other_columns = mp_df.iloc[:, 1:]
+        master_profile_chainage = other_columns.apply(lambda col: col.str.split(",").str[0]).astype(float).iloc[0].tolist()
+        master_profile_elevation = other_columns.apply(lambda col: col.str.split(",").str[-2]).astype(float).iloc[0].tolist()
 
         min_chainage = master_profile_chainage[0]
         max_chainage = master_profile_chainage[-1]
@@ -320,6 +327,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         max_chainage = int(max_chainage) + 200
 
         topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
+
+
 
         if selection == "3D":
 
@@ -573,9 +582,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         print(multi_lines)
         # Make the multi-profile line plot here....
 
-        # All shapefile loaded into the database should not be promoted to multi
-        engine = create_engine("postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-        # Connect to the database using the engine
+        # Get the proforma text from the database
+        engine = create_engine(
+            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
         conn = engine.connect()
 
         # Load topo data from DB

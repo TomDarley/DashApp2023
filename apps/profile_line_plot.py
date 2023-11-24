@@ -701,7 +701,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 yaxis_title="Profile",
                 zaxis_title="Elevation (m)",
             ),
-            title=f"{selected_sur_unit}",
+            title=f"<b>{selected_sur_unit}</b>",
             title_x=0.5,  # Set the x position of the title to the center
             title_y=0.95,
             title_font=dict(color="blue", size=15, family="Arial" ),

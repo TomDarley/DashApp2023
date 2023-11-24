@@ -5,7 +5,7 @@ from dash import html
 
 # Define custom CSS style for navigation links
 custom_navlink_style = {
-    "font-size": "18px",
+    "font-size": "16px",
     "color": "white",
     ## Adjust the font size as needed
 }

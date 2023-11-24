@@ -1,3 +1,7 @@
+
+
+
+
 /* SCATTER PLOT CSS */
 
 /* Main Dash page div that holds the scatter plot */
@@ -21,6 +25,12 @@
     position: relative;
     height: 100%;
     margin-right: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;/* Add border style */
+    border: 2px solid #ccc;
+    box-shadow: 5px 5px 5px lightblue;
+
 
    }
 
@@ -36,10 +46,14 @@
     #scatter_plot_div {
         position: relative;
         height: 100%;
+        border-radius: 10px;
+        overflow: hidden;
         margin-top: 20px;
         margin-left: 10px;
         margin-bottom: 10px;
         margin-right: 20px;
+        border: 2px solid #ccc;
+
 
     }
 }
@@ -62,6 +76,8 @@
     border-radius: 10px;
     overflow: hidden;
     background-color: white;
+    border: 2px solid #ccc; /* Add border style */
+    box-shadow: 5px 5px 5px lightblue;
 
 }
 
@@ -75,6 +91,8 @@
     border-radius: 10px;
     overflow: hidden;
     background-color: white;
+    border: 2px solid #ccc; /* Add border style */
+    box-shadow: 5px 5px 5px lightblue;
 
 
     }
@@ -98,6 +116,8 @@
         buffer-right: 20px;
         border-radius: 10px;
         overflow: hidden;
+        border: 2px solid #ccc; /* Add border style */
+        box-shadow: 5px 5px 5px lightblue;
   
 }
 
@@ -111,6 +131,8 @@
         buffer-right: 00px;
         border-radius: 10px;
         overflow: hidden;
+        border: 2px solid #ccc; /* Add border style */
+        box-shadow: 5px 5px 5px lightblue;
 
 
 

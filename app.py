@@ -52,8 +52,8 @@ app.layout = html.Div(children =
                       [navigation.navbar,
                        dash.page_container,
                       ],
-
-                      style ={'background': 'linear-gradient(to bottom right, #073b73,#7ebbfc)','background-color': 'white'}
+                      #'background': 'linear-gradient(to bottom right, #073b73,#7ebbfc)',
+                      style ={'background-color': 'white'}
 
 )
 # Append the footer to the main layout

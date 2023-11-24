@@ -16,6 +16,8 @@
 #spr_spr_card{
     border-radius: 10px;
     width: 100%;
+    border: 2px solid #ccc;
+    box-shadow: 5px 5px 5px lightblue;
 
 }
 #spr_spr_col{
@@ -30,6 +32,8 @@
 #base_spr_card{
     border-radius: 10px;
     width: 100%;
+    border: 2px solid #ccc;
+    box-shadow: 5px 5px 5px lightblue;
 
 
 

@@ -77,6 +77,11 @@ layout = html.Div(
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
 
+
+    ctx_id = dash.callback_context.triggered_id
+    if ctx_id == 'selected-df-storage':
+        print('willies')
+
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
     df = df.drop("Sum", axis=0)

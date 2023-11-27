@@ -116,7 +116,7 @@ style_data_conditional = [
             "filter_query": "{Baseline to Spring Diff (m2)} >= 30",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": " RGB(6, 117, 255)",
+        "backgroundColor": "RGB(6, 117, 255)",
         "color": "black",
     },
 ]

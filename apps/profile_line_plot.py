@@ -168,10 +168,6 @@ layout = html.Div(
         ],id = 'month_year_dropdown',
           style= {'display': 'block'}),
 
-
-
-
-
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
@@ -184,7 +180,7 @@ layout = html.Div(
             ],
             id="line_info_model",
             is_open=False,
-            fullscreen=True,
+            fullscreen=False,
         ),
         dbc.Modal(
             [
@@ -368,7 +364,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             fig.update_layout(
                 scene=dict(
                     xaxis_title="Chainage (m)",
-                    yaxis_title="Date",
+                    yaxis_title='',
                     zaxis_title="Elevation (m)",
                 )
             )
@@ -480,9 +476,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
                 survey_dfs.append(df_filter)  # Append the merged result to the list
 
-            # Print or utilize survey_dfs if required
-            # print(survey_dfs)
-
             count = 0
             for df in survey_dfs:
                 merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
@@ -502,7 +495,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             merge_df['Mean Elevation'] = average_ele
             merge_df['Min Elevation'] = min_ele
             merge_df = merge_df.reset_index()
-            #print(merge_df)
+
             fig = px.line(
                 merge_df,
                 x="chainage",
@@ -571,10 +564,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
         )
 
-
-
-
-
         # Add a title to the plot
         # fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
@@ -593,7 +582,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         return fig, fig, chart_data, button_3d_style,button_2d_style,button_range_style, month_year_dropdown_style,\
             dash.no_update, dash.no_update
     else:
-        print(multi_lines)
+
         # Make the multi-profile line plot here....
 
         # Get the proforma text from the database
@@ -640,7 +629,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         years = sorted(list(topo_df['year'].unique().astype(int)))
         months = list(topo_df['season'].unique())
 
-        print(years, months)
 
         def make_options(unique_vals: list):
 

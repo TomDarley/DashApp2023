@@ -63,17 +63,22 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("CSA Scatter Plot")),
+                dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
                 dbc.ModalBody(
                     [
                         html.P(
-                            "This chart shows the combined cross-sectional area for each profile line. It is nice, I like it a lot.",
+                            """This chart shows the combined profile area for a selected survey unit. """,style={"font-size": 20},),
+                        html.P(
+                            """The chart is a good way to depict overall trends of an entire survey unit or for showing 
+                               showing seasonal fluctuations. The combined profile area is calculated by summing all 
+                               the profiles cross sectional areas for a given survey.""",
+
                             style={"font-size": 20},
                         ),
                         html.Img(
                             src=f"data:image/jpeg;base64,{encoded_image}",
                             alt="CSA Scatter Plot Image",
-                            style={"height": "40vh"},
+                            style={"height": "40vh","width": "100%",  },
                         ),
                     ]
                 ),
@@ -88,7 +93,7 @@ layout = html.Div(
             ],
             id="scatter_info_model",
             is_open=False,
-            fullscreen=True,
+            fullscreen=False,
         ),
         dbc.Modal(
             [

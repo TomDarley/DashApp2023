@@ -44,7 +44,7 @@ layout = html.Div(
             ],
             id="error_info_model",
             is_open=False,
-            fullscreen=True,
+            fullscreen=False,
         ),
         dbc.Modal(
             [
@@ -76,8 +76,6 @@ layout = html.Div(
     State("survey-unit-dropdown", "value"),
 )
 def make_scatter_plot(cpa_df, selected_survey_unit):
-    print(dash.callback_context.triggered_id)
-
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))

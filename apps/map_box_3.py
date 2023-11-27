@@ -6,7 +6,8 @@ import plotly.express as px
 from shapely.wkt import loads
 import plotly.graph_objects as go
 from shapely.geometry import LineString, Polygon
-
+import pandas as pd
+import numpy as np
 
 unit_to_options = {
     "6aSU10": [
@@ -3823,6 +3824,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         current_selected_sur_and_prof = current_selected_sur_and_prof[0]
 
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
+    set_profile_line = current_selected_sur_and_prof["profile_line"]
 
     # Get the proforma text from the database
     engine = create_engine(
@@ -3833,62 +3835,125 @@ def update_map(current_selected_sur_and_prof: dict ):
     query = "SELECT * FROM survey_units"  # Modify this query according to your table
     gdf = gpd.GeoDataFrame.from_postgis(query,conn, geom_col="wkb_geometry")
 
+    # change crs to supported crs
     gdf = gdf.to_crs(epsg=4326)
-
-
 
     # Extract latitude and longitude from the geometry column
     gdf["lat"] = gdf["wkb_geometry"].y
     gdf["long"] = gdf["wkb_geometry"].x
     gdf["size"] = 15
 
-    # Set the color of the selected survey unit to red
-    gdf["color"] = ''
-    gdf['color'] = gdf['color'].astype(str)
-    gdf.loc[gdf["sur_unit"] == set_survey_unit, "color"] = "#eb05c4"
-    gdf.loc[gdf["sur_unit"] != set_survey_unit, "color"] = "#4459c2"
+    # Getting CPA table so styling can be based on the pct change of the survey unit
+    query = f"SELECT * FROM cpa_table"  # Modify this query according to your table
+    cpa_df = pd.read_sql_query(query, conn)
+    cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
-    set_profile_line = current_selected_sur_and_prof["profile_line"]
+    # pivot the table to get grouping of total area by survey unit and date
+    pivot_table = cpa_df.pivot_table(values='area', index=['survey_unit', 'date'], aggfunc='sum').reset_index()
 
+    # Find the most recent and earliest dates for each survey unit
+    max_dates = pivot_table.groupby('survey_unit')['date'].idxmax()
+    min_dates = pivot_table.groupby('survey_unit')['date'].idxmin()
+
+    # Create a new column 'min_max' and mark the rows with 'max' and 'min'
+    pivot_table['min_max'] = 'mid'
+    pivot_table.loc[max_dates, 'min_max'] = 'max'
+    pivot_table.loc[min_dates, 'min_max'] = 'min'
+
+    # Drop rows where 'min_max' is 'mid'
+    pivot_table = pivot_table[pivot_table['min_max'] != 'mid']
+
+    # Create a pivot table to separate 'min' and 'max' values
+    pivot_table = pivot_table.pivot_table(values='area', index='survey_unit', columns='min_max', aggfunc='first')
+
+    # Calculate the difference between 'max' and 'min'
+    # pivot_table['difference'] = pivot_table['max'] - pivot_table['min']
+
+    # Calculate the pct between 'max' and 'min'
+    pivot_table['difference'] = (pivot_table['max'] - pivot_table['min']) / pivot_table['min'] * 100
+    pivot_table['difference'] = pivot_table['difference'].round(2)
+
+    # set all na values, they shouldn't exist when all the correct data is loaded in
+    data_check = pivot_table['difference'].isna().any()
+    if data_check:
+        print('error calculating difference')
+    pivot_table = pivot_table.fillna(0)
+
+    pivot_table['classification'] = 'Default Value'
+    pivot_table['classification'] = pivot_table['classification'].astype(str)
+
+    # Add a new column 'classification' based on multiple conditional statements based on pct change values
+    pivot_table.loc[pivot_table['difference'] <= -30, 'classification'] = 'High Erosion'
+    pivot_table.loc[
+        (pivot_table['difference'] >= -30) & (pivot_table['difference'] <= -15), 'classification'] = 'Mild Erosion'
+    pivot_table.loc[
+        (pivot_table['difference'] >= -15) & (pivot_table['difference'] <= -5), 'classification'] = 'Low Erosion'
+    pivot_table.loc[
+        (pivot_table['difference'] >= -5) & (pivot_table['difference'] <= 5), 'classification'] = 'No Change'
+    pivot_table.loc[
+        (pivot_table['difference'] >= 5) & (pivot_table['difference'] <= 15), 'classification'] = 'Low Accretion'
+    pivot_table.loc[
+        (pivot_table['difference'] >= 15) & (pivot_table['difference'] <= 30), 'classification'] = 'Mild Accretion'
+    pivot_table.loc[pivot_table['difference'] > 30, 'classification'] = 'High Accretion'
+
+    pivot_table = pivot_table.reset_index()
+
+    # merge pivot cpa values table to the survey unit table
+    gdf = pd.merge(gdf, pivot_table[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
+                   right_on='survey_unit')
+
+    # set the selected survey unit classification to Selected Unit.
+    gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
     updated_gdf = gdf.copy()
-
-    updated_gdf = updated_gdf.drop("color", axis=1)
-    updated_gdf["color"] = ''
-
-    # Set the color of the selected survey unit to red
-    updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit, "color"] = "#4459c2" # This will set the label shown
-    updated_gdf.loc[updated_gdf["sur_unit"] != set_survey_unit, "color"] = "#eb05c4"
 
     # Extract the coordinates of the selected survey unit
     selected_point = updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit].iloc[0]
     center_lat = selected_point["lat"]
     center_lon = selected_point["long"]
 
-    # Update the map
+    # To set the size of the survey unit points sqrt the difference(pct) values to close the range
+    updated_gdf['sqrt_size'] = np.sqrt(updated_gdf['difference'].abs())
+    updated_gdf['sqrt_size'] = np.sqrt(updated_gdf['sqrt_size'] * 4)  # adjust this to make points larger overall
+
+    # Sort the valus by difference to order the legend items (legend is turned off in for now)
+    updated_gdf = updated_gdf.sort_values('difference')
+
+    # Define a color mapping dictionary for each classification
+    color_mapping = {
+        'High Erosion': "#ff0000",
+        'Mild Erosion': "#ff6666",
+        'Low Erosion': "#ff9999",
+        'No Change': "#4f4f54",
+        'Low Accretion': "#00ace6",
+        'Mild Accretion': "rgb(0, 103, 230)",
+        'High Accretion': "rgb(0, 57, 128)",
+        'Selected Unit': "#ffff05"
+
+    }
+
+    # Make the map
     updated_scatter_trace = px.scatter_mapbox(
         updated_gdf,
         lat="lat",
         lon="long",
-
         hover_name="sur_unit",
         hover_data=["sur_unit"],
-        custom_data=['sur_unit'],
-        color="color",  # Use the 'color' column to specify point colors
-        color_discrete_sequence=["#4459c2", "#eb05c4"],  # Define colors for the legend, these are also the colors used
+        custom_data=['sur_unit', 'classification'],
+        color='classification',  # Use the 'classification' column for classifier to use
+        color_discrete_map=color_mapping,  # use color map to set the colors
         center={
             "lat": center_lat,
             "lon": center_lon,
-        },  # Set the map center to the selected point
+        },
         zoom=5,
-        # height=690,
-        size="size",
-        size_max=12,
+        size="sqrt_size",  # set the size based off sqrt column
+        size_max=25,
+
 
     )
 
     # Format the label shown, must have the <extra></extra> to remove the color being shown
-    updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}</b><extra></extra>"),
-    updated_scatter_trace.update_traces(hoverinfo='none')
+    updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "%{customdata[1]}" + "<extra></extra>"),
 
     query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
     lines_gdf = gpd.GeoDataFrame.from_postgis(
@@ -3945,6 +4010,9 @@ def update_map(current_selected_sur_and_prof: dict ):
         latitudes = [coord[1] for coord in line.coords]
         longitudes = [coord[0] for coord in line.coords]
 
+        interpolated_latitudes = np.linspace(latitudes[0], latitudes[-1], 50)
+        interpolated_longitudes = np.linspace(longitudes[0], longitudes[-1], 50)
+
         # Get the survey_unit value for this row
         profile_line_id = row['profile']
         baseline = row['baseline']
@@ -3985,11 +4053,10 @@ def update_map(current_selected_sur_and_prof: dict ):
         # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
         trace = px.line_mapbox(
             line_data,
-            lat=latitudes,
-            lon=longitudes,
-            hover_name=[custom_data] * len(latitudes),
-            line_group=[custom_data] * len(latitudes)
-
+            lat=interpolated_latitudes,
+            lon=interpolated_longitudes,
+            hover_name=[custom_data] * len(interpolated_latitudes),
+            line_group=[custom_data] * len(interpolated_longitudes)
 
 
         )

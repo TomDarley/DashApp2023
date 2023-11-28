@@ -585,7 +585,7 @@ layout = html.Div(
                                                         "value": "box_plot",
                                                     },
                                                 ],
-                                                value=[],
+                                                value=['cpa','line_plot','box_plot'],
                                                 labelStyle={"margin-right": "10px"},
                                                 style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
                                                 # inline=True,
@@ -934,7 +934,7 @@ def get_selected_charts(
                     else:
                         c.drawImage(img_reader, 20, 50, width=width, height=height, )
 
-            print(spr_to_spr_table)
+
             # Define column widths (adjust as needed)
             col_widths = [100, 200, 200]
 
@@ -949,10 +949,8 @@ def get_selected_charts(
             ])
 
             # get the table header information
-            spr_spr_header = csa_table_headers.get('spr_spr')
-            baseline_spr_header= csa_table_headers.get('baseline_spr')
-
-            print(spr_spr_header)
+            spr_spr_header = csa_table_headers.get('spr_spr').replace(" - ", ' to ')
+            baseline_spr_header = csa_table_headers.get('baseline_spr').replace(" - ", ' to ')
 
             width = 800
             height = 100
@@ -974,8 +972,7 @@ def get_selected_charts(
             # Add the Title
             c.drawCentredString(A4[0] / 2, 800, 'CSA Tables')
             c.drawString(50, 750, spr_spr_header)
-            spr_to_spr_.drawOn(c, 50, 640)
-
+            spr_to_spr_.drawOn(c, 50, 400)
 
             dfs = []
             index = [0]
@@ -989,8 +986,9 @@ def get_selected_charts(
             spr_to_baseline_ = Table(table_data,colWidths=col_widths)
             spr_to_baseline_.setStyle(style)
             spr_to_baseline_.wrapOn(c, width, height)
-            c.drawString(50, 580, baseline_spr_header)
-            spr_to_baseline_.drawOn(c, 50, 470)
+            c.showPage()
+            c.drawString(50, 750, baseline_spr_header)
+            spr_to_baseline_.drawOn(c, 50, 400)
 
 
             # Save the PDF file
@@ -1000,7 +998,7 @@ def get_selected_charts(
             return buffer.getvalue()
 
         pdf_bytes = to_pdf()
-        print(type(pdf_bytes))
+
 
         # Save the subplot as an image
         # img_bytes = subplot.to_image(format="png")

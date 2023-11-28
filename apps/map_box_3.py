@@ -4107,7 +4107,8 @@ def update_map(current_selected_sur_and_prof: dict ):
         mapbox={
             "center": {"lat": center_lat, "lon": center_lon},
             "zoom": 14,
-        }
+        },
+
     )
 
     return fig, lines_inside_box

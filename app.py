@@ -1,10 +1,11 @@
-from dash import Dash,html
+from dash import Dash,html,dcc, Input,Output
 import dash
 import dash_bootstrap_components as dbc
 from apps import navigation, csa_table, error_bar_plot, map_box_3, profile_line_plot,scatter_plot
+# Import the main_dash layout
+
 
 # register the page with dash giving url path
-
 app = Dash(
     __name__,
     use_pages=True,
@@ -12,8 +13,11 @@ app = Dash(
         dbc.themes.COSMO,
         dbc.icons.BOOTSTRAP,
         dbc.icons.FONT_AWESOME,
-        dbc.icons.BOOTSTRAP
-    ],
+        dbc.icons.BOOTSTRAP,
+
+    ],  # Set the default landing page URL with a trailing slash
+
+
 )
 # Footer content
 footer = html.Div(
@@ -49,7 +53,8 @@ footer = html.Div(
 
 # Set the app layout with the navigation bar, the nav will be inherited by all pages
 app.layout = html.Div(children =
-                      [navigation.navbar,
+                      [dcc.Location(id='url', refresh=True),
+                       navigation.navbar,
                        dash.page_container,
                       ],
                       #'background': 'linear-gradient(to bottom right, #073b73,#7ebbfc)',
@@ -58,7 +63,18 @@ app.layout = html.Div(children =
 )
 # Append the footer to the main layout
 app.layout.children.append(footer)
+
 print("Running Dash App")
+
+@app.callback(
+    Output('url', 'pathname'),
+    [Input('url', 'pathname')]
+)
+def set_default_page(pathname):
+    if pathname is None or pathname == '/':
+        return '/main_dash'
+    return pathname
+
 
 
 if __name__ == "__main__":

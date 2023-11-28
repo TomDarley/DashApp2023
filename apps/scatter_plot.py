@@ -70,8 +70,8 @@ layout = html.Div(
                             """This chart shows the combined profile area for a selected survey unit. """,style={"font-size": 20},),
                         html.P(
                             """The chart is a good way to depict overall trends of an entire survey unit or for showing 
-                               showing seasonal fluctuations. The combined profile area is calculated by summing all 
-                               the profiles cross sectional areas for a given survey.""",
+                               seasonal fluctuations. The combined profile area is calculated by summing all 
+                               the profile cross sectional areas for a given survey.""",
 
                             style={"font-size": 20},
                         ),

@@ -3655,8 +3655,6 @@ layout = html.Div(
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
 
-
-
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
           Input("survey-unit-dropdown", "value"),  # dropdown value of the line dropdown
@@ -3664,6 +3662,26 @@ layout = html.Div(
           Input('selected-value-storage', 'data'))
 
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, selected_val_storage):
+    """
+    Update the output based on user interactions. Main function that controls the logic of user inputs and how the
+    app changes and updates charts.
+
+    Parameters:
+        click_data (dict): Click data from the 'example-map' component.
+        box_selected_data (dict): Selected data from the 'example-map' component using box selection.
+        sur_unit_dropdown_val (str): Value selected in the 'survey-unit-dropdown'.
+        prof_line_dropdown_val (str): Value selected in the 'survey-line-dropdown'.
+        selected_val_storage (dict): Previously selected values stored in 'selected-value-storage'.
+
+    Returns:
+        Tuple[dict, List[dict], str, str, dict]: A tuple containing the following:
+            - A dictionary representing the selected values and metadata.
+            - A list of profile line options for the 'survey-line-dropdown'.
+            - The selected value in 'survey-unit-dropdown'.
+            - The selected value in 'survey-line-dropdown'.
+            - Click data from the 'example-map'.
+    """
+
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
 
@@ -3736,13 +3754,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
-        survey_units = unit_to_options.keys()
 
         if click_data is not None :
-
-            #print(click_data)
-
-            #click_data_hovertext = click_data['points'][0]['hovertext'].split(':')[1].split('<')[0].strip()
 
             # Line data has the key hovertext in the clickdata, points have customdata
             if "Profile Line ID" in click_data['points'][0]['hovertext']:
@@ -3778,7 +3791,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         else:
 
             if  box_selected_data is not None and 'range' in box_selected_data.keys():
-                #print(f"{box_selected_data} - box data")
+
                 selected_value_result = {
                     "survey_unit": sur_unit_dropdown_val,
                     "profile_line": prof_line_dropdown_val,
@@ -3792,7 +3805,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     else:
 
         if box_selected_data is not None and 'range' in box_selected_data.keys():
-            # print(f"{box_selected_data} - box data")
+
             selected_value_result = {
                 "survey_unit": sur_unit_dropdown_val,
                 "profile_line": prof_line_dropdown_val,
@@ -3997,7 +4010,7 @@ def update_map(current_selected_sur_and_prof: dict ):
             profile = row['profname']
 
             if geometry.intersects(range_polygon):
-                #print(f"{profile} intersects!!")
+
                 lines_inside_box.append(profile)
     else:
         lines_inside_box = []
@@ -4098,23 +4111,6 @@ def update_map(current_selected_sur_and_prof: dict ):
     )
 
     return fig, lines_inside_box
-
-#@callback(
-#          Output("survey-unit-dropdown", "value"),
-#          Output("survey-line-dropdown", "value"),
-#          Input("selected-value-storage", "data"),
-#          config_prevent_initial_callbacks= True)
-#
-#def update_dropdown_values(current_selected_sur_and_prof):
-#    if current_selected_sur_and_prof is not None:
-#
-#        if current_selected_sur_and_prof is not None and isinstance(current_selected_sur_and_prof, list):
-#            current_selected_sur_and_prof = current_selected_sur_and_prof[0]
-#            return current_selected_sur_and_prof['survey_unit'], current_selected_sur_and_prof['profile_line']
-#        elif current_selected_sur_and_prof is not None:
-#            return current_selected_sur_and_prof['survey_unit'], current_selected_sur_and_prof['profile_line']
-#        else:
-#            return dash.no_update
 
 
 

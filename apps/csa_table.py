@@ -1,4 +1,4 @@
-from dash import Output, Input, html, callback, dash_table
+from dash import Output, Input, html, callback, dash_table,dcc
 import pandas as pd
 from datetime import datetime
 import dash_bootstrap_components as dbc
@@ -122,7 +122,10 @@ style_data_conditional = [
 ]
 
 layout = html.Div(
-    [
+    [dcc.Store(
+            id="csa_header_store",
+            data={"spr_spr": None,"baseline_spr":None},
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -272,6 +275,7 @@ layout = html.Div(
         Output("spr_to_baseline_table", "data"),
         Output("spr_to_baseline_table", "columns"),
         Output("baseline_to_spring_header", "children"),
+        Output("csa_header_store","data")
     ),
     [Input("selected-df-storage", "data")],
 )
@@ -363,6 +367,8 @@ def make_csa_table(selected_csa_data):
     spr_spr_title = f"{last_years_spring} - {latest_spring}"
     base_spr_title = f"{first_survey} - {latest_spring}"
 
+    table_header_data = {'spr_spr':spr_spr_title, 'baseline_spr': base_spr_title}
+
     return (
         spr_spr_df_to_records,
         spr_spr_columns,
@@ -370,4 +376,5 @@ def make_csa_table(selected_csa_data):
         base_spr_df_to_records,
         base_spr_columns,
         base_spr_title,
+        table_header_data
     )

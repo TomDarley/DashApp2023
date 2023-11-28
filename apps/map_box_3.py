@@ -3628,7 +3628,6 @@ INITIAL_LOAD_PROFILE_LINE = '6a01613'
 
 fig = go.Figure()
 
-
 layout = html.Div(
     children=[
         dcc.Store(id="zoom-level-store", data=13),
@@ -3642,6 +3641,9 @@ layout = html.Div(
         dcc.Graph(
             id="example-map",
             figure=fig,
+            config={
+                'modeBarButtonsToRemove': ['lasso2d']
+            },
 
         ),
     ],
@@ -3961,6 +3963,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         zoom=5,
         size="sqrt_size",  # set the size based off sqrt column
         size_max=25,
+
 
 
     )

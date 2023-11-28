@@ -1,0 +1,14 @@
+.mr-3:hover {
+        background-color: black;
+        /* Add any other styles you want to apply on hover */
+    }
+
+.mr-3:hover {
+    transition: transform 0.3s ease-in-out; /* Specify the property, duration, and timing function */
+}
+
+.mr-3:hover:hover {
+    transform: scale(1.15); /* Scale up on hover */
+    /* Add any other styles you want to apply on hover */
+}
+

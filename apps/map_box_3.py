@@ -3859,62 +3859,99 @@ def update_map(current_selected_sur_and_prof: dict ):
     gdf["size"] = 15
 
     # Getting CPA table so styling can be based on the pct change of the survey unit
+
+    # THIS NEEDS AMENDING ONLY USE CPA WHERE ENOUGH DATA IS PRESENT (not just start and end Values)!!!!!!!!!!
+
     query = f"SELECT * FROM cpa_table"  # Modify this query according to your table
     cpa_df = pd.read_sql_query(query, conn)
     cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
-    # pivot the table to get grouping of total area by survey unit and date
-    pivot_table = cpa_df.pivot_table(values='area', index=['survey_unit', 'date'], aggfunc='sum').reset_index()
+    cpa_all_survey_units = list(cpa_df['survey_unit'].unique())
+    cpa_dfs = []
 
-    # Find the most recent and earliest dates for each survey unit
-    max_dates = pivot_table.groupby('survey_unit')['date'].idxmax()
-    min_dates = pivot_table.groupby('survey_unit')['date'].idxmin()
+    for sur_unit in cpa_all_survey_units:
+        # Filter for each survey_unit
+        filter_cpa_df = cpa_df.loc[cpa_df['survey_unit'] == sur_unit]
+        master_df = filter_cpa_df[["date", "profile", "area"]]
 
-    # Create a new column 'min_max' and mark the rows with 'max' and 'min'
-    pivot_table['min_max'] = 'mid'
-    pivot_table.loc[max_dates, 'min_max'] = 'max'
-    pivot_table.loc[min_dates, 'min_max'] = 'min'
+        pivot_df = master_df.pivot(index="profile", columns="date", values="area")
+        pivot_df.loc[:, "Mean"] = pivot_df.mean(axis=1)
+        # Add column with representing the sum of the total number of dates in df
+        pivot_df.loc[:, "countSurveyedDates"] = (len(list(pivot_df.columns)) - 1) / 2
+        # Add column representing the sum of the total number NaNs in each row
+        pivot_df.loc[:, "NaNCount"] = pivot_df.isnull().sum(axis=1)
+        # Logic for determining if the number of NaNs is more than half the number of total number of dates surveyed
+        pivot_df.loc[:, "DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
+        # droppedRows = pd.DataFrame((pivot_df.loc[pivot_df['DropRow'] == False]))
+        # get the filtered for NaNs as new df for plotting
+        df1 = pivot_df.loc[pivot_df["DropRow"] == True]
+        # remove NaNCount, DropRow columns
+        df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates", "Mean"], axis=1)
+        # fill NaN values in each row with Mean
+        df1 = df1.T.fillna(df1.mean(axis=1)).T
 
-    # Drop rows where 'min_max' is 'mid'
-    pivot_table = pivot_table[pivot_table['min_max'] != 'mid']
+        # add a sum of columns to df
+        df1.loc["Sum"] = df1.sum()
 
-    # Create a pivot table to separate 'min' and 'max' values
-    pivot_table = pivot_table.pivot_table(values='area', index='survey_unit', columns='min_max', aggfunc='first')
+        # leave only the sum row
+        df1 = df1.tail(1)
 
-    # Calculate the difference between 'max' and 'min'
-    # pivot_table['difference'] = pivot_table['max'] - pivot_table['min']
+        # drop the index and set it to the survey unit
+        df1['Survey_Unit'] = sur_unit
+        df1 = df1.reset_index(drop=True)
+        df1 = df1.set_index('Survey_Unit')
 
-    # Calculate the pct between 'max' and 'min'
-    pivot_table['difference'] = (pivot_table['max'] - pivot_table['min']) / pivot_table['min'] * 100
-    pivot_table['difference'] = pivot_table['difference'].round(2)
+        # get the first and last sum values
+        first_column_value = df1.iloc[0, 0]
+        last_column_index = df1.shape[1] - 1
+        last_column_value = df1.iloc[0, last_column_index]
+
+        df1['first'] = first_column_value
+        df1['last'] = last_column_value
+
+        # Calculate the pct between 'max' and 'min'
+        df1['difference'] = (df1['last'] - df1['first']) / df1['first'] * 100
+
+        # drop all other columns in df1 to save memory
+        df1 = df1[['difference']]
+
+        # add sur unit cpa to list
+        cpa_dfs.append(df1)
+
+    # concat all cpa df into one df
+    all_cpa_dfs = pd.concat(cpa_dfs)
 
     # set all na values, they shouldn't exist when all the correct data is loaded in
-    data_check = pivot_table['difference'].isna().any()
+    data_check = all_cpa_dfs['difference'].isna().any()
     if data_check:
         print('error calculating difference')
-    pivot_table = pivot_table.fillna(0)
-
-    pivot_table['classification'] = 'Default Value'
-    pivot_table['classification'] = pivot_table['classification'].astype(str)
+    all_cpa_dfs = all_cpa_dfs.fillna(0)
 
     # Add a new column 'classification' based on multiple conditional statements based on pct change values
-    pivot_table.loc[pivot_table['difference'] <= -30, 'classification'] = 'High Erosion'
-    pivot_table.loc[
-        (pivot_table['difference'] >= -30) & (pivot_table['difference'] <= -15), 'classification'] = 'Mild Erosion'
-    pivot_table.loc[
-        (pivot_table['difference'] >= -15) & (pivot_table['difference'] <= -5), 'classification'] = 'Low Erosion'
-    pivot_table.loc[
-        (pivot_table['difference'] >= -5) & (pivot_table['difference'] <= 5), 'classification'] = 'No Change'
-    pivot_table.loc[
-        (pivot_table['difference'] >= 5) & (pivot_table['difference'] <= 15), 'classification'] = 'Low Accretion'
-    pivot_table.loc[
-        (pivot_table['difference'] >= 15) & (pivot_table['difference'] <= 30), 'classification'] = 'Mild Accretion'
-    pivot_table.loc[pivot_table['difference'] > 30, 'classification'] = 'High Accretion'
+    all_cpa_dfs['classification'] = 'Default Value'
+    all_cpa_dfs['classification'] = all_cpa_dfs['classification'].astype(str)
 
-    pivot_table = pivot_table.reset_index()
+    # Add a new column 'classification' based on multiple conditional statements based on pct change values
+    all_cpa_dfs.loc[all_cpa_dfs['difference'] <= -30, 'classification'] = 'High Erosion'
+    all_cpa_dfs.loc[
+        (all_cpa_dfs['difference'] >= -30) & (all_cpa_dfs['difference'] <= -15), 'classification'] = 'Mild Erosion'
+    all_cpa_dfs.loc[
+        (all_cpa_dfs['difference'] >= -15) & (all_cpa_dfs['difference'] <= -5), 'classification'] = 'Low Erosion'
+    all_cpa_dfs.loc[
+        (all_cpa_dfs['difference'] >= -5) & (all_cpa_dfs['difference'] <= 5), 'classification'] = 'No Change'
+    all_cpa_dfs.loc[
+        (all_cpa_dfs['difference'] >= 5) & (all_cpa_dfs['difference'] <= 15), 'classification'] = 'Low Accretion'
+    all_cpa_dfs.loc[
+        (all_cpa_dfs['difference'] >= 15) & (all_cpa_dfs['difference'] <= 30), 'classification'] = 'Mild Accretion'
+    all_cpa_dfs.loc[all_cpa_dfs['difference'] > 30, 'classification'] = 'High Accretion'
+
+    all_cpa_dfs = all_cpa_dfs.reset_index()
+
+    # raname the all cpa survey_unit column to match the gdf sur_unit
+    all_cpa_dfs = all_cpa_dfs.rename(columns ={'Survey_Unit': 'survey_unit'})
 
     # merge pivot cpa values table to the survey unit table
-    gdf = pd.merge(gdf, pivot_table[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
+    gdf = pd.merge(gdf, all_cpa_dfs[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
                    right_on='survey_unit')
 
     # set the selected survey unit classification to Selected Unit.

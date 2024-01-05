@@ -283,8 +283,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         mp_df = pd.read_sql_query(master_profile_query, conn)
         mp_df = mp_df.dropna(axis=1, how="any")
 
-
-
         # must sort the data by chainage for it to display correctly
         topo_df = topo_df.sort_values(by=["chainage"])
 
@@ -321,12 +319,15 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         min_chainage = float(min_chainage)
         max_chainage = float(max_chainage)
 
-        min_chainage = int(min_chainage) -200
-        max_chainage = int(max_chainage) + 200
+        # Modifier to make the lines overlap the master profile. How much to show past master profile
+        modifier_percent  = 0.05
+
+        chainge_overshoot = max_chainage * modifier_percent
+
+        min_chainage = int(min_chainage) - chainge_overshoot  #-200
+        max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
 
         topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
-
-
 
         if selection == "3D":
 

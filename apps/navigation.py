@@ -1,32 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html,dcc,callback
-from dash_bootstrap_components._components.Container import Container
 
 PLOTLY_LOGO = "assets/Full-Logo (white sky).png"
-# Define custom CSS style for navigation links
-custom_navlink_style = {
-    "font-size": "16px",
-    "color": "white",'position': 'absolute','right': '10px','top': '10px'
-
-    ## Adjust the font size as needed
-}
-search_bar = dbc.Row(
-    [
-        dbc.Col(),
-        dbc.Col(
-            dbc.NavItem(
-                dbc.NavLink(
-                    "SWCM Dash",
-                    href="https://southwest.coastalmonitoring.org/",
-                    style=custom_navlink_style,
-                )
-            ),
-            width="auto",
-        ),
-    ],
-    className="g-0 ms-auto flex-nowrap mt-3 mt-md-0",
-    align="center",
-)
 
 navbar = dbc.Navbar(
     dbc.Container(
@@ -35,43 +10,48 @@ navbar = dbc.Navbar(
                 # Use row and col to control vertical alignment of logo / brand
                 dbc.Row(
                     [
-                        dbc.Col(html.Img(src=PLOTLY_LOGO, height="40px", style={'position': 'absolute','left': '10px','top': '5px'})),
-                        dbc.Col(dcc.Loading(
-                            id='test_loader',
-                            children=[html.Div(".", style={
-                                "backgroundColor": "rgba(0, 0, 0, 0)",
-                                'width': '10px',
-                                'height': '1px',
-                                "zIndex": -1
-                            })],
-                            style={'position': 'fixed','top':'3%', 'left': '50%', 'transform': 'translate(-50%, -50%)'},
-
-
-                            loading_state={'is_loading': True}
-                        )),
-
-
+                        dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                        dbc.Col(dbc.NavbarBrand("SWCM Dash", className="ms-2",style={
+                             'font-family': 'sans-serif',
+                             'font-size': '20px',  # Adjust the size as needed
+                             'color': 'your-font-color',
+                         })),
+                        dbc.Col(
+                            dcc.Loading(
+                                id='test_loader',
+                                children=[html.Div("", style={
+                                    "backgroundColor": "rgba(0, 0, 0, 0)",
+                                    'width': '10px',
+                                    'height': '1px',
+                                    "zIndex": -1
+                                })],
+                                style={'position': 'fixed', 'margin-left': '50%'},
+                                loading_state={'is_loading': True}
+                            ),
+                        ),
                     ],
                     align="center",
                     className="g-0",
                 ),
-                href="https://southwest.coastalmonitoring.org/",
+                href="https://plotly.com",
                 style={"textDecoration": "none"},
             ),
             dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
             dbc.Collapse(
-                search_bar,
+                dbc.Nav([
+                    dbc.NavItem(dbc.NavLink("Home", href="https://southwest.coastalmonitoring.org")),
+                    dbc.NavItem(dbc.NavLink("About", href="https://southwest.coastalmonitoring.org/about-us/")),
+                    dbc.NavItem(dbc.NavLink("Terms", href="https://southwest.coastalmonitoring.org/terms-and-conditions/"))],className="ms-auto"
+                ),
                 id="navbar-collapse",
                 is_open=False,
                 navbar=True,
             ),
         ]
     ),
-    style={'height': '50px'},
     color="#10335b",
     dark=True,
 )
-
 
 # add callback for toggling the collapse on small screens
 @callback(

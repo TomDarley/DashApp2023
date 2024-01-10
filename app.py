@@ -1,7 +1,7 @@
 from dash import Dash,html,dcc, Input,Output
 import dash
 import dash_bootstrap_components as dbc
-from apps import navigation, csa_table, error_bar_plot, map_box_3, profile_line_plot,scatter_plot
+from apps import navigation
 # Import the main_dash layout
 
 

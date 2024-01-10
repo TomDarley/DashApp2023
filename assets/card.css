@@ -5,7 +5,7 @@
 }
 @media screen and (min-width: 0px) and (max-width:950px) {
     #all_cards_div {
-         max-height: 40vh;
+         max-height: 80vh;
          overflow: auto;
     }
 }

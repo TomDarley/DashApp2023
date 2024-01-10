@@ -7,7 +7,6 @@ import matplotlib.dates as mdates
 import plotly.express as px
 import statsmodels.api as sm
 import plotly.graph_objs as go
-import sqlalchemy
 import base64
 from dash.exceptions import PreventUpdate
 from sqlalchemy import create_engine

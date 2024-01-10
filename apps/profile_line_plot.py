@@ -184,7 +184,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
+                #dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
                 dbc.ModalBody(
                     dcc.Graph(id="line_plot_model", style={"height": "100vh"})
                 ),
@@ -553,7 +553,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             legend_traceorder="reversed",
             legend_title_text=f"",
             title={
-                "text": f"<b>{selected_sur_unit}: {selected_profile}</b>",
+                "text": f"<b>CSL: {selected_sur_unit}-{selected_profile}</b>",
                 "y": 0.96,
                 "x": 0.5,
                 "xanchor": "center",
@@ -690,7 +690,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 yaxis_title="Profile",
                 zaxis_title="Elevation (m)",
             ),
-            title=f"<b>{selected_sur_unit}</b>",
+            title=f"<b>CSL: {selected_sur_unit}</b>",
             title_x=0.5,  # Set the x position of the title to the center
             title_y=0.95,
             title_font=dict(color="blue", size=15, family="Arial" ),

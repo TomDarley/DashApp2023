@@ -97,7 +97,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
+                #dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
                 dbc.ModalBody(
                     dcc.Graph(id="scatter_plot_model", style={"height": "100vh"})
                 ),  ## might not work
@@ -323,7 +323,7 @@ def make_scatter_plot(selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"<b>{selected_survey_unit}</b>",
+            "text": f"<b> CPA: {selected_survey_unit}</b>",
             "y": 0.95,
             "x": 0.5,
             "xanchor": "center",

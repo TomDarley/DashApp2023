@@ -48,7 +48,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
+                #dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
                 dbc.ModalBody(
                     dcc.Graph(id="error_plot_model", style={"height": "90vh"})
                 ),  ## might not work
@@ -158,7 +158,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"<b>{selected_survey_unit}</b>",
+            "text": f"<b>Box Plot: {selected_survey_unit}</b>",
             "y": 0.96,
             "x": 0.5,
             "xanchor": "center",

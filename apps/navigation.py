@@ -65,12 +65,10 @@ navbar = dbc.Navbar(
                 is_open=False,
                 navbar=True,
             ),
-
-
         ]
     ),
     style={'height': '50px'},
-    color="dark",
+    color="#10335b",
     dark=True,
 )
 

@@ -80,12 +80,12 @@ layout = html.Div(
             type="circle",
             children= [
 
-        dcc.Graph(
-            id="line_plot"
+                dcc.Graph(
+                    id="line_plot"
+                        ),
+            ],  ),
 
-        ),
 
-            ]),
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="md",
@@ -203,8 +203,6 @@ layout = html.Div(
 )
 
 
-
-
 @callback(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
@@ -217,6 +215,8 @@ layout = html.Div(
     Output('month_year_dropdown', 'style'),
     Output('month-dropdown', 'options'),
     Output('year-dropdown', 'options'),
+
+
 
 
     Input("survey-unit-dropdown", "value"),

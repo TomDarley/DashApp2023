@@ -622,8 +622,10 @@ layout = html.Div(
 
                 ),
                 dbc.Col(
+
                     html.Div(
                         [
+
                             map_box_3.layout,
                         ],
                         id="main_dash_map_div",

@@ -9,6 +9,8 @@ from shapely.geometry import LineString, Polygon
 import pandas as pd
 import numpy as np
 
+from dash.exceptions import PreventUpdate
+
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3639,16 +3641,20 @@ layout = html.Div(
         dcc.Location(id="url", refresh=False),  # Add a Location component
 
         dcc.Graph(
-            id="example-map",
-            figure=fig,
-            config={
-                'modeBarButtonsToRemove': ['lasso2d']
-            },
+                    id="example-map",
+                    figure=fig,
+                    config={'modeBarButtonsToRemove': ['lasso2d']},
+                    className="map",
 
-        ),
+                ),
+
     ],
-    id = "mapbox_div"
+    id="mapbox_div",
+
 )
+
+
+
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -3656,6 +3662,7 @@ layout = html.Div(
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
+
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -3821,7 +3828,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
 @callback(
     Output("example-map", "figure"),
-    Output('multi-select-lines', 'data'),  # holds if multi select the line ids
+    Output('multi-select-lines', 'data'),# holds if multi select the line ids
+    Output("test_loader", "loading_state"),
     Input("selected-value-storage", "data"),
 
     prevent_initial_call=False,
@@ -3835,6 +3843,8 @@ def update_map(current_selected_sur_and_prof: dict ):
     to the user."""
 
     #print(current_selected_sur_and_prof)
+
+    # print(current_selected_sur_and_prof)
     if isinstance(current_selected_sur_and_prof, list):
         current_selected_sur_and_prof = current_selected_sur_and_prof[0]
 
@@ -3848,7 +3858,7 @@ def update_map(current_selected_sur_and_prof: dict ):
 
     # Import point (survey unit) spatial data as GeoDataFrame, conn is now a global function
     query = "SELECT * FROM survey_units"  # Modify this query according to your table
-    gdf = gpd.GeoDataFrame.from_postgis(query,conn, geom_col="wkb_geometry")
+    gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
 
     # change crs to supported crs
     gdf = gdf.to_crs(epsg=4326)
@@ -3858,97 +3868,82 @@ def update_map(current_selected_sur_and_prof: dict ):
     gdf["long"] = gdf["wkb_geometry"].x
     gdf["size"] = 15
 
-    # Getting CPA table so styling can be based on the pct change of the survey unit
-
-    # THIS NEEDS AMENDING ONLY USE CPA WHERE ENOUGH DATA IS PRESENT (not just start and end Values)!!!!!!!!!!
-
     query = f"SELECT * FROM cpa_table"  # Modify this query according to your table
     cpa_df = pd.read_sql_query(query, conn)
     cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
-    cpa_all_survey_units = list(cpa_df['survey_unit'].unique())
-    cpa_dfs = []
+    def calculate_difference(group):
 
-    for sur_unit in cpa_all_survey_units:
-        # Filter for each survey_unit
-        filter_cpa_df = cpa_df.loc[cpa_df['survey_unit'] == sur_unit]
-        master_df = filter_cpa_df[["date", "profile", "area"]]
+        master_df = group[["date", "profile", "area"]]
 
         pivot_df = master_df.pivot(index="profile", columns="date", values="area")
-        pivot_df.loc[:, "Mean"] = pivot_df.mean(axis=1)
-        # Add column with representing the sum of the total number of dates in df
-        pivot_df.loc[:, "countSurveyedDates"] = (len(list(pivot_df.columns)) - 1) / 2
-        # Add column representing the sum of the total number NaNs in each row
-        pivot_df.loc[:, "NaNCount"] = pivot_df.isnull().sum(axis=1)
-        # Logic for determining if the number of NaNs is more than half the number of total number of dates surveyed
-        pivot_df.loc[:, "DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
-        # droppedRows = pd.DataFrame((pivot_df.loc[pivot_df['DropRow'] == False]))
-        # get the filtered for NaNs as new df for plotting
+        pivot_df["Mean"] = pivot_df.mean(axis=1)
+
+        pivot_df["countSurveyedDates"] = (len(pivot_df.columns) - 1) / 2
+        pivot_df["NaNCount"] = pivot_df.isnull().sum(axis=1)
+        pivot_df["DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
+
         df1 = pivot_df.loc[pivot_df["DropRow"] == True]
-        # remove NaNCount, DropRow columns
         df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates", "Mean"], axis=1)
-        # fill NaN values in each row with Mean
         df1 = df1.T.fillna(df1.mean(axis=1)).T
 
-        # add a sum of columns to df
         df1.loc["Sum"] = df1.sum()
-
-        # leave only the sum row
         df1 = df1.tail(1)
 
-        # drop the index and set it to the survey unit
-        df1['Survey_Unit'] = sur_unit
-        df1 = df1.reset_index(drop=True)
-        df1 = df1.set_index('Survey_Unit')
-
-        # get the first and last sum values
         first_column_value = df1.iloc[0, 0]
         last_column_index = df1.shape[1] - 1
         last_column_value = df1.iloc[0, last_column_index]
 
-        df1['first'] = first_column_value
-        df1['last'] = last_column_value
+        df1["first"] = first_column_value
+        df1["last"] = last_column_value
 
-        # Calculate the pct between 'max' and 'min'
-        df1['difference'] = (df1['last'] - df1['first']) / df1['first'] * 100
+        df1["difference"] = (df1["last"] - df1["first"]) / df1["first"] * 100
+        df1 = df1[["difference"]]
 
-        # drop all other columns in df1 to save memory
-        df1 = df1[['difference']]
+        df1["Survey_Unit"] = group.name
+        df1 = df1.reset_index()
+        df1 = df1.set_index("Survey_Unit")
 
-        # add sur unit cpa to list
-        cpa_dfs.append(df1)
+        return df1
 
-    # concat all cpa df into one df
-    all_cpa_dfs = pd.concat(cpa_dfs)
+    # Use groupby and apply the function to each group
+    cpa_dfs = cpa_df.groupby("survey_unit").apply(calculate_difference).reset_index()
+    cpa_dfs = cpa_dfs[['survey_unit', 'difference']]
 
     # set all na values, they shouldn't exist when all the correct data is loaded in
-    data_check = all_cpa_dfs['difference'].isna().any()
+    data_check = cpa_dfs['difference'].isna().any()
     if data_check:
         print('error calculating difference')
-    all_cpa_dfs = all_cpa_dfs.fillna(0)
+    all_cpa_dfs = cpa_dfs.fillna(0)
 
     # Add a new column 'classification' based on multiple conditional statements based on pct change values
     all_cpa_dfs['classification'] = 'Default Value'
     all_cpa_dfs['classification'] = all_cpa_dfs['classification'].astype(str)
 
-    # Add a new column 'classification' based on multiple conditional statements based on pct change values
-    all_cpa_dfs.loc[all_cpa_dfs['difference'] <= -30, 'classification'] = 'High Erosion'
-    all_cpa_dfs.loc[
-        (all_cpa_dfs['difference'] >= -30) & (all_cpa_dfs['difference'] <= -15), 'classification'] = 'Mild Erosion'
-    all_cpa_dfs.loc[
-        (all_cpa_dfs['difference'] >= -15) & (all_cpa_dfs['difference'] <= -5), 'classification'] = 'Low Erosion'
-    all_cpa_dfs.loc[
-        (all_cpa_dfs['difference'] >= -5) & (all_cpa_dfs['difference'] <= 5), 'classification'] = 'No Change'
-    all_cpa_dfs.loc[
-        (all_cpa_dfs['difference'] >= 5) & (all_cpa_dfs['difference'] <= 15), 'classification'] = 'Low Accretion'
-    all_cpa_dfs.loc[
-        (all_cpa_dfs['difference'] >= 15) & (all_cpa_dfs['difference'] <= 30), 'classification'] = 'Mild Accretion'
-    all_cpa_dfs.loc[all_cpa_dfs['difference'] > 30, 'classification'] = 'High Accretion'
+    # Define the conditions and corresponding values for classification, using numpy for speed
+    conditions = [
+        (all_cpa_dfs['difference'] <= -30),
+        ((all_cpa_dfs['difference'] >= -30) & (all_cpa_dfs['difference'] <= -15)),
+        ((all_cpa_dfs['difference'] >= -15) & (all_cpa_dfs['difference'] <= -5)),
+        ((all_cpa_dfs['difference'] >= -5) & (all_cpa_dfs['difference'] <= 5)),
+        ((all_cpa_dfs['difference'] >= 5) & (all_cpa_dfs['difference'] <= 15)),
+        ((all_cpa_dfs['difference'] >= 15) & (all_cpa_dfs['difference'] <= 30)),
+        (all_cpa_dfs['difference'] > 30)
+    ]
+    values = [
+        'High Erosion',
+        'Mild Erosion',
+        'Low Erosion',
+        'No Change',
+        'Low Accretion',
+        'Mild Accretion',
+        'High Accretion'
+    ]
+
+    # Use numpy.select to assign values based on conditions
+    all_cpa_dfs['classification'] = np.select(conditions, values, default='Default Value')
 
     all_cpa_dfs = all_cpa_dfs.reset_index()
-
-    # raname the all cpa survey_unit column to match the gdf sur_unit
-    all_cpa_dfs = all_cpa_dfs.rename(columns ={'Survey_Unit': 'survey_unit'})
 
     # merge pivot cpa values table to the survey unit table
     gdf = pd.merge(gdf, all_cpa_dfs[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
@@ -4063,8 +4058,9 @@ def update_map(current_selected_sur_and_prof: dict ):
         latitudes = [coord[1] for coord in line.coords]
         longitudes = [coord[0] for coord in line.coords]
 
-        interpolated_latitudes = np.linspace(latitudes[0], latitudes[-1], 50)
-        interpolated_longitudes = np.linspace(longitudes[0], longitudes[-1], 50)
+        # Added more points for each line, more points smoother larger click area
+        interpolated_latitudes = np.linspace(latitudes[0], latitudes[-1], 20)
+        interpolated_longitudes = np.linspace(longitudes[0], longitudes[-1], 20)
 
         # Get the survey_unit value for this row
         profile_line_id = row['profile']
@@ -4084,24 +4080,13 @@ def update_map(current_selected_sur_and_prof: dict ):
         # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
 
-        # set the colors based on if a multiselect was used
+        # Set the colors and width
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
-
-            if profile_line_id in lines_inside_box:
-                colour = "#e8d90c"
-                width = 8
-            else:
-                colour = "#246673"
-                width = 5
-
+            colour = "#e8d90c" if profile_line_id in lines_inside_box else "#246673"
+            width = 8 if profile_line_id in lines_inside_box else 5
         else:
-
-            if set_profile_line == profile_line_id:
-                colour = "#e8d90c"
-                width = 8
-            else:
-                colour = "#246673"
-                width = 5
+            colour = "#e8d90c" if set_profile_line == profile_line_id else "#246673"
+            width = 8 if set_profile_line == profile_line_id else 5
 
         # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
         trace = px.line_mapbox(
@@ -4123,35 +4108,26 @@ def update_map(current_selected_sur_and_prof: dict ):
 
         line_traces.append(trace)
 
-        # Add the modified trace to the figure
-        # updated_fig.add_trace(trace.data[0])
-
     fig = go.Figure()  # Set the map center to the selected point)
 
     # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
     for i in range(len(line_traces)):
         fig.add_trace(line_traces[i].data[0])
 
-    fig.update_layout(mapbox_style="open-street-map", )
-
-    # Add the scatter trace to the figure
-    fig.add_traces(updated_scatter_trace.data)
-
-    # this removes white space around the map
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-    fig.update_traces(showlegend=False)
-
-    # check if the initial call triggered the callback, if initial we set intial load values
-
     fig.update_layout(
+        mapbox_style="open-street-map",
+        margin=dict(l=0, r=0, b=0, t=0),
+        showlegend=False,
         mapbox={
             "center": {"lat": center_lat, "lon": center_lon},
             "zoom": 14,
         },
-
     )
 
-    return fig, lines_inside_box
+    # Add the scatter trace to the figure
+    fig.add_traces(updated_scatter_trace.data)
+
+    return fig, lines_inside_box, {'is_loading': True}
 
 
 

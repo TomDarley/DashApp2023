@@ -3653,16 +3653,11 @@ layout = html.Div(
 
 )
 
-
-
-
-
 @callback(Output('selected-value-storage', 'data'),
           Output("survey-line-dropdown", "options"),
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
-
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -3721,8 +3716,11 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     # handle if nothing selected:
     if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown'] or ctx_id is None:
+
+
         default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT,
                                                "profile_line": INITIAL_LOAD_PROFILE_LINE}
+
         default_options= [{'label': "6a01613",'value': "6a01613"},
                                      {'label': "6a01614",'value': "6a01614"},
                                      {'label': "6a01615",'value': "6a01615"},
@@ -3995,9 +3993,6 @@ def update_map(current_selected_sur_and_prof: dict ):
         zoom=5,
         size="sqrt_size",  # set the size based off sqrt column
         size_max=25,
-
-
-
     )
 
     # Format the label shown, must have the <extra></extra> to remove the color being shown

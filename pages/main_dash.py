@@ -59,6 +59,7 @@ layout = html.Div(
                                                 id="drop_down_card-title",
 
                                             ),
+
                                             dcc.Dropdown(
                                                 options=[
                                                     {"label": "6aSU10  -  Sidmouth", "value": "6aSU10"},

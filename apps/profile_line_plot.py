@@ -553,7 +553,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             legend_traceorder="reversed",
             legend_title_text=f"",
             title={
-                "text": f"<b>CSL: {selected_sur_unit}-{selected_profile}</b>",
+                "text": f"<b>CSL: {selected_sur_unit} {selected_profile}</b>",
                 "y": 0.96,
                 "x": 0.5,
                 "xanchor": "center",

@@ -3750,16 +3750,76 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     elif ctx.triggered_id == 'survey-unit-dropdown':
 
         survey_unit_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
+
+        def get_new_profile_options():
+
+            """Function creates new profile dropdown options based on the survey type selected"""
+
+            # If one survey type is selected a str is returned not a list, check for this and convert to a list
+            if isinstance(survey_type_dropdown_vals, str):
+                set_survey_types = [survey_type_dropdown_vals]
+
+            selected_columns = ['Interim', 'Post Storm', 'Baseline']
+            user_selection = survey_type_dropdown_vals
+
+            # all baselines are both interims and can be poststorms (every profile)
+            # if 'Baseline' in set_survey_types:
+            #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
+            if len(survey_type_dropdown_vals) == 1:
+                formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
+
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND  {formatted_survey_type} = 'YES'"
+
+            else:
+                # Create a default SQL query string
+                base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND "
+                # Build the WHERE clause dynamically based on user selection
+                conditions = []
+                for column in selected_columns:
+                    if column in user_selection:
+                        conditions.append(f"{column.lower().replace(' ', '_')} = 'YES'")
+
+                # Join the conditions using AND
+                base_sql_query += " AND ".join(conditions)
+                sql_query = base_sql_query
+
+            query_profile_lines = sql_query
+
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+            conn = engine.connect()
+
+            lines_gdf = gpd.GeoDataFrame.from_postgis(
+                query_profile_lines, conn, geom_col="wkb_geometry"
+            )
+
+            profile_line_options = []
+
+            for _, row in lines_gdf.iterrows():
+                option_dict = {}
+                profile = row['profname']
+                option_dict.update({'label': profile, 'value': profile})
+                profile_line_options.append(option_dict)
+
+            return profile_line_options
+
+        cal_profile_line_options = get_new_profile_options()
+        profile_line_value = cal_profile_line_options[0].get('value')
+
+
+
+
+
         selected_value_result = {"survey_unit": sur_unit_dropdown_val,
-                                 "profile_line": survey_unit_dropdown_options[0],
+                                 "profile_line": profile_line_value,
                                  'multi': False,
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals
                                  },
 
-        profile_line_options = survey_unit_dropdown_options
+        #profile_line_options = survey_unit_dropdown_options
 
-        return selected_value_result, profile_line_options, sur_unit_dropdown_val, survey_unit_dropdown_options[0], None, dash.no_update
+        return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update
 
     elif ctx.triggered_id == 'survey-line-dropdown':
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
@@ -3772,14 +3832,75 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
 
     elif ctx.triggered_id == 'survey-type-dropdown':
+
+        # need to filter the dropdown options for only profiles that meet the survey type:
+
+
+        def get_new_profile_options():
+
+            """Function creates new profile dropdown options based on the survey type selected"""
+
+            # If one survey type is selected a str is returned not a list, check for this and convert to a list
+            if isinstance(survey_type_dropdown_vals, str):
+                set_survey_types = [survey_type_dropdown_vals]
+
+            selected_columns = ['Interim', 'Post Storm', 'Baseline']
+            user_selection = survey_type_dropdown_vals
+
+            # all baselines are both interims and can be poststorms (every profile)
+            # if 'Baseline' in set_survey_types:
+            #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
+            if len(survey_type_dropdown_vals) == 1:
+                formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
+
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND  {formatted_survey_type} = 'YES'"
+
+            else:
+                # Create a default SQL query string
+                base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND "
+                # Build the WHERE clause dynamically based on user selection
+                conditions = []
+                for column in selected_columns:
+                    if column in user_selection:
+                        conditions.append(f"{column.lower().replace(' ', '_')} = 'YES'")
+
+                # Join the conditions using AND
+                base_sql_query += " AND ".join(conditions)
+                sql_query = base_sql_query
+
+            query_profile_lines = sql_query
+
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+            conn = engine.connect()
+
+            lines_gdf = gpd.GeoDataFrame.from_postgis(
+                query_profile_lines, conn, geom_col="wkb_geometry"
+            )
+
+            profile_line_options = []
+
+            for _,row in lines_gdf.iterrows():
+                option_dict ={}
+                profile = row['profname']
+                option_dict.update({'label':profile, 'value': profile})
+                profile_line_options.append(option_dict)
+
+            return profile_line_options
+
+        # set the profile selected to the first in the new calulated options
+
+        cal_profile_line_options = get_new_profile_options()
+        profile_line_value = cal_profile_line_options[0].get('value')
+
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
         selected_value_result = {"survey_unit": sur_unit_dropdown_val,
-                                 "profile_line": prof_line_dropdown_val,
+                                 "profile_line": profile_line_value,
                                  'multi': False,
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals},
 
-        return selected_value_result, dash.no_update, dash.no_update, dash.no_update, None, survey_type_dropdown_vals
+        return selected_value_result,  cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals
 
 
 
@@ -4063,6 +4184,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         for column in selected_columns:
             if column in user_selection:
                 conditions.append(f"{column.lower().replace(' ','_')} = 'YES'")
+
 
 
         # Join the conditions using AND

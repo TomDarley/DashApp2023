@@ -10,7 +10,7 @@ navbar = dbc.Navbar(
                 # Use row and col to control vertical alignment of logo / brand
                 dbc.Row(
                     [
-                        dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                        dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px", style={'margin-right':'20px'})),
                         dbc.Col(dbc.NavbarBrand("SWCM Dash", className="ms-2",style={
                              'font-family': 'sans-serif',
                              'font-size': '20px',  # Adjust the size as needed

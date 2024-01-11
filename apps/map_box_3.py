@@ -4063,8 +4063,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         for column in selected_columns:
             if column in user_selection:
                 conditions.append(f"{column.lower().replace(' ','_')} = 'YES'")
-            #else:
-                #conditions.append(f"{column.lower().replace(' ','_')} = 'NO'")
+
 
         # Join the conditions using AND
         base_sql_query += " AND ".join(conditions)

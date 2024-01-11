@@ -144,6 +144,21 @@
 
 }
 
+/* Default card style for the survey unit dropdown inside the card */
+#survey-type-dropdown{
+    font-size: 13px;
+    font-weight: bold;
+    color: blue;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;
+    background-color: #d4f7ff;
+    margin-bottom: 5px;
+
+
+}
+
+
 /* Default card style for the survey line dropdown inside the card */
 #survey-line-dropdown{
       font-size: 13px;
@@ -152,7 +167,7 @@
       width: 100%;
       margin-top: 5px;
       border-radius: 10px;
-       border-radius: 10px;
+      border-radius: 10px;
     box-shadow: 5px 5px 5px lightblue;
     background-color: #d4f7ff;
 }

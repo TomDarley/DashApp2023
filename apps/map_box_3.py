@@ -3626,7 +3626,10 @@ unit_to_options = {
 }
 
 INITIAL_LOAD_SURVEY_UNIT = '6aSU12'
-INITIAL_LOAD_PROFILE_LINE = '6a01613'
+INITIAL_LOAD_PROFILE_LINE = '6a01624'
+
+#Uused to add the names of the survey
+#SURVEY_UNIT_NAMES_DICT = {'6aSU10': '6aSU10  -  Sidmouth', '6aSU12': '6aSU12  -  Budleigh Salterton (East)', '6aSU13': '6aSU13  -  Budleigh Salterton', '6aSU16-1': '6aSU16-1  -  Exmouth', '6aSU2': '6aSU2  -  Chesil Beach', '6aSU3-2': '6aSU3-2  -  West Bexington', '6aSU3-3': '6aSU3-3  -  The Hive', '6aSU3-5': '6aSU3-5  -  Burton Freshwater', '6aSU4': '6aSU4  -  West Bay', '6aSU5-2': '6aSU5-2  -  Seatown', '6aSU5-4': '6aSU5-4  -  Charmouth', '6aSU6-1': '6aSU6-1  -  Lyme Regis (Broad Ledge)', '6aSU6-2': '6aSU6-2  -  Lyme Regis', '6aSU7-1': '6aSU7-1  -  The Cobb', '6aSU8-1': '6aSU8-1  -  Seaton (Devon)', '6bSU16-3': '6bSU16-3  -  Dawlish Warren', '6bSU17': '6bSU17  -  Dawlish', '6bSU18-1': '6bSU18-1  -  Teignmouth', '6bSU18-2': '6bSU18-2  -  Teign Estuary', '6bSU20-1': '6bSU20-1  -  Oddicombe', '6bSU21-2': '6bSU21-2  -  Meadfoot', '6bSU21-4': '6bSU21-4  -  Torquay and Livermead', '6bSU21-5': '6bSU21-5  -  Paignton', '6bSU21-6': '6bSU21-6  -  Goodrington Sands', '6bSU21-8': '6bSU21-8  -  Broadsands', '6bSU25-2': '6bSU25-2  -  Blackpool Sands', '6bSU26-1': '6bSU26-1  -  Slapton Sands', '6bSU26-2': '6bSU26-2  -  Beesands', '6bSU26-3': '6bSU26-3  -  Hallsands', '6cSU28': '6cSU28  -  Salcombe', '6cSU30-2': '6cSU30-2  -  Hope Cove', '6cSU30-4': '6cSU30-4  -  Thurlestone', '6cSU31-1': '6cSU31-1  -  Bantham', '6cSU31-2': '6cSU31-2  -  Bigbury-on-Sea', '6cSU31-3': '6cSU31-3  -  Challaborough', '6cSU33': '6cSU33  -  Wembury', '6cSU38': '6cSU38  -  Kingsand & Cawsand', '6d6D1-4': '6d6D1-4  -  Seaton (Cornwall) & Downderry', '6d6D1-6': '6d6D1-6  -  Looe', '6d6D1-8': '6d6D1-8  -  Talland', '6d6D2-13': '6d6D2-13  -  Pentewan Sands', '6d6D2-15': '6d6D2-15  -  Portmellon Beach', '6d6D2-17': '6d6D2-17  -  Gorran Haven', '6d6D2-4': '6d6D2-4  -  Par Sands', '6d6D2-7': '6d6D2-7  -  Carlyon Bay', '6d6D3-10': '6d6D3-10  -  Carne Beach', '6d6D3-12': '6d6D3-12  -  Portscatho', '6d6D3-2': '6d6D3-2  -  Hemmick Beach', '6d6D3-4': '6d6D3-4  -  Porthluney Cove', '6d6D3-6': '6d6D3-6  -  Portholland', '6d6D5-10': '6d6D5-10  -  Porthallow', '6d6D5-11': '6d6D5-11  -  Porthoustock', '6d6D5-12': '6d6D5-12  -  Coverack', '6d6D5-14': '6d6D5-14  -  Kennack Sands (East)', '6d6D5-15': '6d6D5-15  -  Kennack Sands (West)', '6d6D5-17': '6d6D5-17  -  Cadgwith', '6d6D5-2': '6d6D5-2  -  Swanpool', '6d6D5-4': '6d6D5-4  -  Maenporth', '6eA4-2': '6eA4-2  -  The Bar', '6eA8-1': '6eA8-1  -  Periglis', '6eA8-2': '6eA8-2  -  Porth Coose', '6eA8-4': '6eA8-4  -  Porth Killer', '6eB1-1': '6eB1-1  -  Great Porth', '6eB1-2': '6eB1-2  -  Sinking Porth', '6eB1-4': '6eB1-4  -  Great Popplestones', '6eB1-5': '6eB1-5  -  Little Popplestones', '6eB2-2': '6eB2-2  -  Kitchen Porth', '6eB3-1': '6eB3-1  -  The Town', '6eB3-2 & 6eB3-3': '6eB3-2 & 6eB3-3  -  Green Bay', '6eB4': '6eB4  -  Rushy Bay', '6eM12': '6eM12  -  Old Town', '6eM1-3': '6eM1-3  -  Hugh Town', '6eM1-4': '6eM1-4  -  Hugh Town', '6eM15': '6eM15  -  Porthcressa', '6eM2': '6eM2  -  Porth Mellon', '6eM3': "6eM3  -  Thomas' Porth", '6eM4': '6eM4  -  Porth Loo', '6eM5': '6eM5  -  Bar Point', '6eM6': '6eM6  -  Pelistry', '6eM7': '6eM7  -  Porth Hellick', '6eM9': '6eM9  -  Porth Minnick', '6eN1': "6eN1  -  Bab's Carn", '6eN2': "6eN2  -  St Martin's Bay", '6eN3': '6eN3  -  Higher Town Bay', '6eN4': "6eN4  -  St Martin's Flats", '6eSU10-1': '6eSU10-1  -  Marazion', '6eSU10-2': '6eSU10-2  -  Mounts Bay', '6eSU11': '6eSU11  -  Newlyn', '6eSU3-2': '6eSU3-2  -  Mullion', '6eSU3-4': '6eSU3-4  -  Poldhu', '6eSU3-6': '6eSU3-6  -  Church Cove', '6eSU4-3': '6eSU4-3  -  Gunwalloe Cove', '6eSU4-4': '6eSU4-4  -  Loe Bar', '6eSU4-5': '6eSU4-5  -  Porthleven Sands', '6eSU4-6': '6eSU4-6  -  Porthleven', '6eSU6-2': '6eSU6-2  -  Praa Sands', '6eSU8-2': '6eSU8-2  -  Perran Sands', '6eSU9-2': '6eSU9-2  -  Little London', '6eT1': '6eT1  -  New Grimsby', '6eT3-2': '6eT3-2  -  Old Grimsby', '6eT4': '6eT4  -  Borough Beach', '6eT5': '6eT5  -  Pentle Bay', '6eT6': '6eT6  -  Appletree Bay', '6eT7': '6eT7  -  New Grimsby', '7a7A1-2': '7a7A1-2  -  Sennen Cove', '7a7A2-2': '7a7A2-2  -  Porthmeor Beach', '7a7A2-3': '7a7A2-3  -  Porth Gwidden', '7a7A2-4': '7a7A2-4  -  St Ives', '7a7A2-5': '7a7A2-5  -  Carbis Bay', '7a7A2-6': '7a7A2-6  -  Hayle Estuary', '7a7A2-7': '7a7A2-7  -  Hayle Estuary to Godrevy Point', '7a7A3-13': '7a7A3-13  -  Crantock Beach', '7a7A3-15': '7a7A3-15  -  Fistral Beach', '7a7A3-17': '7a7A3-17  -  Newquay to Porth (Towan)', '7a7A3-18': '7a7A3-18  -  Watergate Bay', '7a7A3-19': '7a7A3-19  -  Trenance', '7a7A3-2': '7a7A3-2  -  Portreath', '7a7A3-21': '7a7A3-21  -  Porthcothan', '7a7A3-23': '7a7A3-23  -  Treyarnon & Constantine', '7a7A3-4': '7a7A3-4  -  Porth Towan', '7a7A3-8': '7a7A3-8  -  Perranporth', '7a7A3-9': '7a7A3-9  -  Perranporth Sands', '7b7B1-2': '7b7B1-2  -  Harlyn', '7b7B1-8': '7b7B1-8  -  Polzeath', '7b7B2-4': '7b7B2-4  -  Port Isaac', '7b7B3-1': '7b7B3-1  -  Black Rock', '7b7B3-2': '7b7B3-2  -  Widemouth Sand', '7b7B3-4': '7b7B3-4  -  Bude', '7cINST2': '7cINST2  -  Instow', '7cSAUN1': '7cSAUN1  -  Crow Point to Saunton Sands', '7cWEST2': '7cWEST2  -  Westward Ho!', '7dBURN2': '7dBURN2  -  Burnham-on-sea', '7dBURN3': '7dBURN3  -  Berrow Dunes', '7dBURN4-A': '7dBURN4-A  -  Brean Village (South)', '7dBURN4-B': '7dBURN4-B  -  Brean Village (North)', '7dLILS2': '7dLILS2  -  Lilstock', '7dMINE1': '7dMINE1  -  Culver Cliff to Minehead', '7dMINE2': '7dMINE2  -  Minehead Harbour to Warren Point', '7dMINE3': '7dMINE3  -  The Warren', '7dMINE3b': '7dMINE3b  -  The Warren', '7dMINE4': '7dMINE4  -  Dunster Beach Holiday Park', '7dMINE5': '7dMINE5  -  Ker Moor', '7dMINE5b': '7dMINE5b  -  Ker Moor', '7dMINE6': '7dMINE6  -  Blue Anchor', '7dPARR2': '7dPARR2  -  Hinkley Point to Stolford', '7dPARR3': '7dPARR3  -  Steart', '7dPARR3b': '7dPARR3b  -  Steart', '7dPARR3c': '7dPARR3c  -  Steart', '7dPORL1': '7dPORL1  -  Gore Point to Porlock Weir', '7dPORL2': '7dPORL2  -  Porlock Weir', '7dPORL3': '7dPORL3  -  Porlockford to Hurlstone Point', '7eSANB1': '7eSANB1  -  Sand Bay', '7eSANB1b': '7eSANB1b  -  Sand Bay', '7eSU15-1': '7eSU15-1  -  Severn Beach', '7eSU15-2': '7eSU15-2  -  Avonmouth', '7eSU17-2': '7eSU17-2  -  Portishead', '7eSU17-5': '7eSU17-5  -  Clevedon', '7eWSM1': '7eWSM1  -  Weston-super-Mare', '7eWSM2': '7eWSM2  -  Weston-super-Mare'}
 
 fig = go.Figure()
 
@@ -3635,7 +3638,7 @@ layout = html.Div(
         dcc.Store(id="zoom-level-store", data=13),
         dcc.Store(
             id="selected-value-storage",
-            data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data' : None},
+            data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data' : None, 'survey_type':'Interim'},
         ),
         dcc.Store(id = 'multi-select-lines'),
         dcc.Location(id="url", refresh=False),  # Add a Location component
@@ -3659,13 +3662,18 @@ layout = html.Div(
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
 
+          Output("survey-type-dropdown", "value"),
+
+
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
           Input("survey-unit-dropdown", "value"),  # dropdown value of the line dropdown
           Input("survey-line-dropdown", "value"),
-          Input('selected-value-storage', 'data'))
+          Input('selected-value-storage', 'data'),
 
-def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, selected_val_storage):
+          Input("survey-type-dropdown", "value"))
+
+def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, selected_val_storage, survey_type_dropdown_vals):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -3715,28 +3723,28 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             multi_same_check = True
 
     # handle if nothing selected:
-    if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown'] or ctx_id is None:
+    if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown', 'survey-type-dropdown'] or ctx_id is None:
 
 
         default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT,
                                                "profile_line": INITIAL_LOAD_PROFILE_LINE}
 
         default_options= [{'label': "6a01613",'value': "6a01613"},
-                                     {'label': "6a01614",'value': "6a01614"},
-                                     {'label': "6a01615",'value': "6a01615"},
-                                     {'label': "6a01616",'value': "6a01616"},
-                                     {'label': "6a01617",'value': "6a01617"},
-                                     {'label': "6a01618",'value': "6a01618"},
-                                     {'label': "6a01619",'value': "6a01619"},
-                                     {'label': "6a01620",'value': "6a01620"},
-                                     {'label': "6a01621",'value': "6a01621"},
-                                     {'label': "6a01622",'value': "6a01622"},
-                                     {'label': "6a01623",'value': "6a01623"},
-                                     {'label': "6a01624",'value': "6a01624"}]
+                                     #{'label': "6a01614",'value': "6a01614"},
+                                     {'label': "6a01615",'value': "6a01615"},#
+                                     #{'label': "6a01616",'value': "6a01616"},
+                                     #{'label': "6a01617",'value': "6a01617"},
+                                     {'label': "6a01618",'value': "6a01618"},#
+                                     #{'label': "6a01619",'value': "6a01619"},
+                                     #{'label': "6a01620",'value': "6a01620"},
+                                     {'label': "6a01621",'value': "6a01621"},#
+                                     #{'label': "6a01622",'value': "6a01622"},
+                                     #{'label': "6a01623",'value': "6a01623"},
+                                     {'label': "6a01624",'value': "6a01624"}]#
 
-        selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE, 'multi': False,'box_selected_data': None },
+        selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE, 'multi': False,'box_selected_data': None,'survey_type':'Interim'},
         profile_line_options = default_options
-        return selected_value_result, profile_line_options, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None
+        return selected_value_result, profile_line_options, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None , 'Interim'
 
     # survey_unit_dropdown was used set the survey unit, the profile line options and the first line option as the val:
     elif ctx.triggered_id == 'survey-unit-dropdown':
@@ -3745,20 +3753,36 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         selected_value_result = {"survey_unit": sur_unit_dropdown_val,
                                  "profile_line": survey_unit_dropdown_options[0],
                                  'multi': False,
-                                 'box_selected_data': None },
+                                 'box_selected_data': None,
+                                 'survey_type': survey_type_dropdown_vals
+                                 },
 
         profile_line_options = survey_unit_dropdown_options
 
-        return selected_value_result, profile_line_options, sur_unit_dropdown_val, survey_unit_dropdown_options[0], None
+        return selected_value_result, profile_line_options, sur_unit_dropdown_val, survey_unit_dropdown_options[0], None, dash.no_update
 
     elif ctx.triggered_id == 'survey-line-dropdown':
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
         selected_value_result = {"survey_unit": sur_unit_dropdown_val,
                                  "profile_line": prof_line_dropdown_val,
                                  'multi': False,
-                                 'box_selected_data': None },
+                                 'box_selected_data': None,
+                                 'survey_type': survey_type_dropdown_vals},
 
-        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None
+        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
+
+    elif ctx.triggered_id == 'survey-type-dropdown':
+        # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
+        selected_value_result = {"survey_unit": sur_unit_dropdown_val,
+                                 "profile_line": prof_line_dropdown_val,
+                                 'multi': False,
+                                 'box_selected_data': None,
+                                 'survey_type': survey_type_dropdown_vals},
+
+        return selected_value_result, dash.no_update, dash.no_update, dash.no_update, None, survey_type_dropdown_vals
+
+
+
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
 
@@ -3776,12 +3800,15 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
                 prof_line_dropdown_options = unit_to_options.get(clicked_survey_unit, [])
 
-                selected_value_result = {"survey_unit":clicked_survey_unit,
+                selected_value_result = ({"survey_unit":clicked_survey_unit,
                                          "profile_line": prof_line_dropdown_options[0] ,
                                          'multi': False,
-                                         'box_selected_data': None}, prof_line_dropdown_options
+                                         'box_selected_data': None,
+                                         'survey_type': survey_type_dropdown_vals}
 
-                return selected_value_result, prof_line_dropdown_options, clicked_survey_unit, prof_line_dropdown_options[0], None
+                                         , prof_line_dropdown_options)
+
+                return selected_value_result, prof_line_dropdown_options, clicked_survey_unit, prof_line_dropdown_options[0], None,  dash.no_update
 
 
             # if the lines (profile lines) were clicked:
@@ -3791,9 +3818,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 selected_value_result = {"survey_unit":sur_unit_dropdown_val,
                                          "profile_line": clicked_profile_line,
                                          'multi': False,
-                                         'box_selected_data': None}
+                                         'box_selected_data': None,
+                                         'survey_type': survey_type_dropdown_vals}
 
-                return selected_value_result, prof_line_dropdown_options, dash.no_update, clicked_profile_line, None
+                return selected_value_result, prof_line_dropdown_options, dash.no_update, clicked_profile_line, None,  dash.no_update
 
         else:
 
@@ -3803,12 +3831,14 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                     "survey_unit": sur_unit_dropdown_val,
                     "profile_line": prof_line_dropdown_val,
                     'multi': True,
-                    'box_selected_data': box_selected_data['range']['mapbox']}
+                    'box_selected_data': box_selected_data['range']['mapbox'],
+                    'survey_type': survey_type_dropdown_vals
+                }
 
-                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None
+                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
 
             else:
-                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
+                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update
     else:
 
         if box_selected_data is not None and 'range' in box_selected_data.keys():
@@ -3817,12 +3847,14 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 "survey_unit": sur_unit_dropdown_val,
                 "profile_line": prof_line_dropdown_val,
                 'multi': True,
-                'box_selected_data': box_selected_data['range']['mapbox']}
+                'box_selected_data': box_selected_data['range']['mapbox'],
+                'survey_type': survey_type_dropdown_vals
+            }
 
-            return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None
+            return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
 
         else:
-            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None
+            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None,dash.no_update
 
 @callback(
     Output("example-map", "figure"),
@@ -3848,6 +3880,7 @@ def update_map(current_selected_sur_and_prof: dict ):
 
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
     set_profile_line = current_selected_sur_and_prof["profile_line"]
+    set_survey_types = current_selected_sur_and_prof["survey_type"]
 
     # Get the proforma text from the database
     engine = create_engine(
@@ -3855,7 +3888,7 @@ def update_map(current_selected_sur_and_prof: dict ):
     conn = engine.connect()
 
     # Import point (survey unit) spatial data as GeoDataFrame, conn is now a global function
-    query = "SELECT * FROM survey_units"  # Modify this query according to your table
+    query = "SELECT * FROM new_survey_units"  # Modify this query according to your table
     gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
 
     # change crs to supported crs
@@ -3963,6 +3996,12 @@ def update_map(current_selected_sur_and_prof: dict ):
     # Sort the valus by difference to order the legend items (legend is turned off in for now)
     updated_gdf = updated_gdf.sort_values('difference')
 
+
+    # join the names to the updated gdf for each surveyunit
+
+
+
+
     # Define a color mapping dictionary for each classification
     color_mapping = {
         'High Erosion': "#ff0000",
@@ -3983,7 +4022,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         lon="long",
         hover_name="sur_unit",
         hover_data=["sur_unit"],
-        custom_data=['sur_unit', 'classification'],
+        custom_data=['sur_unit', 'classification', 'name'],
         color='classification',  # Use the 'classification' column for classifier to use
         color_discrete_map=color_mapping,  # use color map to set the colors
         center={
@@ -3996,9 +4035,44 @@ def update_map(current_selected_sur_and_prof: dict ):
     )
 
     # Format the label shown, must have the <extra></extra> to remove the color being shown
-    updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "%{customdata[1]}" + "<extra></extra>"),
+    updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "<b>%{customdata[2]}<br>"
+                                                      + "%{customdata[1]}" + "<extra></extra>")
 
-    query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
+    # Logic to set the SQL query to account for user selected survey type
+    # If one survey type is selected a str is returned not a list, check for this and convert to a list
+    if isinstance(set_survey_types, str):
+        set_survey_types = [set_survey_types]
+
+    selected_columns = ['Interim', 'Post Storm', 'Baseline']
+    user_selection = set_survey_types
+
+
+    # all baselines are both interims and can be poststorms (every profile)
+    #if 'Baseline' in set_survey_types:
+    #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
+    if len(set_survey_types) == 1:
+        formatted_survey_type = set_survey_types[0].lower().replace(' ', '_')
+
+        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  {formatted_survey_type} = 'YES'"
+
+    else:
+        # Create a default SQL query string
+        base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND "
+        # Build the WHERE clause dynamically based on user selection
+        conditions = []
+        for column in selected_columns:
+            if column in user_selection:
+                conditions.append(f"{column.lower().replace(' ','_')} = 'YES'")
+            #else:
+                #conditions.append(f"{column.lower().replace(' ','_')} = 'NO'")
+
+        # Join the conditions using AND
+        base_sql_query += " AND ".join(conditions)
+        sql_query = base_sql_query
+
+   # query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
+    query_profile_lines = sql_query
+
     lines_gdf = gpd.GeoDataFrame.from_postgis(
         query_profile_lines, conn, geom_col="wkb_geometry"
     )

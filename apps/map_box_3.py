@@ -8,6 +8,9 @@ import plotly.graph_objects as go
 from shapely.geometry import LineString, Polygon
 import pandas as pd
 import numpy as np
+from sqlalchemy.exc import OperationalError
+import time
+from math import radians, sin, cos, sqrt, atan2
 
 from dash.exceptions import PreventUpdate
 
@@ -3628,33 +3631,87 @@ unit_to_options = {
 INITIAL_LOAD_SURVEY_UNIT = '6aSU12'
 INITIAL_LOAD_PROFILE_LINE = '6a01624'
 
-#Uused to add the names of the survey
-#SURVEY_UNIT_NAMES_DICT = {'6aSU10': '6aSU10  -  Sidmouth', '6aSU12': '6aSU12  -  Budleigh Salterton (East)', '6aSU13': '6aSU13  -  Budleigh Salterton', '6aSU16-1': '6aSU16-1  -  Exmouth', '6aSU2': '6aSU2  -  Chesil Beach', '6aSU3-2': '6aSU3-2  -  West Bexington', '6aSU3-3': '6aSU3-3  -  The Hive', '6aSU3-5': '6aSU3-5  -  Burton Freshwater', '6aSU4': '6aSU4  -  West Bay', '6aSU5-2': '6aSU5-2  -  Seatown', '6aSU5-4': '6aSU5-4  -  Charmouth', '6aSU6-1': '6aSU6-1  -  Lyme Regis (Broad Ledge)', '6aSU6-2': '6aSU6-2  -  Lyme Regis', '6aSU7-1': '6aSU7-1  -  The Cobb', '6aSU8-1': '6aSU8-1  -  Seaton (Devon)', '6bSU16-3': '6bSU16-3  -  Dawlish Warren', '6bSU17': '6bSU17  -  Dawlish', '6bSU18-1': '6bSU18-1  -  Teignmouth', '6bSU18-2': '6bSU18-2  -  Teign Estuary', '6bSU20-1': '6bSU20-1  -  Oddicombe', '6bSU21-2': '6bSU21-2  -  Meadfoot', '6bSU21-4': '6bSU21-4  -  Torquay and Livermead', '6bSU21-5': '6bSU21-5  -  Paignton', '6bSU21-6': '6bSU21-6  -  Goodrington Sands', '6bSU21-8': '6bSU21-8  -  Broadsands', '6bSU25-2': '6bSU25-2  -  Blackpool Sands', '6bSU26-1': '6bSU26-1  -  Slapton Sands', '6bSU26-2': '6bSU26-2  -  Beesands', '6bSU26-3': '6bSU26-3  -  Hallsands', '6cSU28': '6cSU28  -  Salcombe', '6cSU30-2': '6cSU30-2  -  Hope Cove', '6cSU30-4': '6cSU30-4  -  Thurlestone', '6cSU31-1': '6cSU31-1  -  Bantham', '6cSU31-2': '6cSU31-2  -  Bigbury-on-Sea', '6cSU31-3': '6cSU31-3  -  Challaborough', '6cSU33': '6cSU33  -  Wembury', '6cSU38': '6cSU38  -  Kingsand & Cawsand', '6d6D1-4': '6d6D1-4  -  Seaton (Cornwall) & Downderry', '6d6D1-6': '6d6D1-6  -  Looe', '6d6D1-8': '6d6D1-8  -  Talland', '6d6D2-13': '6d6D2-13  -  Pentewan Sands', '6d6D2-15': '6d6D2-15  -  Portmellon Beach', '6d6D2-17': '6d6D2-17  -  Gorran Haven', '6d6D2-4': '6d6D2-4  -  Par Sands', '6d6D2-7': '6d6D2-7  -  Carlyon Bay', '6d6D3-10': '6d6D3-10  -  Carne Beach', '6d6D3-12': '6d6D3-12  -  Portscatho', '6d6D3-2': '6d6D3-2  -  Hemmick Beach', '6d6D3-4': '6d6D3-4  -  Porthluney Cove', '6d6D3-6': '6d6D3-6  -  Portholland', '6d6D5-10': '6d6D5-10  -  Porthallow', '6d6D5-11': '6d6D5-11  -  Porthoustock', '6d6D5-12': '6d6D5-12  -  Coverack', '6d6D5-14': '6d6D5-14  -  Kennack Sands (East)', '6d6D5-15': '6d6D5-15  -  Kennack Sands (West)', '6d6D5-17': '6d6D5-17  -  Cadgwith', '6d6D5-2': '6d6D5-2  -  Swanpool', '6d6D5-4': '6d6D5-4  -  Maenporth', '6eA4-2': '6eA4-2  -  The Bar', '6eA8-1': '6eA8-1  -  Periglis', '6eA8-2': '6eA8-2  -  Porth Coose', '6eA8-4': '6eA8-4  -  Porth Killer', '6eB1-1': '6eB1-1  -  Great Porth', '6eB1-2': '6eB1-2  -  Sinking Porth', '6eB1-4': '6eB1-4  -  Great Popplestones', '6eB1-5': '6eB1-5  -  Little Popplestones', '6eB2-2': '6eB2-2  -  Kitchen Porth', '6eB3-1': '6eB3-1  -  The Town', '6eB3-2 & 6eB3-3': '6eB3-2 & 6eB3-3  -  Green Bay', '6eB4': '6eB4  -  Rushy Bay', '6eM12': '6eM12  -  Old Town', '6eM1-3': '6eM1-3  -  Hugh Town', '6eM1-4': '6eM1-4  -  Hugh Town', '6eM15': '6eM15  -  Porthcressa', '6eM2': '6eM2  -  Porth Mellon', '6eM3': "6eM3  -  Thomas' Porth", '6eM4': '6eM4  -  Porth Loo', '6eM5': '6eM5  -  Bar Point', '6eM6': '6eM6  -  Pelistry', '6eM7': '6eM7  -  Porth Hellick', '6eM9': '6eM9  -  Porth Minnick', '6eN1': "6eN1  -  Bab's Carn", '6eN2': "6eN2  -  St Martin's Bay", '6eN3': '6eN3  -  Higher Town Bay', '6eN4': "6eN4  -  St Martin's Flats", '6eSU10-1': '6eSU10-1  -  Marazion', '6eSU10-2': '6eSU10-2  -  Mounts Bay', '6eSU11': '6eSU11  -  Newlyn', '6eSU3-2': '6eSU3-2  -  Mullion', '6eSU3-4': '6eSU3-4  -  Poldhu', '6eSU3-6': '6eSU3-6  -  Church Cove', '6eSU4-3': '6eSU4-3  -  Gunwalloe Cove', '6eSU4-4': '6eSU4-4  -  Loe Bar', '6eSU4-5': '6eSU4-5  -  Porthleven Sands', '6eSU4-6': '6eSU4-6  -  Porthleven', '6eSU6-2': '6eSU6-2  -  Praa Sands', '6eSU8-2': '6eSU8-2  -  Perran Sands', '6eSU9-2': '6eSU9-2  -  Little London', '6eT1': '6eT1  -  New Grimsby', '6eT3-2': '6eT3-2  -  Old Grimsby', '6eT4': '6eT4  -  Borough Beach', '6eT5': '6eT5  -  Pentle Bay', '6eT6': '6eT6  -  Appletree Bay', '6eT7': '6eT7  -  New Grimsby', '7a7A1-2': '7a7A1-2  -  Sennen Cove', '7a7A2-2': '7a7A2-2  -  Porthmeor Beach', '7a7A2-3': '7a7A2-3  -  Porth Gwidden', '7a7A2-4': '7a7A2-4  -  St Ives', '7a7A2-5': '7a7A2-5  -  Carbis Bay', '7a7A2-6': '7a7A2-6  -  Hayle Estuary', '7a7A2-7': '7a7A2-7  -  Hayle Estuary to Godrevy Point', '7a7A3-13': '7a7A3-13  -  Crantock Beach', '7a7A3-15': '7a7A3-15  -  Fistral Beach', '7a7A3-17': '7a7A3-17  -  Newquay to Porth (Towan)', '7a7A3-18': '7a7A3-18  -  Watergate Bay', '7a7A3-19': '7a7A3-19  -  Trenance', '7a7A3-2': '7a7A3-2  -  Portreath', '7a7A3-21': '7a7A3-21  -  Porthcothan', '7a7A3-23': '7a7A3-23  -  Treyarnon & Constantine', '7a7A3-4': '7a7A3-4  -  Porth Towan', '7a7A3-8': '7a7A3-8  -  Perranporth', '7a7A3-9': '7a7A3-9  -  Perranporth Sands', '7b7B1-2': '7b7B1-2  -  Harlyn', '7b7B1-8': '7b7B1-8  -  Polzeath', '7b7B2-4': '7b7B2-4  -  Port Isaac', '7b7B3-1': '7b7B3-1  -  Black Rock', '7b7B3-2': '7b7B3-2  -  Widemouth Sand', '7b7B3-4': '7b7B3-4  -  Bude', '7cINST2': '7cINST2  -  Instow', '7cSAUN1': '7cSAUN1  -  Crow Point to Saunton Sands', '7cWEST2': '7cWEST2  -  Westward Ho!', '7dBURN2': '7dBURN2  -  Burnham-on-sea', '7dBURN3': '7dBURN3  -  Berrow Dunes', '7dBURN4-A': '7dBURN4-A  -  Brean Village (South)', '7dBURN4-B': '7dBURN4-B  -  Brean Village (North)', '7dLILS2': '7dLILS2  -  Lilstock', '7dMINE1': '7dMINE1  -  Culver Cliff to Minehead', '7dMINE2': '7dMINE2  -  Minehead Harbour to Warren Point', '7dMINE3': '7dMINE3  -  The Warren', '7dMINE3b': '7dMINE3b  -  The Warren', '7dMINE4': '7dMINE4  -  Dunster Beach Holiday Park', '7dMINE5': '7dMINE5  -  Ker Moor', '7dMINE5b': '7dMINE5b  -  Ker Moor', '7dMINE6': '7dMINE6  -  Blue Anchor', '7dPARR2': '7dPARR2  -  Hinkley Point to Stolford', '7dPARR3': '7dPARR3  -  Steart', '7dPARR3b': '7dPARR3b  -  Steart', '7dPARR3c': '7dPARR3c  -  Steart', '7dPORL1': '7dPORL1  -  Gore Point to Porlock Weir', '7dPORL2': '7dPORL2  -  Porlock Weir', '7dPORL3': '7dPORL3  -  Porlockford to Hurlstone Point', '7eSANB1': '7eSANB1  -  Sand Bay', '7eSANB1b': '7eSANB1b  -  Sand Bay', '7eSU15-1': '7eSU15-1  -  Severn Beach', '7eSU15-2': '7eSU15-2  -  Avonmouth', '7eSU17-2': '7eSU17-2  -  Portishead', '7eSU17-5': '7eSU17-5  -  Clevedon', '7eWSM1': '7eWSM1  -  Weston-super-Mare', '7eWSM2': '7eWSM2  -  Weston-super-Mare'}
+# These are the interims for the INITIAL_LOAD_PROFILE_LINE
+INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
+                                {'label': "6a01615", 'value': "6a01615"},
+                                {'label': "6a01618", 'value': "6a01618"},
+                                {'label': "6a01621", 'value': "6a01621"},
+                                {'label': "6a01624", 'value': "6a01624"}]
+
+def haversine(lat1, lon1, lat2, lon2):
+    # Radius of the Earth in meters
+    R = 6371000.0
+
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+
+def establish_connection(retries=3, delay=5):
+    """Function attempts to connect to the database. It will retry 3 times before giving up"""
+
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Attempt to create an engine and connect to the database
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
+            )
+            conn = engine.connect()
+
+            # If the connection is successful, return the connection object
+            return conn
+
+        except OperationalError as e:
+            # Handle the case where a connection cannot be established
+            print(f"Error connecting to the database: {e}")
+            attempts += 1
+
+            if attempts < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Max retry attempts reached. Giving up.")
+                # Optionally, you can raise an exception, log the error, or take other appropriate actions
+
+    return None  # Return None if all attempts fail
+
 
 fig = go.Figure()
 
 layout = html.Div(
     children=[
-        dcc.Store(id="zoom-level-store", data=13),
+        dcc.Store(id='map-state', data={'center': None}),
         dcc.Store(
             id="selected-value-storage",
-            data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data' : None, 'survey_type':'Interim'},
+            data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data': None,
+                  'survey_type': 'Interim'},
         ),
-        dcc.Store(id = 'multi-select-lines'),
+        dcc.Store(id='multi-select-lines'),
         dcc.Location(id="url", refresh=False),  # Add a Location component
 
         dcc.Graph(
-                    id="example-map",
-                    figure=fig,
-                    config={'modeBarButtonsToRemove': ['lasso2d']},
-                    className="map",
+            id="example-map",
+            figure=fig,
+            config={'modeBarButtonsToRemove': ['lasso2d']},
+            className="map",
 
-                ),
+        ),
 
     ],
     id="mapbox_div",
 
 )
+
 
 @callback(Output('selected-value-storage', 'data'),
           Output("survey-line-dropdown", "options"),
@@ -3664,7 +3721,6 @@ layout = html.Div(
 
           Output("survey-type-dropdown", "value"),
 
-
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
           Input("survey-unit-dropdown", "value"),  # dropdown value of the line dropdown
@@ -3672,8 +3728,8 @@ layout = html.Div(
           Input('selected-value-storage', 'data'),
 
           Input("survey-type-dropdown", "value"))
-
-def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str, selected_val_storage, survey_type_dropdown_vals):
+def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
+                  selected_val_storage, survey_type_dropdown_vals):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -3697,60 +3753,80 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
 
-    # setting if a multi select was indeed used and it is different from the last call
-    multi_same_check = True
-    if box_selected_data:
-        if 'range' in box_selected_data.keys():
-            current_box = box_selected_data['range']['mapbox']
+    def get_box_selected_data():
+
+        """Function returns if user has used box selection in the map. When box select is used 'selectedData'
+           prop from the map becomes populated. Note this is different from when a mouse click is used clickData'.
+           If box select used, returns list of box coordinates, else returns None
+
+           box_selected_data -> 'example-map', 'selectedData'
+
+           return -> None or 'selected_data' box coordinates as list
+
+           """
+
+        if box_selected_data:
+
+            if 'range' in box_selected_data.keys():
+                current_box = box_selected_data['range']['mapbox']
+            else:
+                current_box = None
         else:
             current_box = None
-    else:
-        current_box = None
 
-    if selected_val_storage:
-        # convert to a dict if not:
-        if isinstance(selected_val_storage, list):
-            fixed_val_storage = selected_val_storage[0]
-        else:
-            fixed_val_storage = selected_val_storage
+        return current_box
 
-        if fixed_val_storage['box_selected_data'] is not None:
-            if fixed_val_storage['box_selected_data'] == current_box:
-                multi_same_check = True
+    cal_box_selected_data = get_box_selected_data()
+
+    def value_storage_check():
+
+        """Function checks if 'selected_value_storage' dcc.store exists. If it does checks if it is a list. By default
+           it should always be. If 'selected_val_storage' is not a list, it directly assigns it to fixed_val_storage"""
+
+        if selected_val_storage:
+
+            # convert to a dict if not:
+            if isinstance(selected_val_storage, list):
+                fixed_val_storage = selected_val_storage[0]
             else:
-                multi_same_check = False
+                fixed_val_storage = selected_val_storage
+
         else:
-            multi_same_check = True
+            fixed_val_storage = None
 
-    # handle if nothing selected:
-    if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown', 'survey-type-dropdown'] or ctx_id is None:
+        return fixed_val_storage
 
+    checked_val_storage = value_storage_check()
 
-        default_values_for_store = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT,
-                                               "profile_line": INITIAL_LOAD_PROFILE_LINE}
+    def compare_val_storage_box_data_to_map_selected_data():
 
-        default_options= [{'label': "6a01613",'value': "6a01613"},
-                                     #{'label': "6a01614",'value': "6a01614"},
-                                     {'label': "6a01615",'value': "6a01615"},#
-                                     #{'label': "6a01616",'value': "6a01616"},
-                                     #{'label': "6a01617",'value': "6a01617"},
-                                     {'label': "6a01618",'value': "6a01618"},#
-                                     #{'label': "6a01619",'value': "6a01619"},
-                                     #{'label': "6a01620",'value': "6a01620"},
-                                     {'label': "6a01621",'value': "6a01621"},#
-                                     #{'label': "6a01622",'value': "6a01622"},
-                                     #{'label': "6a01623",'value': "6a01623"},
-                                     {'label': "6a01624",'value': "6a01624"}]#
+        """Function determines if box select was used, and also if it is different from the previous box selection.
+           This is needed as any previous box select data is stored in the dcc.store 'selected_val_storage' and
+           by checking if the new and old values are different tells the app if a new box select is used."""
 
-        selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE, 'multi': False,'box_selected_data': None,'survey_type':'Interim'},
-        profile_line_options = default_options
-        return selected_value_result, profile_line_options, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None , 'Interim'
+        if checked_val_storage['box_selected_data'] is not None:
+            if checked_val_storage['box_selected_data'] == cal_box_selected_data:
+                val_storage_box_select_data_same = True
+            else:
+                val_storage_box_select_data_same = False
+        else:
+            val_storage_box_select_data_same = True
+
+        return val_storage_box_select_data_same
+
+    multi_same_check = compare_val_storage_box_data_to_map_selected_data()
+
+    # handle if nothing selected, the initial load will run this block:
+    if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown',
+                      'survey-type-dropdown'] or ctx_id is None:
+
+        selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE,
+                                 'multi': False, 'box_selected_data': None, 'survey_type': 'Interim'},
+
+        return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim'
 
     # survey_unit_dropdown was used set the survey unit, the profile line options and the first line option as the val:
     elif ctx.triggered_id == 'survey-unit-dropdown':
-
-        survey_unit_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
-
         def get_new_profile_options():
 
             """Function creates new profile dropdown options based on the survey type selected"""
@@ -3762,9 +3838,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             selected_columns = ['Interim', 'Post Storm', 'Baseline']
             user_selection = survey_type_dropdown_vals
 
-            # all baselines are both interims and can be poststorms (every profile)
-            # if 'Baseline' in set_survey_types:
-            #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
             if len(survey_type_dropdown_vals) == 1:
                 formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
 
@@ -3773,6 +3846,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             else:
                 # Create a default SQL query string
                 base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND "
+
                 # Build the WHERE clause dynamically based on user selection
                 conditions = []
                 for column in selected_columns:
@@ -3785,9 +3859,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             query_profile_lines = sql_query
 
-            engine = create_engine(
-                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-            conn = engine.connect()
+            conn = establish_connection()
 
             lines_gdf = gpd.GeoDataFrame.from_postgis(
                 query_profile_lines, conn, geom_col="wkb_geometry"
@@ -3806,18 +3878,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         cal_profile_line_options = get_new_profile_options()
         profile_line_value = cal_profile_line_options[0].get('value')
 
-
-
-
-
         selected_value_result = {"survey_unit": sur_unit_dropdown_val,
                                  "profile_line": profile_line_value,
                                  'multi': False,
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals
                                  },
-
-        #profile_line_options = survey_unit_dropdown_options
 
         return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update
 
@@ -3834,8 +3900,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     elif ctx.triggered_id == 'survey-type-dropdown':
 
         # need to filter the dropdown options for only profiles that meet the survey type:
-
-
         def get_new_profile_options():
 
             """Function creates new profile dropdown options based on the survey type selected"""
@@ -3848,8 +3912,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             user_selection = survey_type_dropdown_vals
 
             # all baselines are both interims and can be poststorms (every profile)
-            # if 'Baseline' in set_survey_types:
-            #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
             if len(survey_type_dropdown_vals) == 1:
                 formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
 
@@ -3858,6 +3920,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             else:
                 # Create a default SQL query string
                 base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND "
+
                 # Build the WHERE clause dynamically based on user selection
                 conditions = []
                 for column in selected_columns:
@@ -3870,9 +3933,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             query_profile_lines = sql_query
 
-            engine = create_engine(
-                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-            conn = engine.connect()
+            conn = establish_connection()
 
             lines_gdf = gpd.GeoDataFrame.from_postgis(
                 query_profile_lines, conn, geom_col="wkb_geometry"
@@ -3880,10 +3941,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             profile_line_options = []
 
-            for _,row in lines_gdf.iterrows():
-                option_dict ={}
+            for _, row in lines_gdf.iterrows():
+                option_dict = {}
                 profile = row['profname']
-                option_dict.update({'label':profile, 'value': profile})
+                option_dict.update({'label': profile, 'value': profile})
                 profile_line_options.append(option_dict)
 
             return profile_line_options
@@ -3900,14 +3961,11 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals},
 
-        return selected_value_result,  cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals
-
-
-
+        return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
 
-        if click_data is not None :
+        if click_data is not None:
 
             # Line data has the key hovertext in the clickdata, points have customdata
             if "Profile Line ID" in click_data['points'][0]['hovertext']:
@@ -3917,36 +3975,145 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             # if the points (survey units) were clicked:
             if not line:
+
                 clicked_survey_unit = click_data.get("points", [])[0].get("customdata")[0]
 
-                prof_line_dropdown_options = unit_to_options.get(clicked_survey_unit, [])
+                def get_new_profile_options():
 
-                selected_value_result = ({"survey_unit":clicked_survey_unit,
-                                         "profile_line": prof_line_dropdown_options[0] ,
-                                         'multi': False,
-                                         'box_selected_data': None,
-                                         'survey_type': survey_type_dropdown_vals}
+                    """Function creates new profile dropdown options based on the survey type selected"""
 
-                                         , prof_line_dropdown_options)
+                    # If one survey type is selected a str is returned not a list, check for this and convert to a list
+                    if isinstance(survey_type_dropdown_vals, str):
+                        set_survey_types = [survey_type_dropdown_vals]
 
-                return selected_value_result, prof_line_dropdown_options, clicked_survey_unit, prof_line_dropdown_options[0], None,  dash.no_update
+                    selected_columns = ['Interim', 'Post Storm', 'Baseline']
+                    user_selection = survey_type_dropdown_vals
 
+                    # all baselines are both interims and can be poststorms (every profile)
+                    if len(survey_type_dropdown_vals) == 1:
+                        formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
+
+                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}' AND  {formatted_survey_type} = 'YES'"
+
+                    else:
+                        # Create a default SQL query string
+                        base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}' AND "
+
+                        # Build the WHERE clause dynamically based on user selection
+                        conditions = []
+                        for column in selected_columns:
+                            if column in user_selection:
+                                conditions.append(f"{column.lower().replace(' ', '_')} = 'YES'")
+
+                        # Join the conditions using AND
+                        base_sql_query += " AND ".join(conditions)
+                        sql_query = base_sql_query
+
+                    query_profile_lines = sql_query
+
+                    conn = establish_connection()
+
+                    lines_gdf = gpd.GeoDataFrame.from_postgis(
+                        query_profile_lines, conn, geom_col="wkb_geometry"
+                    )
+
+                    profile_line_options = []
+
+                    for _, row in lines_gdf.iterrows():
+                        option_dict = {}
+                        profile = row['profname']
+                        option_dict.update({'label': profile, 'value': profile})
+                        profile_line_options.append(option_dict)
+
+                    return profile_line_options
+
+                # set the profile selected to the first in the new calulated options
+
+                cal_profile_line_options = get_new_profile_options()
+                profile_line_value = cal_profile_line_options[0].get('value')
+
+                selected_value_result = ({"survey_unit": clicked_survey_unit,
+                                          "profile_line": profile_line_value,
+                                          'multi': False,
+                                          'box_selected_data': None,
+                                          'survey_type': survey_type_dropdown_vals}
+
+                                         , cal_profile_line_options)
+
+                return selected_value_result, cal_profile_line_options, clicked_survey_unit, \
+                profile_line_value, None, dash.no_update
 
             # if the lines (profile lines) were clicked:
             elif line:
-                clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[1].replace(" ","")
-                prof_line_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
-                selected_value_result = {"survey_unit":sur_unit_dropdown_val,
+                clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[
+                    1].replace(" ", "")
+
+                #prof_line_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
+
+                def get_new_profile_options():
+
+                    """Function creates new profile dropdown options based on the survey type selected"""
+
+                    # If one survey type is selected a str is returned not a list, check for this and convert to a list
+                    if isinstance(survey_type_dropdown_vals, str):
+                        set_survey_types = [survey_type_dropdown_vals]
+
+                    selected_columns = ['Interim', 'Post Storm', 'Baseline']
+                    user_selection = survey_type_dropdown_vals
+
+                    # all baselines are both interims and can be poststorms (every profile)
+                    if len(survey_type_dropdown_vals) == 1:
+                        formatted_survey_type = survey_type_dropdown_vals[0].lower().replace(' ', '_')
+
+                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND  {formatted_survey_type} = 'YES'"
+
+                    else:
+                        # Create a default SQL query string
+                        base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND "
+
+                        # Build the WHERE clause dynamically based on user selection
+                        conditions = []
+                        for column in selected_columns:
+                            if column in user_selection:
+                                conditions.append(f"{column.lower().replace(' ', '_')} = 'YES'")
+
+                        # Join the conditions using AND
+                        base_sql_query += " AND ".join(conditions)
+                        sql_query = base_sql_query
+
+                    query_profile_lines = sql_query
+
+                    conn = establish_connection()
+
+                    lines_gdf = gpd.GeoDataFrame.from_postgis(
+                        query_profile_lines, conn, geom_col="wkb_geometry"
+                    )
+
+                    profile_line_options = []
+
+                    for _, row in lines_gdf.iterrows():
+                        option_dict = {}
+                        profile = row['profname']
+                        option_dict.update({'label': profile, 'value': profile})
+                        profile_line_options.append(option_dict)
+
+                    return profile_line_options
+
+                # set the profile selected to the first in the new calulated options
+
+                cal_profile_line_options = get_new_profile_options()
+
+                selected_value_result = {"survey_unit": sur_unit_dropdown_val,
                                          "profile_line": clicked_profile_line,
                                          'multi': False,
                                          'box_selected_data': None,
                                          'survey_type': survey_type_dropdown_vals}
 
-                return selected_value_result, prof_line_dropdown_options, dash.no_update, clicked_profile_line, None,  dash.no_update
+                return selected_value_result, cal_profile_line_options, dash.no_update, clicked_profile_line, None, dash.no_update
 
         else:
 
-            if  box_selected_data is not None and 'range' in box_selected_data.keys():
+            if box_selected_data is not None and 'range' in box_selected_data.keys():
 
                 selected_value_result = {
                     "survey_unit": sur_unit_dropdown_val,
@@ -3975,25 +4142,28 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
 
         else:
-            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None,dash.no_update
+            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update
+
 
 @callback(
     Output("example-map", "figure"),
-    Output('multi-select-lines', 'data'),# holds if multi select the line ids
+    Output('multi-select-lines', 'data'),  # holds if multi select the line ids
     Output("test_loader", "loading_state"),
+    Output('map-state', 'data'),
+
     Input("selected-value-storage", "data"),
+    Input('map-state', "data"),
+    State('example-map', "relayoutData"),
 
     prevent_initial_call=False,
 )
-
-def update_map(current_selected_sur_and_prof: dict ):
-
+def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data):
     """Function controls the re-loading of the map. Takes in the value store which contains two values, selected survey
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
     to the user."""
 
-    #print(current_selected_sur_and_prof)
+    # print(current_selected_sur_and_prof)
 
     # print(current_selected_sur_and_prof)
     if isinstance(current_selected_sur_and_prof, list):
@@ -4004,11 +4174,9 @@ def update_map(current_selected_sur_and_prof: dict ):
     set_survey_types = current_selected_sur_and_prof["survey_type"]
 
     # Get the proforma text from the database
-    engine = create_engine(
-        "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-    conn = engine.connect()
+    conn = establish_connection()
 
-    # Import point (survey unit) spatial data as GeoDataFrame, conn is now a global function
+    # Import point (survey unit) spatial data as GeoDataFrame
     query = "SELECT * FROM new_survey_units"  # Modify this query according to your table
     gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
 
@@ -4114,14 +4282,8 @@ def update_map(current_selected_sur_and_prof: dict ):
     updated_gdf['sqrt_size'] = np.sqrt(updated_gdf['difference'].abs())
     updated_gdf['sqrt_size'] = np.sqrt(updated_gdf['sqrt_size'] * 4)  # adjust this to make points larger overall
 
-    # Sort the valus by difference to order the legend items (legend is turned off in for now)
+    # Sort the values by difference to order the legend items (legend is turned off in for now)
     updated_gdf = updated_gdf.sort_values('difference')
-
-
-    # join the names to the updated gdf for each surveyunit
-
-
-
 
     # Define a color mapping dictionary for each classification
     color_mapping = {
@@ -4167,10 +4329,6 @@ def update_map(current_selected_sur_and_prof: dict ):
     selected_columns = ['Interim', 'Post Storm', 'Baseline']
     user_selection = set_survey_types
 
-
-    # all baselines are both interims and can be poststorms (every profile)
-    #if 'Baseline' in set_survey_types:
-    #    sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND  baseline = 'YES'"
     if len(set_survey_types) == 1:
         formatted_survey_type = set_survey_types[0].lower().replace(' ', '_')
 
@@ -4179,19 +4337,18 @@ def update_map(current_selected_sur_and_prof: dict ):
     else:
         # Create a default SQL query string
         base_sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}' AND "
+
         # Build the WHERE clause dynamically based on user selection
         conditions = []
         for column in selected_columns:
             if column in user_selection:
-                conditions.append(f"{column.lower().replace(' ','_')} = 'YES'")
-
-
+                conditions.append(f"{column.lower().replace(' ', '_')} = 'YES'")
 
         # Join the conditions using AND
         base_sql_query += " AND ".join(conditions)
         sql_query = base_sql_query
 
-   # query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"  # Modify this query according to your table
+    # query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
     query_profile_lines = sql_query
 
     lines_gdf = gpd.GeoDataFrame.from_postgis(
@@ -4211,7 +4368,7 @@ def update_map(current_selected_sur_and_prof: dict ):
          "survey_unit": lines_gdf['surveyunit'],
          "geometry": [loads(wkt) for wkt in lines_gdf["wkb_geometry"].astype("string")],
          }
-     )
+    )
 
     lines_inside_box = []
     if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
@@ -4235,7 +4392,6 @@ def update_map(current_selected_sur_and_prof: dict ):
             profile = row['profname']
 
             if geometry.intersects(range_polygon):
-
                 lines_inside_box.append(profile)
     else:
         lines_inside_box = []
@@ -4258,7 +4414,7 @@ def update_map(current_selected_sur_and_prof: dict ):
         interim = row['interim']
         post_storm = row['post_storm']
         strategy = row['strategy']
-        survey_unit= row['survey_unit']
+        survey_unit = row['survey_unit']
 
         # Format the popup data
         custom_data = f"Profile Line ID: {profile_line_id}" \
@@ -4286,7 +4442,6 @@ def update_map(current_selected_sur_and_prof: dict ):
             hover_name=[custom_data] * len(interpolated_latitudes),
             line_group=[custom_data] * len(interpolated_longitudes)
 
-
         )
 
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
@@ -4304,26 +4459,69 @@ def update_map(current_selected_sur_and_prof: dict ):
     for i in range(len(line_traces)):
         fig.add_trace(line_traces[i].data[0])
 
+
+
     fig.update_layout(
         mapbox_style="open-street-map",
         margin=dict(l=0, r=0, b=0, t=0),
         showlegend=False,
-        mapbox={
-            "center": {"lat": center_lat, "lon": center_lon},
-            "zoom": 14,
-        },
+
     )
 
     # Add the scatter trace to the figure
     fig.add_traces(updated_scatter_trace.data)
 
-    return fig, lines_inside_box, {'is_loading': True}
+    old_map_data = map_state
+    new_map_data = {"lat": center_lat, "lon": center_lon}
+    try:
+        current_map_position = map_relayout_data['mapbox.center']
+        current_map_zoom = map_relayout_data['mapbox.zoom']
+    except Exception as e:
+        print(e)
+        current_map_position = None
+        current_map_zoom = None
 
+    #print(old_map_data)
+    #print(new_map_data)
+    #print(map_relayout_data)
 
+    state_to_return = None
+    if len(old_map_data.keys()) == 2:
+        distance = haversine(old_map_data['lat'], old_map_data['lon'], new_map_data['lat'], new_map_data['lon'])
+        distance_threshold = 1500
 
+        if distance > distance_threshold:
+            # If the distance is over the threshold, update the center and set the zoom
+            current_center = new_map_data
+            current_zoom = 13
+            state_to_return = new_map_data
+        else:
+            # If the distance is not over the threshold, keep the current center and zoom
+            if  current_map_position:
+                distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'], new_map_data['lon'])
+                distance_threshold = 1500
+                if distance > distance_threshold:
+                    current_center =new_map_data
+                    current_zoom = 13
+                    state_to_return = new_map_data
+                else:
+                    current_center = current_map_position
+                    current_zoom = current_map_zoom
+                    state_to_return = current_map_position
+            else:
+                current_center = old_map_data
+                current_zoom = 13
+                state_to_return = old_map_data
+    else:
+        # If the old_map_data doesn't have 'lat' and 'lon' keys, use the initial values
+        current_center = {"lat": center_lat, "lon": center_lon}
+        current_zoom = 13
+        state_to_return = current_center
 
+    # Update the map layout
+    fig.update_layout(mapbox={
+        "center": current_center,
+        "zoom": current_zoom,
+    })
 
-
-
-
-
+    return fig, lines_inside_box, {'is_loading': True} , state_to_return

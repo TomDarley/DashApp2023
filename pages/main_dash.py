@@ -59,27 +59,7 @@ layout = html.Div(
                                                 id="drop_down_card-title",
 
                                             ),
-                                            dcc.Dropdown(
-                                                options=[
 
-                                                    {
-                                                        "label": "Interim Surveys",
-                                                        "value": "Interim",
-                                                    },
-                                                    {
-                                                        "label": "Baseline Surveys",
-                                                        "value": "Baseline",
-                                                    },
-{
-                                                        "label": "Post Storm Surveys",
-                                                        "value": "Post Storm",
-                                                    },
-                                                ],
-                                                value="Interim",
-                                                id="survey-type-dropdown",
-                                                multi=True
-
-                                            ),
 
 
                                             dcc.Dropdown(
@@ -510,6 +490,27 @@ layout = html.Div(
                                                          {'label': "6a01624", 'value': "6a01624"}],
                                                 value="6a01613",
                                                 id="survey-line-dropdown",
+
+                                            ),
+                                            dcc.Dropdown(
+                                                options=[
+
+                                                    {
+                                                        "label": "Interim Surveys",
+                                                        "value": "Interim",
+                                                    },
+                                                    {
+                                                        "label": "Baseline Surveys",
+                                                        "value": "Baseline",
+                                                    },
+{
+                                                        "label": "Post Storm Surveys",
+                                                        "value": "Post Storm",
+                                                    },
+                                                ],
+                                                value="Interim",
+                                                id="survey-type-dropdown",
+                                                multi=True
 
                                             ),
                                         ],

@@ -10,11 +10,42 @@ import plotly.graph_objs as go
 import base64
 from dash.exceptions import PreventUpdate
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
+import time
 
 # delete this
 image_path = r"media/NERD.jpeg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
+
+def establish_connection(retries=3, delay=5):
+    """Function attempts to connect to the database. It will retry 3 times before giving up"""
+
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Attempt to create an engine and connect to the database
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
+            )
+            conn = engine.connect()
+
+            # If the connection is successful, return the connection object
+            return conn
+
+        except OperationalError as e:
+            # Handle the case where a connection cannot be established
+            print(f"Error connecting to the database: {e}")
+            attempts += 1
+
+            if attempts < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Max retry attempts reached. Giving up.")
+                # Optionally, you can raise an exception, log the error, or take other appropriate actions
+
+    return None  # Return None if all attempts fail
 
 
 layout = html.Div(
@@ -146,10 +177,8 @@ def make_scatter_plot(selected_survey_unit):
         """Establish database connection, make query and return df, both target profile and target date
         are optional as make_csa_df and get_area functions require different queries"""
 
-        # Get the proforma text from the database
-        engine = create_engine(
-            "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-        conn = engine.connect()
+        conn = establish_connection()
+
         # Import spatial data as GeoDataFrame
         query = f"SELECT * FROM cpa_table WHERE survey_unit = '{target_survey_unit}'"
         df = pd.read_sql_query(query, conn)

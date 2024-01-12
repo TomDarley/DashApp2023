@@ -1,0 +1,23 @@
+#error-bar-dropdown{
+    position: absolute;
+    width: 150px;
+    top: 1%;
+    left: 10px;
+    border-radius: 5px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px lightblue;}
+
+/* Media query for smaller screens (adjust max-width and font size as needed) */
+@media screen and (min-width: 0px) and (max-width:950px) {
+   #error-bar-dropdown{
+       position: absolute;
+        width: 100px;
+        top: 1%;
+        left: 10px;
+        border-radius: 5px;
+        border-radius: 10px;
+        box-shadow: 5px 5px 5px lightblue;
+
+
+        /* Adjust font size for smaller screens */
+    }

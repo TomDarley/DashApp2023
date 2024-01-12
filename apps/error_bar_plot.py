@@ -62,6 +62,22 @@ layout = html.Div(
             is_open=False,
             fullscreen=True,
         ),
+        dcc.Dropdown(
+            options=[
+
+                {
+                    "label": "Latest",
+                    "value": "Latest",
+                },
+
+            ],
+            value="Latest",
+            id="error-bar-dropdown",
+            multi=False
+
+        ),
+
+
     ],
 
     id= 'error_bar_plot_div'
@@ -72,10 +88,14 @@ layout = html.Div(
     Output("error_plot", "figure"),
     Output("error_plot_model", "figure"),
     Output("error_chart", "data"),
+    Output('error-bar-dropdown', 'options'),
+    Output('error-bar-dropdown', 'value'),
     Input("selected-df-storage", "data"),
     State("survey-unit-dropdown", "value"),
+    Input('error-bar-dropdown', 'value'),
+
 )
-def make_scatter_plot(cpa_df, selected_survey_unit):
+def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val):
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -85,6 +105,21 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
     melted_df = df.melt(
         ignore_index=False, var_name="Date", value_name="Value"
     ).reset_index()
+
+    # Get a list of all unique dates to populate the dropdown
+    drop_down_dates = list(melted_df['Date'].unique())
+
+    def make_options_list(date_list):
+        options= []
+        options.append({"label": 'Latest',"value": 'Latest'})
+
+        for date in date_list:
+            option_dict ={}
+            option_dict.update({ "label": date.strftime('%Y-%m-%d'),"value": date})
+            options.append(option_dict)
+        return options
+
+    drop_down_options = make_options_list(drop_down_dates)
 
     # Calculate min and max values for each profile
     min_values = melted_df.groupby("index")["Value"].min()
@@ -100,20 +135,26 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         template="plotly",
         # height=600,
     )
-
-    # Calculate the most recent value information
-    latest_date = df.columns[-1]
-    most_recent_values = df[latest_date]
-    most_recent_info = pd.DataFrame(
-        {"Index": most_recent_values.index, "Value": most_recent_values}
-    )
-
-
+    if drop_down_val == 'Latest' or drop_down_val is None:
+        # Calculate the most recent value information
+        set_dropdown_val = 'Latest'
+        format_legend_title = 'Latest'
+        latest_date = df.columns[-1]
+        most_recent_values = df[latest_date]
+        most_recent_info = pd.DataFrame(
+            {"Index": most_recent_values.index, "Value": most_recent_values}
+        )
+    else:
+        set_dropdown_val = drop_down_val
+        latest_date = drop_down_val
+        format_legend_title = latest_date.split('T')[0]
+        most_recent_values = df[latest_date]
+        most_recent_info = pd.DataFrame(
+            {"Index": most_recent_values.index, "Value": most_recent_values})
 
     # Add a red scatter point for the most recent values
     for _, row in most_recent_info.iterrows():
-
-        popup_text = f"Latest Survey: {latest_date}"
+        popup_text = f"Survey: {format_legend_title}"
         scatter_trace = go.Scatter(
             x=[row["Index"]],
             y=[row["Value"]],
@@ -122,12 +163,9 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
             marker=dict(color="red", size=10),
             showlegend=False,
             customdata=[[[row["Index"]],[round(row["Value"],2)]]],
-
-
-
         )
-
         fig.add_trace(scatter_trace)
+
 
     # Format the label shown in the hover
     fig.update_traces(
@@ -151,7 +189,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
         y=[None],
         mode="markers",
         marker=dict(color="red", size=8),
-        name="Latest Survey",
+        name=str(format_legend_title),
     )
     fig.add_trace(dummy_legend_trace)
     fig.update_layout(showlegend=True, legend_title_text="Profile Name")
@@ -208,7 +246,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit):
     # Update the 'cpa' key in the store's data with the serialized figure
     chart_data = {"error_plot": serialized_fig}
 
-    return fig, fig, chart_data
+    return fig, fig, chart_data, drop_down_options, set_dropdown_val
 
 
 # adding the callbacks that control the modal buttons display logic

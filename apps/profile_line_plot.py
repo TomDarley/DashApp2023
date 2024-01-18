@@ -341,12 +341,12 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         max_chainage = float(max_chainage)
 
         # Modifier to make the lines overlap the master profile. How much to show past master profile
-        modifier_percent  = 0.05
+        modifier_percent  = 0.5
 
         chainge_overshoot = max_chainage * modifier_percent
 
-        min_chainage = int(min_chainage) - chainge_overshoot  #-200
-        max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
+        #min_chainage = int(min_chainage) - chainge_overshoot  #-200
+        #max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
 
         topo_df = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
 

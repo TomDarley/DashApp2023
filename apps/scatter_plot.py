@@ -97,19 +97,28 @@ layout = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """This chart shows the combined profile area for a selected survey unit. """,style={"font-size": 20},),
+                            """This chart represents the combined profile area (CPA m²) trend in cross-sectional area (CSA m²).""",style={"font-size": 20},),
                         html.P(
-                            """The chart is a good way to depict overall trends of an entire survey unit or for showing 
-                               seasonal fluctuations. The combined profile area is calculated by summing all 
-                               the profile cross sectional areas for a given survey.""",
+                            """ All interim profile areas are combined for each interim and baseline survey conducted to date to provide a survey unit with a single ‘beach area’, referred to as the Combined Profile Area (CPA), to compare using linear trend analysis over a temporal scale. Interim surveys from the spring surveys (blue circles), autumn (red diamonds) and baseline (green squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
 
                             style={"font-size": 20},
                         ),
-                        html.Img(
-                            src=f"data:image/jpeg;base64,{encoded_image}",
-                            alt="CSA Scatter Plot Image",
-                            style={"height": "40vh","width": "100%",  },
+
+                        html.P(
+                            """Interim surveys from the spring surveys (blue circles), autumn (red diamonds) and baseline (green squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
+
+                            style={"font-size": 20},
                         ),
+
+
+
+
+
+                        #html.Img(
+                        #    src=f"data:image/jpeg;base64,{encoded_image}",
+                        #    alt="CSA Scatter Plot Image",
+                        #    style={"height": "40vh","width": "100%",  },
+                        #),
                     ]
                 ),
                 dbc.ModalFooter(

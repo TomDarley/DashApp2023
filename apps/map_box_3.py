@@ -4312,7 +4312,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             "lat": center_lat,
             "lon": center_lon,
         },
-        zoom=5,
+        zoom=25,
         size="sqrt_size",  # set the size based off sqrt column
         size_max=25,
     )
@@ -4495,9 +4495,10 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             current_center = new_map_data
             current_zoom = 13
             state_to_return = new_map_data
+
         else:
             # If the distance is not over the threshold, keep the current center and zoom
-            if  current_map_position:
+            if current_map_position:
                 distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'], new_map_data['lon'])
                 distance_threshold = 1500
                 if distance > distance_threshold:
@@ -4513,9 +4514,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 current_zoom = 13
                 state_to_return = old_map_data
     else:
-        # If the old_map_data doesn't have 'lat' and 'lon' keys, use the initial values
+        # If the old_map_data doesn't have 'lat' and 'lon' keys, (Set the initial load zoom and center here!!)
         current_center = {"lat": center_lat, "lon": center_lon}
-        current_zoom = 13
+        current_zoom = 6
         state_to_return = current_center
 
     # Update the map layout

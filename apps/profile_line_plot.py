@@ -170,11 +170,31 @@ layout = html.Div(
 
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
-                dbc.ModalBody("This is a nice chart!"),
+                dbc.ModalHeader(dbc.ModalTitle("Profile Cross-Sectional Area Chart")),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """This chart represents a cross-section of each beach profile, allowing for a visual comparison of beach change for a certain area across the length of the beach profile""",style={"font-size": 20},),
+                        html.P(
+                            """Any number of surveys can be compared by toggling them on or off using the legend function on the right-hand side of the chart. Each profile is displayed against the master profile shown by the dashed red lines, which denotes the seaward boundary of mean low water springs (MLWS) and the landward boundary.""",
+
+                            style={"font-size": 20},
+                        ),
+
+                        html.P(
+                            """This data can also be displayed in 3D by clicking the 3D icon on the top left of the chart. Minimum, maximum and average elevations of any profile can also be displayed by clicking the line graph icon.""",
+
+                            style={"font-size": 20},
+                        ),
+
+                    ]
+                ),
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="line_info_close", className="ms-auto", n_clicks=0
+                        "Close",
+                        id="line_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
                     )
                 ),
             ],
@@ -182,6 +202,7 @@ layout = html.Div(
             is_open=False,
             fullscreen=False,
         ),
+
         dbc.Modal(
             [
                 #dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),

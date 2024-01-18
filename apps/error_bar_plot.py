@@ -31,14 +31,29 @@ layout = html.Div(
             className="mr-3",
             style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
         ),
+
         # adding info and max view modals (the popups)
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
-                dbc.ModalBody("This is a nice chart!"),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """The box plot displays the latest cross-sectional area (CSA m²), min, max, median, upper and lower quartile ranges for all profiles of the selected survey unit""",
+                            style={"font-size": 20}, ),
+                        html.P(
+                            """This allows comparison of the range of change for each profile. The latest CSA m² area can also be changed to view values from previous surveys using the drop-down icon at the top left of the chart.""",
+
+                            style={"font-size": 20},
+                        ),
+                    ]
+                ),
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="error_info_close", className="ms-auto", n_clicks=0
+                        "Close",
+                        id="error_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
                     )
                 ),
             ],
@@ -46,6 +61,7 @@ layout = html.Div(
             is_open=False,
             fullscreen=False,
         ),
+
         dbc.Modal(
             [
                 #dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
@@ -62,6 +78,7 @@ layout = html.Div(
             is_open=False,
             fullscreen=True,
         ),
+
         dcc.Dropdown(
             options=[
 

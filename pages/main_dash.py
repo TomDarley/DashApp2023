@@ -664,6 +664,7 @@ layout = html.Div(
                 ),
                 dbc.Col(
                     html.Div(
+
                         scatter_plot.layout,
                     ),
                     id='main_dash_scatter_div',
@@ -691,7 +692,27 @@ layout = html.Div(
                     align="start",
                 ),
                 dbc.Col(
-                    html.Div(profile_line_plot.layout),
+                    html.Div([
+
+                        # This is the alert message for when mp data only has one point.
+                        dbc.Alert(
+                            "Master Profile Data For This Profile Was Not Found, Please Try Another Profile!",
+                            id="mp-alert",
+                            is_open=False,
+                            #duration=4000,
+                            color="danger",
+                            style={'position': 'absolute', 'top': '0', 'left': '0', 'right': '0', 'zIndex': 1000}
+                        ),
+
+                        profile_line_plot.layout,
+
+
+
+
+
+
+                             ],style={'position': 'relative'}),
+
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
                     md={"size": 12, "offset": 0},

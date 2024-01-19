@@ -4401,8 +4401,12 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     for i, row in line_data.iterrows():
         line = row["geometry"]
 
-        latitudes = [coord[1] for coord in line.coords]
-        longitudes = [coord[0] for coord in line.coords]
+        # Extract only the first and last coordinates, some profiles have more than two data points.
+        first_coordinate = line.coords[0]
+        last_coordinate = line.coords[-1]
+
+        latitudes = [first_coordinate[1], last_coordinate[1]]
+        longitudes = [first_coordinate[0], last_coordinate[0]]
 
         # Added more points for each line, more points smoother larger click area
         interpolated_latitudes = np.linspace(latitudes[0], latitudes[-1], 20)
@@ -4415,6 +4419,17 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         post_storm = row['post_storm']
         strategy = row['strategy']
         survey_unit = row['survey_unit']
+
+        if not strategy:
+            print('missing')
+
+        # Check and set to 'None' if any variable is None. This caused a bug where custom data could not load
+        profile_line_id = 'None' if profile_line_id is None else profile_line_id
+        baseline = 'None' if baseline is None else baseline
+        interim = 'None' if interim is None else interim
+        post_storm = 'None' if post_storm is None else post_storm
+        strategy = 'None' if strategy is None else strategy
+        survey_unit = 'None' if survey_unit is None else survey_unit
 
         # Format the popup data
         custom_data = f"Profile Line ID: {profile_line_id}" \

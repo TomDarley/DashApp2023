@@ -4496,6 +4496,12 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         current_map_position = None
         current_map_zoom = None
 
+    # If current_map_position or current_map_zoom is None, use default values
+    if current_map_position is None:
+        current_map_position = [center_lat, center_lon]
+    if current_map_zoom is None:
+        current_map_zoom =16
+
     #print(old_map_data)
     #print(new_map_data)
     #print(map_relayout_data)

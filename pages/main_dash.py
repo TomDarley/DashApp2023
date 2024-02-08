@@ -23,6 +23,8 @@ from sqlalchemy import create_engine
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 dash.register_page(__name__, path="/main_dash")
+
+
 # define the layout of the main page
 layout = html.Div(
     [

@@ -139,7 +139,6 @@ layout = html.Div(
                 id='month-dropdown',
                 value='summer',
                 multi=True
-
             ),
 
             dcc.Dropdown(

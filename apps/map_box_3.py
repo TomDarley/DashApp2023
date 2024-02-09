@@ -4498,7 +4498,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # If current_map_position or current_map_zoom is None, use default values
     if current_map_position is None:
-        current_map_position = [center_lat, center_lon]
+        current_map_position = {"lat": center_lat, "lon": center_lon}
     if current_map_zoom is None:
         current_map_zoom =16
 
@@ -4520,6 +4520,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         else:
             # If the distance is not over the threshold, keep the current center and zoom
             if current_map_position:
+
+
+
                 distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'], new_map_data['lon'])
                 distance_threshold = 1500
                 if distance > distance_threshold:

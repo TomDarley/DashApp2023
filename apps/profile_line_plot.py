@@ -268,8 +268,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     conn = engine.connect()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
+
     master_profile_query = (
-        f"SELECT * FROM master_profiles WHERE profile_id = '{selected_profile}'"
+        f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
 
     # get mp data as df
@@ -332,11 +333,9 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             initial_visible_traces = [first_trace_date, newest_trace_date, previous_trace_date]
 
             # Load master profile data from DB, extract chainage and elevation
-            other_columns = mp_df.iloc[:, 1:]
-            master_profile_chainage = other_columns.apply(lambda col: col.str.split(",").str[0]).astype(float).iloc[
-                0].tolist()
-            master_profile_elevation = other_columns.apply(lambda col: col.str.split(",").str[-2]).astype(float).iloc[
-                0].tolist()
+
+            master_profile_chainage = list(mp_df['chainage'])
+            master_profile_elevation = list(mp_df['elevation'])
 
             min_chainage = master_profile_chainage[0]
             max_chainage = master_profile_chainage[-1]
@@ -482,7 +481,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                     go.Scatter(
                         x=master_profile_chainage,
                         y=master_profile_elevation,
-                        line=dict(color="red", width=5, dash="dash"),
+                        line=dict(color="red", width=4, dash="dash"),
                         name="Master Profile",
 
                     )
@@ -668,19 +667,24 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 else:
                     return 'winter'
 
+            # add season as column to the df
             topo_df['season'] = topo_df['month'].apply(get_season)
 
+            # get a list of unique years and month sorted, we are dynamically generating the dropdown values
             years = sorted(list(topo_df['year'].unique().astype(int)))
             months = list(topo_df['season'].unique())
 
             def make_options(unique_vals: list):
+                """Function makes a options dict, one that dash dropdown can ingest """
 
                 options = [{'label': str(item), 'value': item} for item in unique_vals]
                 return options
 
+            # make the options dicts for the dropdowns
             year_dropdown_options = make_options(years)
             month_dropdown_options = make_options(months)
 
+            # setting the inital dropdown values
             latest_year = year_dropdown_val
             if isinstance(latest_year, list):
                 latest_year = list([int(x) for x in latest_year])
@@ -688,7 +692,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 latest_year = int(year_dropdown_val)
 
             latest_month = month_dropdown_val
-
             if isinstance(latest_year, list) and isinstance(latest_month, list):
                 filtered_df = topo_df[
                     (topo_df['year'].isin(latest_year)) & (topo_df['season'].isin(latest_month))].copy()
@@ -701,6 +704,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             else:
                 filtered_df = None
 
+            # plot the data selected
             filtered_df['Selected Profiles'] = filtered_df['reg_id'].astype(str) + ' : ' + filtered_df['date'].astype(
                 str)
             filtered_df.rename(columns={'date': 'Selected Dates'}, inplace=True)
@@ -739,14 +743,19 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 title_font=dict(color="blue", size=15, family="Arial"),
             )
 
+            # position the dropdown in top left of the container
             month_year_dropdown_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px",
                                          "width": "200px"}
 
             no_style = {'display': 'none'}
-            # Update the 'cpa' key in the store's data with the serialized figure
+
             # Serialize the figure to JSON
             serialized_fig = fig.to_json()
+
+            # Update the 'cpa' key in the store's data with the serialized figure, this is used in the modal
             chart_data = {"line_plot": serialized_fig}
+
+
 
             return fig, fig, chart_data, no_style, no_style, no_style, month_year_dropdown_style, month_dropdown_options, year_dropdown_options, valid_master_profile_date
     else:

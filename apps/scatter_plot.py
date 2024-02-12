@@ -194,26 +194,99 @@ def make_scatter_plot(selected_survey_unit):
 
         return df
 
-    # load data directly from the DB
+        # load data directly from the DB
+
     master_df = get_data(survey_unit)
     master_df = master_df[["date", "profile", "area"]]
 
     # Pivot the data
     pivot_df = master_df.pivot(index="profile", columns="date", values="area")
-    pivot_df.loc[:, "Mean"] = pivot_df.mean(axis=1)
+
     # Add column with representing the sum of the total number of dates in df
-    pivot_df.loc[:, "countSurveyedDates"] = (len(list(pivot_df.columns)) - 1) / 2
+    pivot_df["countSurveyedDates"] = (len(list(pivot_df.columns)))
+
     # Add column representing the sum of the total number NaNs in each row
     pivot_df.loc[:, "NaNCount"] = pivot_df.isnull().sum(axis=1)
+
     # Logic for determining if the number of NaNs is more than half the number of total number of dates surveyed
-    pivot_df.loc[:, "DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
-    # droppedRows = pd.DataFrame((pivot_df.loc[pivot_df['DropRow'] == False]))
+    pivot_df.loc[:, "DropRow"] = pivot_df["NaNCount"] <= pivot_df["countSurveyedDates"] // 2
+
     # get the filtered for NaNs as new df for plotting
     df1 = pivot_df.loc[pivot_df["DropRow"] == True]
-    # remove NaNCount, DropRow columns
-    df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates", "Mean"], axis=1)
-    # fill NaN values in each row with Mean
-    df1 = df1.T.fillna(df1.mean(axis=1)).T
+
+    # remove columns used in the calculations, leaving only data behind.
+    df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates"], axis=1)
+
+    # new, methodology. We drop all dates where all the data is null. No longer use and average to fill them.
+    df1 = df1.dropna(axis=1, how='all')
+
+    # old method of applying an average
+    # df1 = df1.apply(lambda row: row.fillna(row.mean()), axis=1)
+
+    # Convert column names to datetime objects. need this so we can access the day().
+    df1.columns = pd.to_datetime(df1.columns)
+
+    # Set a threshold for the maximum difference in days to consider columns as close.
+    # Check with mark, if this is an issue with Sands, apparently it should already group the dates on export.
+    max_days_diff = 1
+
+    # find all columns that have a date that is theshold apart
+    result = []
+    for i in range(len(df1.columns)):
+        for j in range(i + 1, len(df1.columns)):
+            date1 = df1.columns[i]
+            date2 = df1.columns[j]
+            if abs((date2 - date1).days) == max_days_diff:
+                result.append((i, j))
+
+    # Flatten the list of tuples into a single list
+    if len(result)>0:
+        flattened_list = list(set([item for sublist in result for item in sublist]))
+        flattened_list = sorted(flattened_list)
+
+        def find_consecutive_blocks(numbers):
+            blocks = []
+            current_block = [numbers[0]]
+
+            for i in range(1, len(numbers)):
+                if numbers[i] == current_block[-1] + 1:
+                    current_block.append(numbers[i])
+                else:
+                    blocks.append(current_block)
+                    current_block = [numbers[i]]
+
+
+            blocks.append(current_block)
+
+            return [block for block in blocks]
+
+        consecutive_blocks  = find_consecutive_blocks(flattened_list)
+
+        all_columns_to_drop  = []
+
+        for i in consecutive_blocks:
+            df2 = df1.iloc[:,i]
+            print(df2)
+            df2.fillna(method ='ffill', axis=1, inplace =True)
+            # Get column indices with NaN values
+            columns_with_na = df2.columns[df2.isna().any()].tolist()
+            for col in columns_with_na:
+                all_columns_to_drop.append(col)
+            df2= df2.dropna(axis= 1)
+            # Drop columns with NaN values by index
+
+
+            print(df2)
+            common_columns = df2.columns.intersection(df1.columns)
+            # Replace columns in the longer DataFrame with corresponding columns from the shorter DataFrame
+            for column in common_columns:
+                df1[column] = df2[column]
+
+        for col in all_columns_to_drop:
+            df1 = df1.drop(col, axis=1)
+
+    # then finally remove any remaining columns that have NaNs
+    df1 = df1.dropna(axis=1)
 
     # add a sum of columns to df
     df1.loc["Sum"] = df1.sum()
@@ -240,15 +313,13 @@ def make_scatter_plot(selected_survey_unit):
     highest_year = row_with_max_value[0]
     highest_values = row_with_max_value[1]
 
-
-
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
     )
 
     # varible holding dates not converted used in the hover data
-    normal_dates =list(chart_ready_df["index1"])
-    normal_dates= [date.strftime('%Y-%m-%d') for date in normal_dates]
+    normal_dates = list(chart_ready_df["index1"])
+    normal_dates = [date.strftime('%Y-%m-%d') for date in normal_dates]
 
     month_list = []
     for i in chart_ready_df["index1"]:
@@ -284,12 +355,16 @@ def make_scatter_plot(selected_survey_unit):
     chart_ready_df["x"] = x_mdates
 
     # Define tick positions and tick labels
-    x_min = min(x_axis)
+    #x_min = min(x_axis)
+    x_min = "2007-01-01"
     x_max = max(x_axis)
-    num_ticks = 10
-    tick_dates = pd.date_range(start=x_min, end=x_max, periods=num_ticks)
+    num_ticks = 100
+    tick_dates = pd.date_range(start=x_min, end=x_max, freq="12M")
     tickvals = mdates.date2num(tick_dates)  # Convert tick dates to number format
     ticktext = tick_dates.strftime("%Y-%m")
+
+
+
 
     # linear regression fit
     regline = (
@@ -311,7 +386,7 @@ def make_scatter_plot(selected_survey_unit):
     # r squared value
     correlation_matrix = np.corrcoef(x_mdates, y_axis)
     correlation_xy = correlation_matrix[0, 1]
-    r_squared = round((correlation_xy**2), 3)
+    #r_squared = round((correlation_xy ** 2), 3)
     # print("R² Value: " + str(r_squared))
 
     # obtain the average area for all profiles for all years
@@ -349,6 +424,24 @@ def make_scatter_plot(selected_survey_unit):
         # height=550,
         template="plotly",
     )
+
+
+    # Calculate the differences between consecutive x values
+    chart_ready_df['date'] = pd.to_datetime(chart_ready_df['date'])
+    x_diff = chart_ready_df['date'].diff()
+
+    threshold = pd.Timedelta(24 * 30.5, 'days')
+    # Identify large gaps (e.g., gaps larger than a threshold)
+    large_gaps_indices = x_diff > threshold  # Adjust the threshold as needed
+
+    # Create a new column in chart_ready_df to mark large gaps
+    chart_ready_df['large_gap'] = False
+    chart_ready_df.loc[large_gaps_indices, 'large_gap'] = True
+
+    # Insert NaNs in the line data at large gaps
+    chart_ready_df['Sum'] = np.where(chart_ready_df['large_gap'], np.nan, chart_ready_df['Sum'])
+
+    fig.add_traces(go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="Trend2"))
 
     # Format the label shown in the hover
     fig.update_traces(
@@ -396,8 +489,6 @@ def make_scatter_plot(selected_survey_unit):
         ),
         selector=dict(mode="markers"),
     )
-
-
 
     # add linear regression line for whole sample
     fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))

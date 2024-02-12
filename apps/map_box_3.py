@@ -4217,7 +4217,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         df1["first"] = first_column_value
         df1["last"] = last_column_value
 
-        df1["difference"] = (df1["last"] - df1["first"]) / df1["first"] * 100
+        df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
         df1 = df1[["difference"]]
 
         df1["Survey_Unit"] = group.name
@@ -4489,8 +4489,12 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     old_map_data = map_state
     new_map_data = {"lat": center_lat, "lon": center_lon}
     try:
-        current_map_position = map_relayout_data['mapbox.center']
-        current_map_zoom = map_relayout_data['mapbox.zoom']
+        if map_relayout_data != None:
+            current_map_position = map_relayout_data['mapbox.center']
+            current_map_zoom = map_relayout_data['mapbox.zoom']
+        else:
+            current_map_position = None
+            current_map_zoom = None
     except Exception as e:
         print(e)
         current_map_position = None

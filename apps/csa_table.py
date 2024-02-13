@@ -308,7 +308,20 @@ def make_csa_table(selected_csa_data):
     first_survey = min(all_dates)
 
     latest_spring = sorted(classify_dates.get("Spring"), reverse=False)[-1]
-    last_years_spring = sorted(classify_dates.get("Spring"), reverse=False)[-2]
+
+    # Scillies are surveyed in the autumn we handle this here. Swap to look for autumns.
+    not_enough_springs = False
+    try:
+        last_years_spring = sorted(classify_dates.get("Spring"), reverse=False)[-2]
+
+    except IndexError as ie:
+        # index error will be thrown as no springs oo look for.
+        print(ie)
+        not_enough_springs = True
+
+    if not_enough_springs:
+        last_years_spring = sorted(classify_dates.get("Autumn"), reverse=False)[-2]
+        latest_spring = sorted(classify_dates.get("Autumn"), reverse=False)[-1]
 
     cols = list(df.columns.astype(str))
     df = df.set_axis(cols, axis=1)
@@ -317,10 +330,17 @@ def make_csa_table(selected_csa_data):
     # get the target date columns only
     df = df[["index", str(first_survey), str(last_years_spring), str(latest_spring)]]
 
-    spr_dif_name = f"Spring to Spring Diff (m2)"
-    spr_per_name = f"Spring to Spring % Change"
-    base_dif_name = f"Baseline to Spring Diff (m2)"
-    base_per_name = f"Baseline to Spring % Change"
+    # change the table names depending on the season being used
+    if not_enough_springs:
+        spr_dif_name = f"Autumn to Autumn Diff (m2)"
+        spr_per_name = f"Autumn to Autumn % Change"
+        base_dif_name = f"Baseline to Autumn Diff (m2)"
+        base_per_name = f"Baseline to Autumn % Change"
+    else:
+        spr_dif_name = f"Spring to Spring Diff (m2)"
+        spr_per_name = f"Spring to Spring % Change"
+        base_dif_name = f"Baseline to Spring Diff (m2)"
+        base_per_name = f"Baseline to Spring % Change"
 
     # calculate the change add as columns
     df[spr_dif_name] = ((df[str(latest_spring)] - df[str(last_years_spring)])).round(2)
@@ -342,16 +362,33 @@ def make_csa_table(selected_csa_data):
     df = df.rename(columns={"index": "Profile"})
 
     # split df into two dfs, each representing the table for each card
-    spr_spr_df = df[
-        ["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change"]
-    ]
-    base_spr_df = df[
-        [
-            "Profile",
-            "Baseline to Spring Diff (m2)",
-            "Baseline to Spring % Change",
+    if not_enough_springs:
+
+        spr_spr_df = df[
+            ["Profile", "Autumn to Autumn Diff (m2)", "Autumn to Autumn % Change"]
         ]
-    ]
+
+        base_spr_df = df[
+            [
+                "Profile",
+                "Baseline to Autumn Diff (m2)",
+                "Baseline to Autumn % Change",
+            ]
+        ]
+
+    else:
+        spr_spr_df = df[
+            ["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change"]
+        ]
+
+        base_spr_df = df[
+            [
+                "Profile",
+                "Baseline to Spring Diff (m2)",
+                "Baseline to Spring % Change",
+            ]
+        ]
+
 
     # convert to records format required by dash table
     spr_spr_df_to_records = spr_spr_df.to_dict("records")
@@ -359,11 +396,9 @@ def make_csa_table(selected_csa_data):
 
     # Define the columns for the DataTableS
     spr_spr_columns = [{"name": i, "id": i} for i in spr_spr_df.columns]
-
     base_spr_columns = [{"name": i, "id": i} for i in base_spr_df.columns]
 
     # Generate the dates as text for the card titles holding each table
-
     spr_spr_title = f"{last_years_spring} - {latest_spring}"
     base_spr_title = f"{first_survey} - {latest_spring}"
 

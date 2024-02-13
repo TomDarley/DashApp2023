@@ -111,15 +111,6 @@ layout = html.Div(
                             style={"font-size": 20},
                         ),
 
-
-
-
-
-                        #html.Img(
-                        #    src=f"data:image/jpeg;base64,{encoded_image}",
-                        #    alt="CSA Scatter Plot Image",
-                        #    style={"height": "40vh","width": "100%",  },
-                        #),
                     ]
                 ),
                 dbc.ModalFooter(

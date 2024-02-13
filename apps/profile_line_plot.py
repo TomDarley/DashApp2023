@@ -168,7 +168,7 @@ layout = html.Div(
 
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Profile Cross-Sectional Area Chart")),
+                dbc.ModalHeader(dbc.ModalTitle("Profile Cross-Sectional Area Chart", style={"color":"blue"})),
                 dbc.ModalBody(
                     [
                         html.P(

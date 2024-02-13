@@ -36,7 +36,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'd
         # adding info and max view modals (the popups)
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
+                dbc.ModalHeader(dbc.ModalTitle("Box Plot", style={"color":"blue"})),
                 dbc.ModalBody(
                     [
                         html.P(

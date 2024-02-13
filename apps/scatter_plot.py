@@ -94,7 +94,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
+                dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area", style={"color":"blue"})),
                 dbc.ModalBody(
                     [
                         html.P(

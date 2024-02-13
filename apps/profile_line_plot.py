@@ -82,7 +82,8 @@ layout = html.Div(
             children=[
 
                 dcc.Graph(
-                    id="line_plot"
+                    id="line_plot",
+                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
                 ),
             ], ),
 
@@ -378,6 +379,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                     custom_data=['date', 'chainage', 'elevation_od'],
                     category_orders={"date": date_order},
                     color_discrete_map=custom_color_mapping,
+
 
                 )
 

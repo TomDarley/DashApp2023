@@ -70,7 +70,8 @@ layout = html.Div(
                         "width": "100%",
                         "height": "60vh", # this will make it bigger
                     },
-                    config={"responsive": True},
+                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
+
                 ),
             ],id = 'scatter_plot_card',
 

@@ -11,6 +11,8 @@ import numpy as np
 from sqlalchemy.exc import OperationalError
 import time
 from math import radians, sin, cos, sqrt, atan2
+import base64
+
 
 from dash.exceptions import PreventUpdate
 
@@ -3688,8 +3690,24 @@ def establish_connection(retries=3, delay=5):
 
 fig = go.Figure()
 
+image_path = r"media/map_legend.PNG"
+with open(image_path, "rb") as image_file:
+    encoded_image = base64.b64encode(image_file.read()).decode()
+
 layout = html.Div(
     children=[
+
+        html.Div(
+
+        html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
+                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '200px',
+                        'height': '80px', 'zIndex': 100, 'border-radius':10 }),
+
+            style= {'position': 'relative'}
+
+        ),
+
+
         dcc.Store(id='map-state', data={'center': None}),
         dcc.Store(
             id="selected-value-storage",
@@ -3702,10 +3720,11 @@ layout = html.Div(
         dcc.Graph(
             id="example-map",
             figure=fig,
-            config={'modeBarButtonsToRemove': ['lasso2d']},
+            config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False},
             className="map",
 
         ),
+
 
     ],
     id="mapbox_div",

@@ -22,12 +22,18 @@ from reportlab.lib.styles import ParagraphStyle
 from sqlalchemy import create_engine
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
+import base64
+
 dash.register_page(__name__, path="/main_dash")
 
+image_path = r"media/map_legend.PNG"
+with open(image_path, "rb") as image_file:
+    encoded_image = base64.b64encode(image_file.read()).decode()
 
 # define the layout of the main page
 layout = html.Div(
-    [
+    [  # Add the image
+
         dcc.Store(
             id="generated_charts",
             data={"cpa": None, "line_plot": None, "error_plot": None},
@@ -649,10 +655,13 @@ layout = html.Div(
                 ),
                 dbc.Col(
 
+
                     html.Div(
                         [
 
+
                             map_box_3.layout,
+
                         ],
                         id="main_dash_map_div",
 

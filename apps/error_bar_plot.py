@@ -13,6 +13,7 @@ layout = html.Div(
 
 
         dcc.Graph(id="error_plot",
+config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
                   ),
         # adding info and max view buttons
         dbc.Button(

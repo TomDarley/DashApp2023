@@ -106,7 +106,7 @@ layout = html.Div(
                         ),
 
                         html.P(
-                            """Interim surveys from the spring surveys (blue circles), autumn (red diamonds) and baseline (green squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
+                            """Interim surveys from the spring surveys (green circles), autumn (blue diamonds) and baseline (pink squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
 
                             style={"font-size": 20},
                         ),
@@ -418,7 +418,7 @@ def make_scatter_plot(selected_survey_unit):
     chart_ready_df['Sum'] = chart_ready_df['Sum'].round(2)
 
     # use this to change the colors of the lines
-    color_map = {'Spring': '#0acc24', 'Summer': '#d411b6', 'Autumn': '#11a0d4', 'Winter': 'blue'}
+    color_map = {'Spring': '#0acc24', 'Summer': '#ed05b3', 'Autumn': '#11a0d4', 'Winter': 'blue'}
 
     # Create the scatter plot using Plotly Express
     fig = px.scatter(

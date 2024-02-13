@@ -3706,9 +3706,9 @@ layout = html.Div(
 
         html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
                  style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '200px',
-                        'height': '80px', 'zIndex': 100, 'border-radius':10 }),
+                        'height': '80px', 'zIndex': 100, 'border-radius':10, 'border-weight':5 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
 
-            style= {'position': 'relative'}
+            style= {'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
 
         ),
 

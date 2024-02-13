@@ -3640,6 +3640,11 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
                                 {'label': "6a01621", 'value': "6a01621"},
                                 {'label': "6a01624", 'value': "6a01624"}]
 
+
+DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon":-4.096976854933279}
+
+
+
 def haversine(lat1, lon1, lat2, lon2):
     # Radius of the Earth in meters
     R = 6371000.0
@@ -4521,7 +4526,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # If current_map_position or current_map_zoom is None, use default values
     if current_map_position is None:
-        current_map_position = {"lat": center_lat, "lon": center_lon}
+        current_map_position = DEFAULT_MAP_CENTER
     if current_map_zoom is None:
         current_map_zoom =16
 
@@ -4562,7 +4567,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 state_to_return = old_map_data
     else:
         # If the old_map_data doesn't have 'lat' and 'lon' keys, (Set the initial load zoom and center here!!)
-        current_center = {"lat": center_lat, "lon": center_lon}
+        current_center = DEFAULT_MAP_CENTER
         current_zoom = 6
         state_to_return = current_center
 

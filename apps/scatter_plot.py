@@ -267,7 +267,7 @@ def make_scatter_plot(selected_survey_unit):
 
         for i in consecutive_blocks:
             df2 = df1.iloc[:,i]
-            print(df2)
+
             df2.fillna(method ='ffill', axis=1, inplace =True)
             # Get column indices with NaN values
             columns_with_na = df2.columns[df2.isna().any()].tolist()
@@ -277,7 +277,7 @@ def make_scatter_plot(selected_survey_unit):
             # Drop columns with NaN values by index
 
 
-            print(df2)
+
             common_columns = df2.columns.intersection(df1.columns)
             # Replace columns in the longer DataFrame with corresponding columns from the shorter DataFrame
             for column in common_columns:
@@ -307,12 +307,15 @@ def make_scatter_plot(selected_survey_unit):
     row_with_min_value = list(chart_ready_df.loc[lowest])
     lowest_year = row_with_min_value[0]
     lowest_values = row_with_min_value[1]
+    lowest_values =  lowest_values.strftime('%Y-%m-%d')
+
 
     # Get highest recorded CPA
     highest = chart_ready_df["Sum"].idxmax()
     row_with_max_value = list(chart_ready_df.loc[highest])
     highest_year = row_with_max_value[0]
     highest_values = row_with_max_value[1]
+    highest_values =  highest_values.strftime('%Y-%m-%d')
 
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
@@ -387,8 +390,8 @@ def make_scatter_plot(selected_survey_unit):
     # r squared value
     correlation_matrix = np.corrcoef(x_mdates, y_axis)
     correlation_xy = correlation_matrix[0, 1]
-    #r_squared = round((correlation_xy ** 2), 3)
-    # print("R² Value: " + str(r_squared))
+    r_squared = round((correlation_xy ** 2), 3)
+    trend_title  =f"Trend: R²{str(r_squared)}"
 
     # obtain the average area for all profiles for all years
     yearly_summed_area = list(df2["Sum"])
@@ -414,6 +417,9 @@ def make_scatter_plot(selected_survey_unit):
     # round the CPA values to 2 decimal places, makes hover data look better
     chart_ready_df['Sum'] = chart_ready_df['Sum'].round(2)
 
+    # use this to change the colors of the lines
+    color_map = {'Spring': '#0acc24', 'Summer': '#d411b6', 'Autumn': '#11a0d4', 'Winter': 'blue'}
+
     # Create the scatter plot using Plotly Express
     fig = px.scatter(
         chart_ready_df,
@@ -422,6 +428,7 @@ def make_scatter_plot(selected_survey_unit):
         color="season",
         symbol="season",
         custom_data=['date', 'Sum'],
+        color_discrete_map=color_map,
         # height=550,
         template="plotly",
     )
@@ -442,7 +449,6 @@ def make_scatter_plot(selected_survey_unit):
     # Insert NaNs in the line data at large gaps
     chart_ready_df['Sum'] = np.where(chart_ready_df['large_gap'], np.nan, chart_ready_df['Sum'])
 
-    fig.add_traces(go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="Trend2"))
 
     # Format the label shown in the hover
     fig.update_traces(
@@ -476,7 +482,7 @@ def make_scatter_plot(selected_survey_unit):
                 family="Helvetica",  # Set the font family
             ),
         ),
-        legend_traceorder="reversed",
+        #legend_traceorder="reversed",
         legend_title_text=f"",
     )
 
@@ -492,7 +498,11 @@ def make_scatter_plot(selected_survey_unit):
     )
 
     # add linear regression line for whole sample
-    fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name="Trend"))
+    fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name=trend_title, line =dict(color='red', dash='dash' )))
+
+
+    fig.add_traces(
+        go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change", line=dict(color='grey')))
 
     # Format the trend line hover data to show nothing, the order of this call matters
     fig.update_traces(None),

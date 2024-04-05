@@ -345,20 +345,56 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
             # Turned off all profile rendering limits for now.
             # Modifier to make the lines overlap the master profile. How much to show past master profile
-            #modifier_percent = 0.5
-
+            #modifier_percent = 0.1
+#
             #chainge_overshoot = max_chainage * modifier_percent
+#
+            #min_chainage = int(min_chainage) - chainge_overshoot  #-200
+            #max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
+#
+            ## there are cases where the data is filtered so much by a dodgy mp that the number tracing logic breaks
+            ## check if number of unique dates == number of traces before adding a filter.
+            #topo_df_filter = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
+            #if len(np.unique(topo_df_filter["date"]))>=3:
+            #    topo_df= topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
+            #else:
+            #    topo_df = topo_df
+            topo_df =topo_df.reset_index()
+            max_index = topo_df.index.max()
+            min_index = topo_df.index.min()
 
-            # min_chainage = int(min_chainage) - chainge_overshoot  #-200
-            # max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
-
-            # there are cases where the data is filtered so much by a dodgy mp that the number tracing logic breaks
-            # check if number of unique dates == number of traces before adding a filter.
-            topo_df_filter = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
-            if len(np.unique(topo_df_filter["date"]))>=3:
-                topo_df= topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
+            # Find the index position of the value closest to 10
+            use_max_plus_1 = False
+            closest_max_chainage_index = (topo_df['chainage'] - max_chainage).abs().idxmin()
+            next_max_index = closest_max_chainage_index + 100
+            if next_max_index > max_index:
+                use_max_plus_1 = False
             else:
-                topo_df = topo_df
+                use_max_plus_1 = True
+
+            use_min_plus_1 = False
+            # Find the index position of the value closest to 10
+            closest_min_chainage_index = (topo_df['chainage'] - min_chainage).abs().idxmin()
+            next_min_index = closest_min_chainage_index - 100
+            if next_min_index < min_index:
+                use_min_plus_1 = False
+            else:
+                use_min_plus_1 = True
+
+            if use_max_plus_1 and use_min_plus_1:
+                topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= next_max_index)]
+            elif not use_min_plus_1 and use_max_plus_1:
+                topo_df = topo_df.loc[(topo_df.index >= closest_min_chainage_index) & (topo_df.index <= next_max_index)]
+            elif use_min_plus_1 and not use_max_plus_1:
+                topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= closest_max_chainage_index)]
+
+
+
+
+
+
+
+
 
 
 

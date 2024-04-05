@@ -429,7 +429,8 @@ def make_scatter_plot(selected_survey_unit):
     chart_ready_df['date'] = pd.to_datetime(chart_ready_df['date'])
     x_diff = chart_ready_df['date'].diff()
 
-    threshold = pd.Timedelta(24 * 30.5, 'days')
+    #threshold = pd.Timedelta(24 * 30.5, 'days')
+    threshold = pd.Timedelta(100 * 30.5, 'days')
     # Identify large gaps (e.g., gaps larger than a threshold)
     large_gaps_indices = x_diff > threshold  # Adjust the threshold as needed
 

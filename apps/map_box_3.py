@@ -3644,7 +3644,6 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
 DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon":-4.096976854933279}
 
 
-
 def haversine(lat1, lon1, lat2, lon2):
     # Radius of the Earth in meters
     R = 6371000.0
@@ -3695,7 +3694,7 @@ def establish_connection(retries=3, delay=5):
 
 fig = go.Figure()
 
-image_path = r"media/map_legend.PNG"
+image_path = r"media/Percent.jpg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -3705,8 +3704,8 @@ layout = html.Div(
         html.Div(
 
         html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
-                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '200px',
-                        'height': '80px', 'zIndex': 100, 'border-radius':10, 'border-weight':5 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
+                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '250px',
+                        'height': '140px', 'zIndex': 100, 'border-radius':10, 'border-weight':5 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
 
             style= {'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
 

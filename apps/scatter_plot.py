@@ -61,6 +61,7 @@ layout = html.Div(
         dcc.Store(id="highest_recorded_year"),
         dcc.Store(id="change_rate"),
         dcc.Store(id="scatter_chart"),
+        dcc.Store(id="percent_change"),
         # wrap inside card so it scales correctly .... stupid
         dbc.Card(
             [
@@ -162,6 +163,8 @@ layout = html.Div(
         Output("highest_recorded_value", "data"),
         Output("highest_recorded_year", "data"),
         Output("scatter_chart", "data"),
+        Output("percent_change", "data"),
+
         Input("survey-unit-dropdown", "value"),
     ),
     allow_duplicate=True,
@@ -392,15 +395,23 @@ def make_scatter_plot(selected_survey_unit):
 
     average_area = average(yearly_summed_area)
 
-    ## calculate the erosion/accretion as a percentage of the average area
-    percentage = abs(accretion_levels) / average_area * 100
-    percentage = percentage.__round__(2)
     # print(percentage)
 
     if accretion_levels <= 0:
         state = "Erosion Rate"
     else:
         state = "Accretion Rate"
+
+        ## calculate the erosion/accretion as a percentage of the average area
+    percentage = abs(accretion_levels) / average_area * 100
+    percentage = percentage.__round__(2)
+    percentage = str(f"{percentage} %")
+
+
+
+
+
+
 
     # add the normal date format back to the dataframe to be used in the hover data
     chart_ready_df['date'] = normal_dates
@@ -494,7 +505,7 @@ def make_scatter_plot(selected_survey_unit):
 
 
     fig.add_traces(
-        go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change", line=dict(color='grey')))
+        go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change", line=dict(color='grey', dash='dash')))
 
     # Format the trend line hover data to show nothing, the order of this call matters
     fig.update_traces(None),
@@ -516,6 +527,7 @@ def make_scatter_plot(selected_survey_unit):
         highest_values,
         highest_year,
         chart_data,
+        percentage
     )
 
 

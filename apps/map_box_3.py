@@ -3704,8 +3704,8 @@ layout = html.Div(
         html.Div(
 
         html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
-                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '250px',
-                        'height': '140px', 'zIndex': 100, 'border-radius':10, 'border-weight':5 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
+                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '300px',
+                        'height': '120px', 'zIndex': 100, 'border-radius':10, 'border-weight':10 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
 
             style= {'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
 
@@ -3718,7 +3718,8 @@ layout = html.Div(
             data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data': None,
                   'survey_type': 'Interim'},
         ),
-        dcc.Store(id='multi-select-lines'),
+        dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
+        dcc.Store(id= 'survey-points-change-values', data=None),
         dcc.Location(id="url", refresh=False),  # Add a Location component
 
         dcc.Graph(
@@ -3741,7 +3742,6 @@ layout = html.Div(
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
-
           Output("survey-type-dropdown", "value"),
 
           Input('example-map', 'clickData'),
@@ -4173,6 +4173,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     Output('multi-select-lines', 'data'),  # holds if multi select the line ids
     Output("test_loader", "loading_state"),
     Output('map-state', 'data'),
+    Output('survey-points-change-values', 'data'),
 
     Input("selected-value-storage", "data"),
     Input('map-state', "data"),
@@ -4292,6 +4293,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     gdf = pd.merge(gdf, all_cpa_dfs[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
                    right_on='survey_unit')
 
+    # Store selected survey unit percent change value as a df, use this in main dash page to display change rate.
+    survey_points_change_values = gdf.loc[gdf['survey_unit'] == set_survey_unit].to_json()
+
     # set the selected survey unit classification to Selected Unit.
     gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
     updated_gdf = gdf.copy()
@@ -4318,7 +4322,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         'Mild Accretion': "rgb(0, 103, 230)",
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
-
     }
 
     # Make the map
@@ -4548,8 +4551,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             # If the distance is not over the threshold, keep the current center and zoom
             if current_map_position:
 
-
-
                 distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'], new_map_data['lon'])
                 distance_threshold = 1500
                 if distance > distance_threshold:
@@ -4576,4 +4577,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         "zoom": current_zoom,
     })
 
-    return fig, lines_inside_box, {'is_loading': True} , state_to_return
+    print(survey_points_change_values)
+
+    return fig, lines_inside_box, {'is_loading': True} , state_to_return, survey_points_change_values

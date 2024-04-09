@@ -15,6 +15,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import A4, landscape, portrait
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Spacer
+from reportlab.lib.units import inch
 import io
 import plotly.io as pio
 from reportlab.platypus import Paragraph
@@ -22,13 +24,14 @@ from reportlab.lib.styles import ParagraphStyle
 from sqlalchemy import create_engine
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
-import base64
+from io import StringIO
+from reportlab.platypus import PageBreak
+import json
+from PIL import Image as PILImage
 
 dash.register_page(__name__, path="/main_dash")
 
-image_path = r"media/map_legend.PNG"
-with open(image_path, "rb") as image_file:
-    encoded_image = base64.b64encode(image_file.read()).decode()
+
 
 # define the layout of the main page
 layout = html.Div(
@@ -528,13 +531,33 @@ layout = html.Div(
                                 id="drop_down_card",
 
                             ),
-
                             dbc.Card(
                                 [
                                     dbc.CardBody(
                                         [
                                             html.H6(
                                                 "Trend:",
+                                                className="card-title",
+                                                style={
+                                                    "color": "blue",
+                                                    "margin-bottom": "5px",
+                                                    "font-weight": 'bold'
+
+                                                },
+                                            ),
+                                            html.Div("----", id="trend_card1"),
+                                        ]
+                                    )
+                                ], id='trend_card_div',
+
+                            ),
+
+                            dbc.Card(
+                                [
+                                    dbc.CardBody(
+                                        [
+                                            html.H6(
+                                                "Rate:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -803,20 +826,78 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
 @callback(
     Output("trend_card", "children"),
     Input("change_rate", "data"),
+    Input("survey-points-change-values", 'data')
 )
-def update_trend_card(trend):
+def update_trend_card(trend, change_value):
     """Callback grabs the trend data from the change rate store found in the scatter plot page.
     Formats the output string"""
+    # Load JSON into DataFrame
+    with StringIO(change_value) as json_data:
+        change_values = pd.read_json(json_data)
+
+    classification = list(change_values['features'])[0]
+    classification= classification['properties']['classification']
+    print(classification)
+    color_mapping = {
+        'High Erosion': "#ff0000",
+        'Mild Erosion': "#ff6666",
+        'Low Erosion': "#ff9999",
+        'No Change': "#4f4f54",
+        'Low Accretion': "#00ace6",
+        'Mild Accretion': "#34c3eb",
+        'High Accretion': "rgb(0, 57, 128)",
+        'Selected Unit': "#ffff05"
+    }
+    color_to_use = color_mapping[classification]
+
 
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
-            return html.Span(f"{comment}", style={"color": "green"})
+            return html.Span(f"{comment}", style={"color": color_to_use})
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Eroding {value}"
-            return html.Span(f"{comment}", style={"color": "red"})
+            return html.Span(f"{comment}", style={"color": color_to_use})
+    else:
+        return f"{trend}"
+
+@callback(
+    Output("trend_card1", "children"),
+    Input("change_rate", "data"),
+    Input("survey-points-change-values", 'data')
+)
+def update_trend_card1(trend, change_value):
+    """Callback grabs the trend data from the change rate store found in the scatter plot page.
+    Formats the output string"""
+    # Load JSON into DataFrame
+    with StringIO(change_value) as json_data:
+        change_values = pd.read_json(json_data)
+
+    classification = list(change_values['features'])[0]
+    classification= classification['properties']['classification']
+    print(classification)
+    color_mapping = {
+        'High Erosion': "#ff0000",
+        'Mild Erosion': "#ff6666",
+        'Low Erosion': "#ff9999",
+        'No Change': "#4f4f54",
+        'Low Accretion': "#00ace6",
+        'Mild Accretion': "#34c3eb",
+        'High Accretion': "rgb(0, 57, 128)",
+        'Selected Unit': "#ffff05"
+    }
+    color_to_use = color_mapping[classification]
+
+
+    if trend:
+        if "Accretion Rate" in trend:
+
+            return html.Span(f"{classification}", style={"color": color_to_use})
+        elif "Erosion Rate" in trend:
+
+            return html.Span(f"{classification}", style={"color": color_to_use})
     else:
         return f"{trend}"
 
@@ -865,13 +946,14 @@ def update_highest_cpa_card(highest_data, highest_year):
     State("spr_to_spr_table", "data"),
     State("spr_to_baseline_table", "data"),
     State('csa_header_store',"data"),
+    State('percent_change', "data"),
 
     allow_duplicate=True,
     prevent_initial_call=True,
 )
 def get_selected_charts(
         n_clicks, chart_selection, scatter_chart, error_chart, line_chart,
-        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -884,173 +966,163 @@ def get_selected_charts(
 
         def to_pdf():
 
-            # Get the proforma text from the database
-            engine = create_engine(
-                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-            conn = engine.connect()
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=A4)
 
-            survey_unit = current_survey_unit
-            query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
-            df = pd.read_sql_query(query, conn)
+            def header(canvas, doc):
+                canvas.saveState()
+                canvas.setFont("Helvetica", 11)
+                canvas.setFillColor(colors.grey)
+                canvas.drawString(40, A4[1] - 20, "SWCM Generated Report")
+                logo_width = 1.5 * inch
+                logo_height = 0.5 * inch
+                logo_x = A4[0] - inch - logo_width
+                logo_y = A4[1] - 40
+                canvas.drawImage(r"assets\Full-Logo (white sky).png", logo_x,
+                                 logo_y, width=logo_width, height=logo_height, mask="auto")
+                canvas.restoreState()
 
-            proforma_text = list(df['proforma'])[0]
+            def footer(canvas, doc):
+                canvas.saveState()
+                canvas.setFont("Helvetica", 9)
+                canvas.drawString(40, 20, f"Page {doc.page}/")
+                canvas.restoreState()
 
-            # Generate the current state paragraph trend, highest, lowest
-            cal_trend = trend['props']['children']
-            cal_highest = highest_date['props']['children']
-            cal_lowest = lowest_date['props']['children']
-            cal_highest_val = f"{round(highest_val, 2)} (m²)"
-            cal_lowest_val = f"{round(lowest_val, 2)} (m²)"
+            def create_paragraph_one():
+                engine = create_engine(
+                    "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
+                conn = engine.connect()
 
-            cal_trend = cal_trend.lower()
-            state_text = f"Analysis of the Combined Profile Area (CPA) indicates that {survey_unit} is {cal_trend}." \
-                         f"The highest recorded CPA was recorded on {cal_highest} at {cal_highest_val} and the lowest" \
-                         f" CPA recorded on {cal_lowest} at {cal_lowest_val}"
+                survey_unit = current_survey_unit
+                query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
+                df = pd.read_sql_query(query, conn)
 
-            # Create a stylesheet for text wrapping
+                proforma_text = list(df['proforma'])[0]
+
+                return proforma_text
+
+            def create_paragraph_two():
+                cal_trend = trend['props']['children']
+                cal_highest = highest_date['props']['children']
+                cal_lowest = lowest_date['props']['children']
+                cal_highest_val = f"{round(highest_val, 2)}m²"
+                cal_lowest_val = f"{round(lowest_val, 2)}m²"
+
+                cal_trend = cal_trend.lower().strip()
+                process_state = cal_trend.split(" ")[0]
+                rate = cal_trend.split(process_state)[1].strip()
+                trend_string = f" {process_state} at a rate of {rate} equating to {percent_change} of the average CPA per year."
+                state_text = (
+                    f"Analysis of the Combined Profile Area (CPA) indicates that {sur_unit_card}  is {trend_string}"
+                    f"The highest recorded CPA was recorded on {cal_highest} at {cal_highest_val} and the lowest"
+                    f" CPA recorded on {cal_lowest} at {cal_lowest_val}.")
+
+                return state_text
+
+            def add_CPA_chart(canvas, doc):
+                chart_width, chart_height = A4[1] - 350, A4[0] - 250
+
+                cpa_figure_data = scatter_chart.get("cpa")
+                cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
+
+                cal_trend = trend['props']['children']
+                cal_trend = cal_trend.lower().strip()
+                process_state = cal_trend.split(" ")[0]
+                rate = cal_trend.split(process_state)[1].strip()
+
+                cpa_figure.update_layout(
+                    xaxis=dict(
+                        tickfont=dict(color='black'),
+                        title=f'{current_survey_unit} Combined Profile Area Chart\nErosion Rate:{rate} equating to {percent_change} of the average CPA per year',
+                        title_font=dict(color='black', size=12),
+                        automargin=True,
+                        title_standoff=8
+                    ),
+                    yaxis=dict(
+                        tickfont=dict(color='black'),
+                        title_font=dict(color='black'),
+                    ),
+                    title=''
+                )
+
+                img_bytes = pio.to_image(cpa_figure, format='png')
+                img_io = io.BytesIO(img_bytes)
+                img_reader = ImageReader(img_io)
+                canvas.drawImage(img_reader, 70, 200, width=chart_width, height=chart_height)
+
+            def add_error_bar_plot():
+                chart_width, chart_height = A4[1] - 350, A4[0] - 250
+                error_figure_data = error_chart.get("error_plot")
+                error_figure = go.Figure(json.loads(error_figure_data))
+
+                error_figure.update_layout(
+                    xaxis=dict(
+                        tickfont=dict(color='black'),
+                        title=f'exgxgfxgfxgfxgfxgfx',
+                        title_font=dict(color='black', size=12),
+                        automargin=True,
+                        title_standoff=8
+                    ),
+                    yaxis=dict(
+                        tickfont=dict(color='black'),
+                        title_font=dict(color='black'),
+                    ),
+                    title=''
+                )
+
+                img_bytes = pio.to_image(error_figure, format='png')
+                img = PILImage.open(io.BytesIO(img_bytes))
+
+                # Convert PIL image to byte array
+                with io.BytesIO() as byte_io:
+                    img.save(byte_io, format='PNG')
+                    img_byte_array = byte_io.getvalue()
+
+                # Create a ReportLab Image object
+                from reportlab.platypus import Image
+                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+
+                return chart_flowable
+
+
+
+
+
             styles = getSampleStyleSheet()
             style = styles["Normal"]
+            centered_style = styles['Title']
 
-            # Set the desired width for text wrapping
-            text_width = A4[0] - 100  # Adjust as needed this higher number makes the right margin larger
+            header_style = ParagraphStyle(name='HeaderStyle', parent=style)
+            header_style.fontName = 'Helvetica-Bold'
 
-            # Create a PDF document
-            buffer = io.BytesIO()  # in ram storage
-
-            # Create a canvas
-            c = canvas.Canvas(buffer, pagesize=portrait(A4))
-
-            width, height = A4[1] - 300, A4[0] - 250  # Adjust these values as needed
-
-            # Create a ParagraphStyle for text wrapping
             wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, wordWrap='CJK')
 
-            # Create a flowable paragraph
-            proforma_paragraph = Paragraph(proforma_text, wrapped_style)
-            proforma_paragraph2 = Paragraph(state_text, wrapped_style)
+            spacer1 = Spacer(1, 20)
+            spacer2 = Spacer(1, 10)
 
-            # Add the Title
-            c.drawCentredString(A4[0] / 2, 780, f"{survey_unit}-{sur_unit_card}!")
-
-            # Add the proforma paragraph to the canvas
-            proforma_paragraph.wrapOn(c, text_width, A4[1])
-            proforma_paragraph.drawOn(c, 50, 680)
-
-            # Add the stats paragraph
-            proforma_paragraph2.wrapOn(c, text_width, A4[1])
-            proforma_paragraph2.drawOn(c, 50, 630)
-
-            # logic to define the first chosen plot:
-            charts_selected = []
-            if "cpa" in chart_selection:
-                charts_selected.append('cpa')
-            if "line_plot" in chart_selection:
-                charts_selected.append('line_plot')
-            if "box_plot" in chart_selection:
-                charts_selected.append('box_plot')
-
-            for index, item in enumerate(charts_selected):
-
-                if item == "cpa":
-                    cpa_figure_data = scatter_chart.get("cpa")
-                    cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
-                    img_bytes = pio.to_image(cpa_figure, format='png')
-                    img_io = io.BytesIO(img_bytes)
-                    img_reader = ImageReader(img_io)
-                    c.drawImage(img_reader, 20, 250, width=width, height=height)
-                    c.showPage()
-
-                if item == "line_plot":
-                    line_figure_data = line_chart.get("line_plot")
-                    line_figure = go.Figure(json.loads(line_figure_data))
-                    img_bytes = pio.to_image(line_figure, format='png')
-                    img_io = io.BytesIO(img_bytes)
-                    img_reader = ImageReader(img_io)
-
-                    if index == 0:
-                        c.drawImage(img_reader, 20, 250, width=width, height=height, )
-                        c.showPage()
-
-                    elif index == 1:
-                        c.drawImage(img_reader, 20, 450, width=width, height=height, )
-                    else:
-                        c.drawImage(img_reader, 20, 50, width=width, height=height, )
-
-                if item == "box_plot":
-                    error_figure_data = error_chart.get("error_plot")
-                    error_figure = go.Figure(json.loads(error_figure_data))
-                    img_bytes = pio.to_image(error_figure, format='png')
-                    img_io = io.BytesIO(img_bytes)
-                    img_reader = ImageReader(img_io)
-
-                    if index == 0:
-                        c.drawImage(img_reader, 20, 250, width=width, height=height, )
-                        c.showPage()
-
-                    elif index == 1:
-                        c.drawImage(img_reader, 20, 450, width=width, height=height, )
-                    else:
-                        c.drawImage(img_reader, 20, 50, width=width, height=height, )
+            title_paragraph = Paragraph(f"<b>{current_survey_unit}-{sur_unit_card}</b>", centered_style)
+            proforma_header = Paragraph("Background", header_style)
+            proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
+            state_header = Paragraph("Survey Unit Analysis", header_style)
+            state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
 
 
-            # Define column widths (adjust as needed)
-            col_widths = [100, 200, 200]
+            content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
+                                    state_paragraph, spacer1]
 
-            style = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ])
+            content_first_page.append(PageBreak())
+            # Create a flowable object for the chart
+            chart_flowable = add_error_bar_plot()
+            content_first_page.append(chart_flowable)
 
-            # get the table header information
-            spr_spr_header = csa_table_headers.get('spr_spr').replace(" - ", ' to ')
-            baseline_spr_header = csa_table_headers.get('baseline_spr').replace(" - ", ' to ')
+            doc.build(
+                content_first_page,
+                onFirstPage=lambda canvas, doc: (
+                    header(canvas, doc), add_CPA_chart(canvas, doc)),
+                onLaterPages=lambda canvas, doc: (
+                    footer(canvas, doc)  # Define the content for subsequent pages
+                ))
 
-            width = 800
-            height = 100
-
-            dfs = []
-            index = [0]
-            for data in spr_to_spr_table:
-                df = pd.DataFrame(data, index=index)
-                dfs.append(df)
-
-            main_df = pd.concat(dfs)
-            table_data = [main_df.columns.tolist()] + main_df.values.tolist()
-
-            spr_to_spr_ = Table(table_data,colWidths=col_widths)
-
-            spr_to_spr_.setStyle(style)
-            spr_to_spr_.wrapOn(c, width, height)
-            c.showPage()
-            # Add the Title
-            c.drawCentredString(A4[0] / 2, 800, 'CSA Tables')
-            c.drawString(50, 750, spr_spr_header)
-            spr_to_spr_.drawOn(c, 50, 400)
-
-            dfs = []
-            index = [0]
-            for data in spr_to_baseline_table:
-                df = pd.DataFrame(data, index=index)
-                dfs.append(df)
-
-            main_df = pd.concat(dfs)
-            table_data = [main_df.columns.tolist()] + main_df.values.tolist()
-
-            spr_to_baseline_ = Table(table_data,colWidths=col_widths)
-            spr_to_baseline_.setStyle(style)
-            spr_to_baseline_.wrapOn(c, width, height)
-            c.showPage()
-            c.drawString(50, 750, baseline_spr_header)
-            spr_to_baseline_.drawOn(c, 50, 400)
-
-
-            # Save the PDF file
-            c.save()
 
             buffer.seek(0)
             return buffer.getvalue()

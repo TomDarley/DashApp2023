@@ -126,6 +126,10 @@ layout = html.Div(
             id="csa_header_store",
             data={"spr_spr": None,"baseline_spr":None},
         ),
+        dcc.Store(
+            id="csa_profile_line_colors",
+            data=None,
+        ),
         dbc.Row(
             [
                 dbc.Col(
@@ -275,7 +279,8 @@ layout = html.Div(
         Output("spr_to_baseline_table", "data"),
         Output("spr_to_baseline_table", "columns"),
         Output("baseline_to_spring_header", "children"),
-        Output("csa_header_store","data")
+        Output("csa_header_store","data"),
+        Output("csa_profile_line_colors", 'data')
     ),
     [Input("selected-df-storage", "data")],
 )
@@ -361,6 +366,40 @@ def make_csa_table(selected_csa_data):
 
     df = df.rename(columns={"index": "Profile"})
 
+    #####################################################################################################
+    # SAVING THE CSA TABLE TO STORE TO BE USED IN THE MAP TO STYLE THE LINES
+
+    # Define the functions to map values to colors
+    def difference_values_to_color(value):
+        # Define your logic to map values to colors here
+        # This is just a sample logic, replace it with your actual logic
+        if value <= -30:
+            return '#ff0000'  # Example color for values less than 20
+        elif value >= -30 and value <=-15:
+            return '#ff6666'
+
+        elif value >= -15 and value <= -5:
+            return '#ff9999'
+        elif value >= -5 and value <= 5:
+            return '#4f4f54'
+        elif value >= 5 and value <= 15:
+            return '#00ace6'
+        elif value >= 15 and value <= 30:
+            return "rgb(0, 103, 230)"
+        elif value > 30:
+            return "rgb(0, 57, 128)"
+        else:
+            return 'black'  # Example color for values greater than or equal to 40
+
+    df_for_map  = df
+    df_for_map['Spring to Spring PCT Color'] =df_for_map['Spring to Spring % Change'].apply(difference_values_to_color)
+    df_for_map['Baseline to Spring PCT Color'] = df_for_map['Baseline to Spring % Change'].apply(
+        difference_values_to_color)
+
+    #df_for_map = df_for_map[['Profile', 'Spring to Spring Diff Color', 'Baseline to Spring Diff Color']]
+    df_for_map = df_for_map.to_dict()
+    #############################################################################################################
+
     # split df into two dfs, each representing the table for each card
     if not_enough_springs:
 
@@ -411,5 +450,6 @@ def make_csa_table(selected_csa_data):
         base_spr_df_to_records,
         base_spr_columns,
         base_spr_title,
-        table_header_data
+        table_header_data,
+        df_for_map
     )

@@ -361,9 +361,6 @@ def make_scatter_plot(selected_survey_unit):
     tickvals = mdates.date2num(tick_dates)  # Convert tick dates to number format
     ticktext = tick_dates.strftime("%Y-%m")
 
-
-
-
     # linear regression fit
     regline = (
         sm.OLS(chart_ready_df["Sum"], sm.add_constant(chart_ready_df["x"]))

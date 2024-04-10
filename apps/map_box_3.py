@@ -3700,32 +3700,63 @@ with open(image_path, "rb") as image_file:
 
 layout = html.Div(
     children=[
-
         html.Div(
+            [
+                dcc.Graph(
+                    id="example-map",
+                    # Include your figure here
+                    # figure=fig,
+                    config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False},
+                    className="map",
+                    style={'position': 'relative','width': '100%', 'height': '100%'}
 
-        html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
-                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '300px',
-                        'height': '120px', 'zIndex': 100, 'border-radius':10, 'border-weight':10 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
+                ),
 
-            style= {'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
-
+            ],
+            style={'position': 'relative'}
         ),
-        html.Div(
+
+        html.Div(children=[
+
+            html.Img(
+                src=f"data:image/jpeg;base64,{encoded_image}",
+                style={
+                    'position': 'absolute',
+                    'bottom': 10,
+                    'left': 10,
+                    'width': '300px',
+                    'height': '120px',
+                    'zIndex': 100,
+                    'border-radius': 10,
+                    'border-weight': 10,
+                    "border-color": "black",
+                    'box-shadow': "5px 5px 5px lightblue"
+                }
+            ),
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
                     {'label': '  Baseline to Spring PCT', 'value': 'base-spr'},
                     {'label': '  Spring to Spring PCT', 'value': 'spr-spr'}
-
                 ],
                 value='base-spr',  # Default selected option
-                style={'position': 'absolute', 'top': 560, 'left': 0, 'width': '200px',
-                        'height': '50px', 'zIndex': 100, 'border-radius':10, 'border-weight':10 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue", 'background-color': 'white'},
+                style={
+                    'position': 'absolute',
+                    'top': '10px',  # Adjust as needed
+                    'left': '10px',  # Adjust as needed
+                    'width': '200px',
+                    'height': '50px',
+                    'zIndex': 100,
+                    'border-radius': 10,
+                    'border-weight': 10,
+                    "border-color": "black",
+                    'box-shadow': "5px 5px 5px lightblue",
+                    'background-color': 'white',
+                    'fontSize': '16px'
+                }
             ),
-            style={'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
 
-        ),
-
+        ]),
 
         dcc.Store(id='map-state', data={'center': None}),
         dcc.Store(
@@ -3736,20 +3767,12 @@ layout = html.Div(
         dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
         dcc.Store(id= 'survey-points-change-values', data=None),
         dcc.Location(id="url", refresh=False),  # Add a Location component
-
-        dcc.Graph(
-            id="example-map",
-            figure=fig,
-            config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False},
-            className="map",
-
-        ),
-
-
     ],
     id="mapbox_div",
-
+    style={'position': 'relative','width': '100%', 'height': '100%'}
 )
+
+
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -4510,12 +4533,15 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         # add conditional here based on button selection to show spring to spring or baseline to baseline
         percent_change_row = None
         temp_state = change_range_radio_button
+        popup_name = None
         if temp_state == 'spr-spr':
             percent_change_row = row['Spring to Spring % Change']
             percent_change_color_row = row['Spring to Spring PCT Color']
+            popup_name ="Spring to Spring (PCT)"
         elif temp_state == 'base-spr':
             percent_change_row = row['Baseline to Spring % Change']
             percent_change_color_row = row['Baseline to Spring PCT Color']
+            popup_name = "Baseline to Spring (PCT)"
 
 
         if not strategy:
@@ -4536,7 +4562,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                       f"<br>Baseline: {baseline.title()}" \
                       f"<br>Post Storm: {post_storm.title()}" \
                       f"<br>Strategy: {strategy.title().replace('_', ' ')}" \
-                      f"<br>{temp_state}: {percent_change_row} %"
+                      f"<br>{popup_name}: {percent_change_row} %"
 
 
         # Get the profile line value for this row
@@ -4652,7 +4678,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     fig.update_layout(mapbox={
         "center": current_center,
         "zoom": current_zoom,
-    })
+    },   # Set the width of the figure
+    height=800,)  # Set the height of the figure)
 
     print(survey_points_change_values)
 

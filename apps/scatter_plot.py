@@ -378,6 +378,10 @@ def make_scatter_plot(selected_survey_unit):
     slope_intercept = float(slope_intercept)
     accretion_levels = round((slope_intercept * 365), 3)
 
+    # caluclate accreation levels
+
+
+
     # r squared value
     correlation_matrix = np.corrcoef(x_mdates, y_axis)
     correlation_xy = correlation_matrix[0, 1]

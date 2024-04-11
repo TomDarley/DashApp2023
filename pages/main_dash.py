@@ -519,12 +519,14 @@ layout = html.Div(
                                 id="drop_down_card",
 
                             ),
+
+
                             dbc.Card(
                                 [
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Trend:",
+                                                "Overall Trend:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -533,7 +535,7 @@ layout = html.Div(
 
                                                 },
                                             ),
-                                            html.Div("----", id="trend_card1"),
+                                            html.Div("----", id="trend_card", style={"color": 'black'}),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -545,7 +547,7 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Rate:",
+                                                "Percent Change:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -554,7 +556,7 @@ layout = html.Div(
 
                                                 },
                                             ),
-                                            html.Div("----", id="trend_card"),
+                                            html.Div("----", id="trend_card1"),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -813,19 +815,24 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
 
 @callback(
     Output("trend_card", "children"),
+
     Input("change_rate", "data"),
-    Input("survey-points-change-values", 'data')
+    Input("survey-points-change-values", 'data'),
+    Input("change_range_radio_button", 'value'),
+
+
 )
-def update_trend_card(trend, change_value):
+def update_trend_card(trend,survey_points_change_values,change_range_radio_button, ):
     """Callback grabs the trend data from the change rate store found in the scatter plot page.
     Formats the output string"""
+
     # Load JSON into DataFrame
-    with StringIO(change_value) as json_data:
+    with StringIO(survey_points_change_values) as json_data:
         change_values = pd.read_json(json_data)
 
     classification = list(change_values['features'])[0]
-    classification= classification['properties']['classification']
-    print(classification)
+    classification_string = classification['properties']['classification']
+
     color_mapping = {
         'High Erosion': "#ff0000",
         'Mild Erosion': "#ff6666",
@@ -836,35 +843,56 @@ def update_trend_card(trend, change_value):
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
     }
-    color_to_use = color_mapping[classification]
+    if change_range_radio_button != "spr-spr":
+        color_to_use = color_mapping[classification_string]
 
 
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
-            return html.Span(f"{comment}", style={"color": color_to_use})
+            if change_range_radio_button != "spr-spr":
+
+                return html.Span(f"{comment}", style={"color": color_to_use})
+            else:
+                return html.Span(f"{comment}"),
+
+
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Eroding {value}"
-            return html.Span(f"{comment}", style={"color": color_to_use})
+            if change_range_radio_button != "spr-spr":
+
+                return html.Span(f"{comment}", style={"color": color_to_use})
+            else:
+                return html.Span(f"{comment}"),
+
+
+
     else:
         return f"{trend}"
 
+
+## Add card for spr to spr percent change or baseline to baselinw percent change
+
 @callback(
     Output("trend_card1", "children"),
-    Input("change_rate", "data"),
-    Input("survey-points-change-values", 'data')
+    Input("survey-points-change-values", 'data'),#
+    State('change_range_radio_button', 'value')
 )
-def update_trend_card1(trend, change_value):
-    """Callback grabs the trend data from the change rate store found in the scatter plot page.
-    Formats the output string"""
+def update_percent_change_card(change_value, change_range_radio_button):
+    """Callback updates the percent change card, based on survey unit selected CPA change between either
+       the baseline to spr or spr to spr selection"""
     # Load JSON into DataFrame
     with StringIO(change_value) as json_data:
         change_values = pd.read_json(json_data)
 
     classification = list(change_values['features'])[0]
-    classification= classification['properties']['classification']
+    classification_string = classification['properties']['classification']
+    percent_change = round(classification['properties']['difference'],2)
+
+    comment = None
+
     print(classification)
     color_mapping = {
         'High Erosion': "#ff0000",
@@ -876,18 +904,35 @@ def update_trend_card1(trend, change_value):
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
     }
-    color_to_use = color_mapping[classification]
+    color_to_use = color_mapping[classification_string]
+    comment = "Error"
+    if classification_string in ['High Erosion','Mild Erosion','Low Erosion' ]:
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"{value} %"
+        else:
+            comment = f"{value} %"
 
+        return html.Span(f"{comment}", style={"color": color_to_use})
+    elif classification_string in ['High Accretion','Mild Accretion','Low Accretion' ]:
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"+ {value} %"
+        else:
+            comment = f"+ {value} %"
 
-    if trend:
-        if "Accretion Rate" in trend:
+        return html.Span(f"{comment}", style={"color": color_to_use})
+    elif classification_string == 'No Change':
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"Baseline to Latest Spring +/- {value} %"
+        else:
+            comment = f"Spring to Latest Spring + +/- {value} %"
 
-            return html.Span(f"{classification}", style={"color": color_to_use})
-        elif "Erosion Rate" in trend:
+        comment =  f" +/- {value} %"
 
-            return html.Span(f"{classification}", style={"color": color_to_use})
-    else:
-        return f"{trend}"
+    return comment
+
 
 
 @callback(
@@ -1072,10 +1117,6 @@ def get_selected_charts(
 
                 return chart_flowable
 
-
-
-
-
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
@@ -1093,7 +1134,6 @@ def get_selected_charts(
             proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
-
 
             content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
                                     state_paragraph, spacer1]

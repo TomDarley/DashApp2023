@@ -28,7 +28,7 @@ from io import StringIO
 from reportlab.platypus import PageBreak
 import json
 from PIL import Image as PILImage
-
+from datetime import datetime
 dash.register_page(__name__, path="/main_dash")
 
 
@@ -614,28 +614,28 @@ layout = html.Div(
                                                     "font-weight": 'bold'
                                                 },
                                             ),
-                                            dcc.Checklist(
-                                                id="download-check-list",
-                                                options=[
-                                                    {
-                                                        "label": " CPA Plot ",
-                                                        "value": "cpa",
-                                                    },
-                                                    {
-                                                        "label": " CSL Plot ",
-                                                        "value": "line_plot",
-                                                    },
-                                                    {
-                                                        "label": " Box Plot",
-                                                        "value": "box_plot",
-                                                    },
-                                                ],
-                                                value=['cpa','line_plot','box_plot'],
-                                                labelStyle={"margin-right": "10px"},
-                                                style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
-                                                # inline=True,
+                                            #dcc.Checklist(
+                                            #    id="download-check-list",
+                                            #    options=[
+                                            #        {
+                                            #            "label": " CPA Plot ",
+                                            #            "value": "cpa",
+                                            #        },
+                                            #        {
+                                            #            "label": " CSL Plot ",
+                                            #            "value": "line_plot",
+                                            #        },
+                                            #        {
+                                            #            "label": " Box Plot",
+                                            #            "value": "box_plot",
+                                            #        },
+                                            #    ],
+                                            #    value=['cpa','line_plot','box_plot'],
+                                            #    labelStyle={"margin-right": "10px"},
+                                            #    style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
+                                            #    # inline=True,
 
-                                            ),
+                                            #),
                                             dbc.Button(
                                                 "Generate Report",
                                                 id="download-charts-button",
@@ -964,7 +964,7 @@ def update_highest_cpa_card(highest_data, highest_year):
 
     Output("download", "data"),
     Input("download-charts-button", "n_clicks"),
-    State("download-check-list", "value"),
+    #State("download-check-list", "value"),
     State("scatter_chart", "data"),
     State("error_chart", "data"),
     State("line_chart", "data"),
@@ -985,7 +985,7 @@ def update_highest_cpa_card(highest_data, highest_year):
     prevent_initial_call=True,
 )
 def get_selected_charts(
-        n_clicks, chart_selection, scatter_chart, error_chart, line_chart,
+        n_clicks, scatter_chart, error_chart, line_chart,
         sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
@@ -1003,10 +1003,16 @@ def get_selected_charts(
             doc = SimpleDocTemplate(buffer, pagesize=A4)
 
             def header(canvas, doc):
+                # Get the current date and time
+                current_datetime = datetime.now()
+
+                # Convert the datetime object to a string
+                current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+
                 canvas.saveState()
-                canvas.setFont("Helvetica", 11)
+                canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
-                canvas.drawString(40, A4[1] - 20, "SWCM Generated Report")
+                canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
                 logo_width = 1.5 * inch
                 logo_height = 0.5 * inch
                 logo_x = A4[0] - inch - logo_width
@@ -1018,7 +1024,7 @@ def get_selected_charts(
             def footer(canvas, doc):
                 canvas.saveState()
                 canvas.setFont("Helvetica", 9)
-                canvas.drawString(40, 20, f"Page {doc.page}/")
+                canvas.drawString(40, 20, f"Page {doc.page}")
                 canvas.restoreState()
 
             def create_paragraph_one():
@@ -1117,6 +1123,43 @@ def get_selected_charts(
 
                 return chart_flowable
 
+            def add_line_plot():
+
+                """Request to add a generator here that makes all the charts for a survey unit?"""
+
+                chart_width, chart_height = A4[1] - 350, A4[0] - 280
+                line_figure_data = line_chart.get("line_plot")
+                line_figure = go.Figure(json.loads(line_figure_data))
+
+                line_figure.update_layout(
+                    xaxis=dict(
+                        tickfont=dict(color='black'),
+                        title=f'exgxgfxgfxgfxgfxgfx',
+                        title_font=dict(color='black', size=12),
+                        automargin=True,
+                        title_standoff=8
+                    ),
+                    yaxis=dict(
+                        tickfont=dict(color='black'),
+                        title_font=dict(color='black'),
+                    ),
+                    title=''
+                )
+
+                img_bytes = pio.to_image(line_figure, format='png')
+                img = PILImage.open(io.BytesIO(img_bytes))
+
+                # Convert PIL image to byte array
+                with io.BytesIO() as byte_io:
+                    img.save(byte_io, format='PNG')
+                    img_byte_array = byte_io.getvalue()
+
+                # Create a ReportLab Image object
+                from reportlab.platypus import Image
+                chart_flowable1 = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+
+                return chart_flowable1
+
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
@@ -1142,11 +1185,16 @@ def get_selected_charts(
             # Create a flowable object for the chart
             chart_flowable = add_error_bar_plot()
             content_first_page.append(chart_flowable)
+            line_chart_flowable = add_line_plot()
+            content_first_page.append(line_chart_flowable)
+
+
+
 
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (
-                    header(canvas, doc), add_CPA_chart(canvas, doc)),
+                    header(canvas, doc), add_CPA_chart(canvas, doc), footer(canvas, doc)),
                 onLaterPages=lambda canvas, doc: (
                     footer(canvas, doc)  # Define the content for subsequent pages
                 ))

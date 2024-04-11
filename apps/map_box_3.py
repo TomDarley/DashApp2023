@@ -15,7 +15,9 @@ import base64
 
 
 from dash.exceptions import PreventUpdate
-
+MAPBOX_TOKEN =  'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
+# tdarley01
+# Plymouth-CO
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3643,6 +3645,13 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
 
 DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon":-4.096976854933279}
 
+# Define the basemap options
+BASEMAPS = [
+    {'label': 'OpenStreetMap', 'value': 'open-street-map'},
+    {'label': 'Satellite', 'value': 'satellite-streets'},
+    # Add more basemap options as needed
+]
+
 
 def haversine(lat1, lon1, lat2, lon2):
     # Radius of the Earth in meters
@@ -3691,8 +3700,8 @@ def establish_connection(retries=3, delay=5):
 
     return None  # Return None if all attempts fail
 
-
 fig = go.Figure()
+
 
 image_path = r"media/Percent.jpg"
 with open(image_path, "rb") as image_file:
@@ -3701,14 +3710,18 @@ with open(image_path, "rb") as image_file:
 layout = html.Div(
     children=[
         html.Div(
+
             [
                 dcc.Graph(
                     id="example-map",
                     # Include your figure here
                     # figure=fig,
-                    config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False},
+                    config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False, 'responsive':True},
                     className="map",
-                    style={'position': 'relative','width': '100%', 'height': '100%'}
+                    style={'position': 'relative','width': '100%', 'height': '100%',
+
+
+                    }
 
                 ),
 
@@ -3717,6 +3730,39 @@ layout = html.Div(
         ),
 
         html.Div(children=[
+            html.Div([
+
+                dcc.Dropdown(
+                    id='basemap-dropdown',
+                    options=BASEMAPS,
+                    value=None, # Set the initial value
+                    style={'font-size':13,
+                           'position':'relative',
+                           'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
+                           'width': '170px',
+                           'height': '30px',
+
+                           # Adjust padding left
+                           },
+                    placeholder= 'Select Basemap',
+                    clearable=False
+
+
+                ),
+
+            ], style={
+                    'position': 'absolute',
+                    'top': 60,
+                    'left': 13,
+                    'width': '171px',
+                    'height': '35px',
+                    'zIndex': 100,
+
+
+
+
+
+                }),
 
             html.Img(
                 src=f"data:image/jpeg;base64,{encoded_image}",
@@ -3730,9 +3776,11 @@ layout = html.Div(
                     'border-radius': 10,
                     'border-weight': 10,
                     "border-color": "black",
+                    'border': '1px solid grey',
                     'box-shadow': "5px 5px 5px lightblue"
                 }
             ),
+
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
@@ -3744,15 +3792,19 @@ layout = html.Div(
                     'position': 'absolute',
                     'top': '10px',  # Adjust as needed
                     'left': '10px',  # Adjust as needed
-                    'width': '200px',
-                    'height': '50px',
+                    'width': '180px',
+                    'height': '45px',
                     'zIndex': 100,
-                    'border-radius': 10,
-                    'border-weight': 10,
-                    "border-color": "black",
+                    'border-radius': 15,
+
+                    #'border': '1px solid grey',
                     'box-shadow': "5px 5px 5px lightblue",
-                    'background-color': 'white',
-                    'fontSize': '16px'
+                    'paddingTop': '5px',  # Adjust padding top
+                    'paddingRight': '5px',  # Adjust padding right
+                    'paddingBottom': '8px',  # Adjust padding bottom
+                    'paddingLeft': '8px',  # Adjust padding left
+
+                    'fontSize': 13
                 }
             ),
 
@@ -3769,10 +3821,10 @@ layout = html.Div(
         dcc.Location(id="url", refresh=False),  # Add a Location component
     ],
     id="mapbox_div",
-    style={'position': 'relative','width': '100%', 'height': '100%'}
+    style={'position': 'relative','width': '100%', 'height': '100%', }
 )
 
-
+# Define a callback to update the basemap based on the dropdown selection
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -3788,9 +3840,10 @@ layout = html.Div(
           Input("survey-line-dropdown", "value"),
           Input('selected-value-storage', 'data'),
 
-          Input("survey-type-dropdown", "value"))
+          Input("survey-type-dropdown", "value"),
+         )
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals):
+                  selected_val_storage, survey_type_dropdown_vals, ):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4218,9 +4271,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     State('example-map', "relayoutData"),
     Input('csa_profile_line_colors', 'data'), # this is the colors mapped to profile.
     Input('change_range_radio_button', 'value'),
+    Input('basemap-dropdown', 'value'),
     prevent_initial_call=False,
 )
-def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors, change_range_radio_button):
+def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors, change_range_radio_button, basemap_selection):
     """Function controls the re-loading of the map. Takes in the value store which contains two values, selected survey
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
@@ -4606,7 +4660,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
 
     fig.update_layout(
-        mapbox_style="open-street-map",
+
         margin=dict(l=0, r=0, b=0, t=0),
         showlegend=False,
 
@@ -4676,10 +4730,17 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # Update the map layout
     fig.update_layout(mapbox={
+        'style': basemap_selection,
+        'accesstoken': MAPBOX_TOKEN,
         "center": current_center,
         "zoom": current_zoom,
-    },   # Set the width of the figure
-    height=800,)  # Set the height of the figure)
+        },height=800
+      ),
+
+
+
+    print(basemap_selection)
+
 
     print(survey_points_change_values)
 

@@ -11,7 +11,7 @@ style_data_conditional = [
             "filter_query": "{Spring to Spring Diff (m2)} <= -30",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": "rgb(255, 0, 0)",
+        "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
@@ -19,7 +19,7 @@ style_data_conditional = [
             "filter_query": "{Spring to Spring Diff (m2)} >= -30 && {Spring to Spring Diff (m2)} <= -15",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(255, 102, 102)",
+        "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
@@ -27,8 +27,8 @@ style_data_conditional = [
             "filter_query": "{Spring to Spring Diff (m2)} >= -15 && {Spring to Spring Diff (m2)} <= -5",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(255, 153, 153)",
-        "color": "black",
+        "backgroundColor": "#ff9999",
+        "color": "white",
     },
     {
         "if": {
@@ -36,31 +36,31 @@ style_data_conditional = [
             "column_id": "Spring to Spring Diff (m2)",
         },
         "backgroundColor": "grey",
-        "color": "black",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Spring to Spring Diff (m2)} >= 5 && {Spring to Spring Diff (m2)} <= 15",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(204, 224, 255)",
-        "color": "black",
+        "backgroundColor": "#00ace6",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Spring to Spring Diff (m2)} >= 15 && {Spring to Spring Diff (m2)} <= 30",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(128, 179, 255)",
-        "color": "black",
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Spring to Spring Diff (m2)} >= 30",
             "column_id": "Spring to Spring Diff (m2)",
         },
-        "backgroundColor": " RGB(6, 117, 255)",
-        "color": "black",
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
     },
     ################################################################## Baseline to Spring Diff (m2)
     {
@@ -68,7 +68,7 @@ style_data_conditional = [
             "filter_query": "{Baseline to Spring Diff (m2)} <= -30",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "rgb(255, 0, 0)",
+        "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
@@ -76,7 +76,7 @@ style_data_conditional = [
             "filter_query": "{Baseline to Spring Diff (m2)} >= -30 && {Baseline to Spring Diff (m2)} <= -15",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(255, 102, 102)",
+        "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
@@ -84,8 +84,8 @@ style_data_conditional = [
             "filter_query": "{Baseline to Spring Diff (m2)} >= -15 && {Baseline to Spring Diff (m2)} <= -5",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(255, 153, 153)",
-        "color": "black",
+        "backgroundColor": "#ff9999",
+        "color": "white",
     },
     {
         "if": {
@@ -93,32 +93,147 @@ style_data_conditional = [
             "column_id": "Baseline to Spring Diff (m2)",
         },
         "backgroundColor": "grey",
-        "color": "black",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Baseline to Spring Diff (m2)} >= 5 && {Baseline to Spring Diff (m2)} <= 15",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(204, 224, 255)",
-        "color": "black",
+        "backgroundColor": "#00ace6",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Baseline to Spring Diff (m2)} >= 15 && {Baseline to Spring Diff (m2)} <= 30",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(128, 179, 255)",
-        "color": "black",
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
     },
     {
         "if": {
             "filter_query": "{Baseline to Spring Diff (m2)} >= 30",
             "column_id": "Baseline to Spring Diff (m2)",
         },
-        "backgroundColor": "RGB(6, 117, 255)",
-        "color": "black",
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
     },
+    ############################
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} <= -30",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= -30 && {Baseline to Spring % Change} <= -15",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= -15 && {Baseline to Spring % Change} <= -5",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= -5 && {Baseline to Spring % Change} <= 5",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= 5 && {Baseline to Spring % Change} <= 15",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= 15 && {Baseline to Spring % Change} <= 30",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Spring % Change} >= 30",
+            "column_id": "Baseline to Spring % Change",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
+    },########
+
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} <= -30",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= -30 && {Spring to Spring % Change} <= -15",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= -15 && {Spring to Spring % Change} <= -5",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= -5 && {Spring to Spring % Change} <= 5",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= 5 && {Spring to Spring % Change} <= 15",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= 15 && {Spring to Spring % Change} <= 30",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Spring to Spring % Change} >= 30",
+            "column_id": "Spring to Spring % Change",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
+    },
+
 ]
 
 layout = html.Div(
@@ -156,6 +271,8 @@ layout = html.Div(
                                                 sort_mode="single",
                                                 style_cell={
                                                     "textAlign": "center",
+
+
                                                 },
                                                 style_header={
                                                     "backgroundColor": "#0d4eb8",
@@ -367,7 +484,8 @@ def make_csa_table(selected_csa_data):
     df = df.rename(columns={"index": "Profile"})
 
     #####################################################################################################
-    # SAVING THE CSA TABLE TO STORE TO BE USED IN THE MAP TO STYLE THE LINES
+    # SAVING THE CSA TABLE TO STORE TO BE USED IN THE MAP TO STYLE THE LINES, NOTE THIS HAS NOTHING TO DO WITH
+    # THE CPA TABLE. IT IS A CONVENIENT PLACE TO EXTRACT THE DATA NEEDED TO COLOR THE MAP LINES.
 
     # Define the functions to map values to colors
     def difference_values_to_color(value):

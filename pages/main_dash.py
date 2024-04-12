@@ -28,7 +28,7 @@ from io import StringIO
 from reportlab.platypus import PageBreak
 import json
 from PIL import Image as PILImage
-
+from datetime import datetime
 dash.register_page(__name__, path="/main_dash")
 
 
@@ -487,41 +487,29 @@ layout = html.Div(
                                             ),
 
                                             dcc.Dropdown(
-                                                options=[{'label': "6a01613", 'value': "6a01613"},
-                                                         {'label': "6a01614", 'value': "6a01614"},
+                                                options=[
+                                                          # Showing interims only!
                                                          {'label': "6a01615", 'value': "6a01615"},
-                                                         {'label': "6a01616", 'value': "6a01616"},
-                                                         {'label': "6a01617", 'value': "6a01617"},
                                                          {'label': "6a01618", 'value': "6a01618"},
-                                                         {'label': "6a01619", 'value': "6a01619"},
-                                                         {'label': "6a01620", 'value': "6a01620"},
                                                          {'label': "6a01621", 'value': "6a01621"},
-                                                         {'label': "6a01622", 'value': "6a01622"},
-                                                         {'label': "6a01623", 'value': "6a01623"},
                                                          {'label': "6a01624", 'value': "6a01624"}],
                                                 value="6a01613",
                                                 id="survey-line-dropdown",
 
                                             ),
                                             dcc.Dropdown(
+                                                # Now set to only have interims as a choice
                                                 options=[
 
                                                     {
                                                         "label": "Interim Surveys",
                                                         "value": "Interim",
                                                     },
-                                                    {
-                                                        "label": "Baseline Surveys",
-                                                        "value": "Baseline",
-                                                    },
-{
-                                                        "label": "Post Storm Surveys",
-                                                        "value": "Post Storm",
-                                                    },
+
                                                 ],
                                                 value="Interim",
                                                 id="survey-type-dropdown",
-                                                multi=True
+                                                multi=False
 
                                             ),
                                         ],
@@ -531,12 +519,14 @@ layout = html.Div(
                                 id="drop_down_card",
 
                             ),
+
+
                             dbc.Card(
                                 [
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Trend:",
+                                                "Overall Trend:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -545,7 +535,7 @@ layout = html.Div(
 
                                                 },
                                             ),
-                                            html.Div("----", id="trend_card1"),
+                                            html.Div("----", id="trend_card", style={"color": 'black'}),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -557,7 +547,7 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6(
-                                                "Rate:",
+                                                "Percent Change:",
                                                 className="card-title",
                                                 style={
                                                     "color": "blue",
@@ -566,7 +556,7 @@ layout = html.Div(
 
                                                 },
                                             ),
-                                            html.Div("----", id="trend_card"),
+                                            html.Div("----", id="trend_card1"),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -624,28 +614,28 @@ layout = html.Div(
                                                     "font-weight": 'bold'
                                                 },
                                             ),
-                                            dcc.Checklist(
-                                                id="download-check-list",
-                                                options=[
-                                                    {
-                                                        "label": " CPA Plot ",
-                                                        "value": "cpa",
-                                                    },
-                                                    {
-                                                        "label": " CSL Plot ",
-                                                        "value": "line_plot",
-                                                    },
-                                                    {
-                                                        "label": " Box Plot",
-                                                        "value": "box_plot",
-                                                    },
-                                                ],
-                                                value=['cpa','line_plot','box_plot'],
-                                                labelStyle={"margin-right": "10px"},
-                                                style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
-                                                # inline=True,
+                                            #dcc.Checklist(
+                                            #    id="download-check-list",
+                                            #    options=[
+                                            #        {
+                                            #            "label": " CPA Plot ",
+                                            #            "value": "cpa",
+                                            #        },
+                                            #        {
+                                            #            "label": " CSL Plot ",
+                                            #            "value": "line_plot",
+                                            #        },
+                                            #        {
+                                            #            "label": " Box Plot",
+                                            #            "value": "box_plot",
+                                            #        },
+                                            #    ],
+                                            #    value=['cpa','line_plot','box_plot'],
+                                            #    labelStyle={"margin-right": "10px"},
+                                            #    style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
+                                            #    # inline=True,
 
-                                            ),
+                                            #),
                                             dbc.Button(
                                                 "Generate Report",
                                                 id="download-charts-button",
@@ -825,19 +815,24 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
 
 @callback(
     Output("trend_card", "children"),
+
     Input("change_rate", "data"),
-    Input("survey-points-change-values", 'data')
+    Input("survey-points-change-values", 'data'),
+    Input("change_range_radio_button", 'value'),
+
+
 )
-def update_trend_card(trend, change_value):
+def update_trend_card(trend,survey_points_change_values,change_range_radio_button, ):
     """Callback grabs the trend data from the change rate store found in the scatter plot page.
     Formats the output string"""
+
     # Load JSON into DataFrame
-    with StringIO(change_value) as json_data:
+    with StringIO(survey_points_change_values) as json_data:
         change_values = pd.read_json(json_data)
 
     classification = list(change_values['features'])[0]
-    classification= classification['properties']['classification']
-    print(classification)
+    classification_string = classification['properties']['classification']
+
     color_mapping = {
         'High Erosion': "#ff0000",
         'Mild Erosion': "#ff6666",
@@ -848,35 +843,56 @@ def update_trend_card(trend, change_value):
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
     }
-    color_to_use = color_mapping[classification]
+    if change_range_radio_button != "spr-spr":
+        color_to_use = color_mapping[classification_string]
 
 
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
-            return html.Span(f"{comment}", style={"color": color_to_use})
+            if change_range_radio_button != "spr-spr":
+
+                return html.Span(f"{comment}", style={"color": color_to_use})
+            else:
+                return html.Span(f"{comment}"),
+
+
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Eroding {value}"
-            return html.Span(f"{comment}", style={"color": color_to_use})
+            if change_range_radio_button != "spr-spr":
+
+                return html.Span(f"{comment}", style={"color": color_to_use})
+            else:
+                return html.Span(f"{comment}"),
+
+
+
     else:
         return f"{trend}"
 
+
+## Add card for spr to spr percent change or baseline to baselinw percent change
+
 @callback(
     Output("trend_card1", "children"),
-    Input("change_rate", "data"),
-    Input("survey-points-change-values", 'data')
+    Input("survey-points-change-values", 'data'),#
+    State('change_range_radio_button', 'value')
 )
-def update_trend_card1(trend, change_value):
-    """Callback grabs the trend data from the change rate store found in the scatter plot page.
-    Formats the output string"""
+def update_percent_change_card(change_value, change_range_radio_button):
+    """Callback updates the percent change card, based on survey unit selected CPA change between either
+       the baseline to spr or spr to spr selection"""
     # Load JSON into DataFrame
     with StringIO(change_value) as json_data:
         change_values = pd.read_json(json_data)
 
     classification = list(change_values['features'])[0]
-    classification= classification['properties']['classification']
+    classification_string = classification['properties']['classification']
+    percent_change = round(classification['properties']['difference'],2)
+
+    comment = None
+
     print(classification)
     color_mapping = {
         'High Erosion': "#ff0000",
@@ -888,18 +904,35 @@ def update_trend_card1(trend, change_value):
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
     }
-    color_to_use = color_mapping[classification]
+    color_to_use = color_mapping[classification_string]
+    comment = "Error"
+    if classification_string in ['High Erosion','Mild Erosion','Low Erosion' ]:
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"{value} %"
+        else:
+            comment = f"{value} %"
 
+        return html.Span(f"{comment}", style={"color": color_to_use})
+    elif classification_string in ['High Accretion','Mild Accretion','Low Accretion' ]:
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"+ {value} %"
+        else:
+            comment = f"+ {value} %"
 
-    if trend:
-        if "Accretion Rate" in trend:
+        return html.Span(f"{comment}", style={"color": color_to_use})
+    elif classification_string == 'No Change':
+        value = percent_change
+        if change_range_radio_button == 'base-spr':
+            comment = f"Baseline to Latest Spring +/- {value} %"
+        else:
+            comment = f"Spring to Latest Spring + +/- {value} %"
 
-            return html.Span(f"{classification}", style={"color": color_to_use})
-        elif "Erosion Rate" in trend:
+        comment =  f" +/- {value} %"
 
-            return html.Span(f"{classification}", style={"color": color_to_use})
-    else:
-        return f"{trend}"
+    return comment
+
 
 
 @callback(
@@ -931,7 +964,7 @@ def update_highest_cpa_card(highest_data, highest_year):
 
     Output("download", "data"),
     Input("download-charts-button", "n_clicks"),
-    State("download-check-list", "value"),
+    #State("download-check-list", "value"),
     State("scatter_chart", "data"),
     State("error_chart", "data"),
     State("line_chart", "data"),
@@ -952,7 +985,7 @@ def update_highest_cpa_card(highest_data, highest_year):
     prevent_initial_call=True,
 )
 def get_selected_charts(
-        n_clicks, chart_selection, scatter_chart, error_chart, line_chart,
+        n_clicks, scatter_chart, error_chart, line_chart,
         sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
@@ -970,10 +1003,16 @@ def get_selected_charts(
             doc = SimpleDocTemplate(buffer, pagesize=A4)
 
             def header(canvas, doc):
+                # Get the current date and time
+                current_datetime = datetime.now()
+
+                # Convert the datetime object to a string
+                current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+
                 canvas.saveState()
-                canvas.setFont("Helvetica", 11)
+                canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
-                canvas.drawString(40, A4[1] - 20, "SWCM Generated Report")
+                canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
                 logo_width = 1.5 * inch
                 logo_height = 0.5 * inch
                 logo_x = A4[0] - inch - logo_width
@@ -985,7 +1024,7 @@ def get_selected_charts(
             def footer(canvas, doc):
                 canvas.saveState()
                 canvas.setFont("Helvetica", 9)
-                canvas.drawString(40, 20, f"Page {doc.page}/")
+                canvas.drawString(40, 20, f"Page {doc.page}")
                 canvas.restoreState()
 
             def create_paragraph_one():
@@ -1084,9 +1123,42 @@ def get_selected_charts(
 
                 return chart_flowable
 
+            def add_line_plot():
 
+                """Request to add a generator here that makes all the charts for a survey unit?"""
 
+                chart_width, chart_height = A4[1] - 350, A4[0] - 280
+                line_figure_data = line_chart.get("line_plot")
+                line_figure = go.Figure(json.loads(line_figure_data))
 
+                line_figure.update_layout(
+                    xaxis=dict(
+                        tickfont=dict(color='black'),
+                        title=f'exgxgfxgfxgfxgfxgfx',
+                        title_font=dict(color='black', size=12),
+                        automargin=True,
+                        title_standoff=8
+                    ),
+                    yaxis=dict(
+                        tickfont=dict(color='black'),
+                        title_font=dict(color='black'),
+                    ),
+                    title=''
+                )
+
+                img_bytes = pio.to_image(line_figure, format='png')
+                img = PILImage.open(io.BytesIO(img_bytes))
+
+                # Convert PIL image to byte array
+                with io.BytesIO() as byte_io:
+                    img.save(byte_io, format='PNG')
+                    img_byte_array = byte_io.getvalue()
+
+                # Create a ReportLab Image object
+                from reportlab.platypus import Image
+                chart_flowable1 = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+
+                return chart_flowable1
 
             styles = getSampleStyleSheet()
             style = styles["Normal"]
@@ -1106,7 +1178,6 @@ def get_selected_charts(
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
 
-
             content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
                                     state_paragraph, spacer1]
 
@@ -1114,11 +1185,16 @@ def get_selected_charts(
             # Create a flowable object for the chart
             chart_flowable = add_error_bar_plot()
             content_first_page.append(chart_flowable)
+            line_chart_flowable = add_line_plot()
+            content_first_page.append(line_chart_flowable)
+
+
+
 
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (
-                    header(canvas, doc), add_CPA_chart(canvas, doc)),
+                    header(canvas, doc), add_CPA_chart(canvas, doc), footer(canvas, doc)),
                 onLaterPages=lambda canvas, doc: (
                     footer(canvas, doc)  # Define the content for subsequent pages
                 ))

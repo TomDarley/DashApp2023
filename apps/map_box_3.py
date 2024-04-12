@@ -15,7 +15,9 @@ import base64
 
 
 from dash.exceptions import PreventUpdate
-
+MAPBOX_TOKEN =  'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
+# tdarley01
+# Plymouth-CO
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3643,6 +3645,13 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
 
 DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon":-4.096976854933279}
 
+# Define the basemap options
+BASEMAPS = [
+    {'label': 'OpenStreetMap', 'value': 'open-street-map'},
+    {'label': 'Satellite', 'value': 'satellite-streets'},
+    # Add more basemap options as needed
+]
+
 
 def haversine(lat1, lon1, lat2, lon2):
     # Radius of the Earth in meters
@@ -3691,8 +3700,8 @@ def establish_connection(retries=3, delay=5):
 
     return None  # Return None if all attempts fail
 
-
 fig = go.Figure()
+
 
 image_path = r"media/Percent.jpg"
 with open(image_path, "rb") as image_file:
@@ -3700,17 +3709,106 @@ with open(image_path, "rb") as image_file:
 
 layout = html.Div(
     children=[
-
         html.Div(
 
-        html.Img(src=f"data:image/jpeg;base64,{encoded_image}",
-                 style={'position': 'absolute', 'top': 0, 'left': 0, 'width': '300px',
-                        'height': '120px', 'zIndex': 100, 'border-radius':10, 'border-weight':10 , "border-color": "black", 'box-shadow': "5px 5px 5px lightblue"}),
+            [
+                dcc.Graph(
+                    id="example-map",
+                    # Include your figure here
+                    # figure=fig,
+                    config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False, 'responsive':True},
+                    className="map",
+                    style={'position': 'relative','width': '100%', 'height': '100%',
 
-            style= {'position': 'relative', 'box-shadow': "5px 5px 5px lightblue"}
 
+                    }
+
+                ),
+
+            ],
+            style={'position': 'relative'}
         ),
 
+        html.Div(children=[
+            html.Div([
+
+                dcc.Dropdown(
+                    id='basemap-dropdown',
+                    options=BASEMAPS,
+                    value=None, # Set the initial value
+                    style={'font-size':13,
+                           'position':'relative',
+                           'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
+                           'width': '170px',
+                           'height': '30px',
+
+                           # Adjust padding left
+                           },
+                    placeholder= 'Select Basemap',
+                    clearable=False
+
+
+                ),
+
+            ], style={
+                    'position': 'absolute',
+                    'top': 60,
+                    'left': 13,
+                    'width': '171px',
+                    'height': '35px',
+                    'zIndex': 100,
+
+
+
+
+
+                }),
+
+            html.Img(
+                src=f"data:image/jpeg;base64,{encoded_image}",
+                style={
+                    'position': 'absolute',
+                    'bottom': 10,
+                    'left': 10,
+                    'width': '300px',
+                    'height': '120px',
+                    'zIndex': 100,
+                    'border-radius': 10,
+                    'border-weight': 10,
+                    "border-color": "black",
+                    'border': '1px solid grey',
+                    'box-shadow': "5px 5px 5px lightblue"
+                }
+            ),
+
+            dcc.RadioItems(
+                id='change_range_radio_button',
+                options=[
+                    {'label': '  Baseline to Spring PCT', 'value': 'base-spr'},
+                    {'label': '  Spring to Spring PCT', 'value': 'spr-spr'}
+                ],
+                value='base-spr',  # Default selected option
+                style={
+                    'position': 'absolute',
+                    'top': '10px',  # Adjust as needed
+                    'left': '10px',  # Adjust as needed
+                    'width': '180px',
+                    'height': '45px',
+                    'zIndex': 100,
+                    'border-radius': 15,
+
+                    #'border': '1px solid grey',
+                    'box-shadow': "5px 5px 5px lightblue",
+                    'paddingTop': '5px',  # Adjust padding top
+                    'paddingRight': '5px',  # Adjust padding right
+                    'paddingBottom': '8px',  # Adjust padding bottom
+                    'paddingLeft': '8px',  # Adjust padding left
+
+                    'fontSize': 13
+                }
+            ),
+
+        ]),
 
         dcc.Store(id='map-state', data={'center': None}),
         dcc.Store(
@@ -3721,20 +3819,12 @@ layout = html.Div(
         dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
         dcc.Store(id= 'survey-points-change-values', data=None),
         dcc.Location(id="url", refresh=False),  # Add a Location component
-
-        dcc.Graph(
-            id="example-map",
-            figure=fig,
-            config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False},
-            className="map",
-
-        ),
-
-
     ],
     id="mapbox_div",
-
+    style={'position': 'relative','width': '100%', 'height': '100%', }
 )
+
+# Define a callback to update the basemap based on the dropdown selection
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -3750,9 +3840,10 @@ layout = html.Div(
           Input("survey-line-dropdown", "value"),
           Input('selected-value-storage', 'data'),
 
-          Input("survey-type-dropdown", "value"))
+          Input("survey-type-dropdown", "value"),
+         )
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals):
+                  selected_val_storage, survey_type_dropdown_vals, ):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4178,10 +4269,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     Input("selected-value-storage", "data"),
     Input('map-state', "data"),
     State('example-map', "relayoutData"),
-
+    Input('csa_profile_line_colors', 'data'), # this is the colors mapped to profile.
+    Input('change_range_radio_button', 'value'),
+    Input('basemap-dropdown', 'value'),
     prevent_initial_call=False,
 )
-def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data):
+def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors, change_range_radio_button, basemap_selection):
     """Function controls the re-loading of the map. Takes in the value store which contains two values, selected survey
     unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
     relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
@@ -4234,15 +4327,45 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         df1.loc["Sum"] = df1.sum()
         df1 = df1.tail(1)
 
-        first_column_value = df1.iloc[0, 0]
-        last_column_index = df1.shape[1] - 1
-        last_column_value = df1.iloc[0, last_column_index]
+        # logic to calculate the difference based on change_range_radio_button selection
 
-        df1["first"] = first_column_value
-        df1["last"] = last_column_value
+        if change_range_radio_button  == "base-spr":
 
-        df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
-        df1 = df1[["difference"]]
+
+            first_column_value = df1.iloc[0, 0]
+            last_column_index = df1.shape[1] - 1
+            last_column_value = df1.iloc[0, last_column_index]
+
+            df1["first"] = first_column_value
+            df1["last"] = last_column_value
+
+            df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
+            df1 = df1[["difference"]]
+
+        if change_range_radio_button == "spr-spr":
+            import datetime
+            spring_months =[1,2,3,4,5,6]
+            #df1 = df1.apply(pd.to_datetime, unit='s')
+            # Extract month from each datetime column
+            spring_month_columns = []
+            for column in df1.columns:
+                    dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
+                    month = dt_object.month
+                    if month in spring_months:
+                        spring_month_columns.append(column)
+
+            if len(spring_month_columns)>=2:
+                first_column_value = list(df1[spring_month_columns[-2]])[0]
+                last_column_value =list(df1[spring_month_columns[-1]])[0]
+                df1["first"] = first_column_value
+                df1["last"] = last_column_value
+                df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
+                df1 = df1[["difference"]]
+            else:
+                df1["difference"] = 0
+                df1 = df1[["difference"]]
+
+
 
         df1["Survey_Unit"] = group.name
         df1 = df1.reset_index()
@@ -4423,6 +4546,21 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         lines_inside_box = []
 
     # adding each WKT string as trace to the fig as a trace
+
+
+    # Getting the colors change colors  mapped to each profile generated in the cpa table .py
+    profile_colors_df = pd.DataFrame.from_dict(csa_profile_line_colors)
+    profile_colors_df = profile_colors_df.rename(columns={'Profile': 'profile'})
+
+    # join the colors to the line_data df
+
+    # Merge line_data with profile_colors_df based on the 'Profile' column
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring PCT Color']], on='profile')
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring PCT Color']], on='profile')
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile')
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile')
+
+
     line_traces = []
     for i, row in line_data.iterrows():
         line = row["geometry"]
@@ -4446,6 +4584,20 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         strategy = row['strategy']
         survey_unit = row['survey_unit']
 
+        # add conditional here based on button selection to show spring to spring or baseline to baseline
+        percent_change_row = None
+        temp_state = change_range_radio_button
+        popup_name = None
+        if temp_state == 'spr-spr':
+            percent_change_row = row['Spring to Spring % Change']
+            percent_change_color_row = row['Spring to Spring PCT Color']
+            popup_name ="Spring to Spring (PCT)"
+        elif temp_state == 'base-spr':
+            percent_change_row = row['Baseline to Spring % Change']
+            percent_change_color_row = row['Baseline to Spring PCT Color']
+            popup_name = "Baseline to Spring (PCT)"
+
+
         if not strategy:
             print('missing')
 
@@ -4456,23 +4608,28 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         post_storm = 'None' if post_storm is None else post_storm
         strategy = 'None' if strategy is None else strategy
         survey_unit = 'None' if survey_unit is None else survey_unit
+        percent_change_row ='None' if percent_change_row is None else percent_change_row
 
         # Format the popup data
         custom_data = f"Profile Line ID: {profile_line_id}" \
                       f"<br>Interim: {interim.title()}" \
                       f"<br>Baseline: {baseline.title()}" \
                       f"<br>Post Storm: {post_storm.title()}" \
-                      f"<br>Strategy: {strategy.title().replace('_', ' ')}"
+                      f"<br>Strategy: {strategy.title().replace('_', ' ')}" \
+                      f"<br>{popup_name}: {percent_change_row} %"
+
 
         # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
+
+
 
         # Set the colors and width
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
             colour = "#e8d90c" if profile_line_id in lines_inside_box else "#246673"
             width = 8 if profile_line_id in lines_inside_box else 5
         else:
-            colour = "#e8d90c" if set_profile_line == profile_line_id else "#246673"
+            colour = "#e8d90c" if set_profile_line == profile_line_id else percent_change_color_row
             width = 8 if set_profile_line == profile_line_id else 5
 
         # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
@@ -4503,7 +4660,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
 
     fig.update_layout(
-        mapbox_style="open-street-map",
+
         margin=dict(l=0, r=0, b=0, t=0),
         showlegend=False,
 
@@ -4573,9 +4730,17 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # Update the map layout
     fig.update_layout(mapbox={
+        'style': basemap_selection,
+        'accesstoken': MAPBOX_TOKEN,
         "center": current_center,
         "zoom": current_zoom,
-    })
+        },height=800
+      ),
+
+
+
+    print(basemap_selection)
+
 
     print(survey_points_change_values)
 

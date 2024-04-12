@@ -44,7 +44,7 @@ footer = html.Div(
                                 html.Li(html.A("Privacy Policy", href="https://southwest.coastalmonitoring.org/privacy-policy/")),
                             ],
                         ),
-                        html.P("TDarley Applications © 2023", className="copyright"),
+                        html.P("TDarley Applications © 2024", className="copyright"),
                     ],
                 ),
             ]
@@ -62,6 +62,7 @@ app.layout = html.Div(children =
                       style ={'background-color': 'white'}
 
 )
+
 # Append the footer to the main layout
 app.layout.children.append(footer)
 

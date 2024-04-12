@@ -263,6 +263,8 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
     else:
         fixed_val_storage = None
 
+
+
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
     engine = create_engine(
         "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
@@ -387,15 +389,6 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 topo_df = topo_df.loc[(topo_df.index >= closest_min_chainage_index) & (topo_df.index <= next_max_index)]
             elif use_min_plus_1 and not use_max_plus_1:
                 topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= closest_max_chainage_index)]
-
-
-
-
-
-
-
-
-
 
 
 

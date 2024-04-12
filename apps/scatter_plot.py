@@ -361,9 +361,6 @@ def make_scatter_plot(selected_survey_unit):
     tickvals = mdates.date2num(tick_dates)  # Convert tick dates to number format
     ticktext = tick_dates.strftime("%Y-%m")
 
-
-
-
     # linear regression fit
     regline = (
         sm.OLS(chart_ready_df["Sum"], sm.add_constant(chart_ready_df["x"]))
@@ -380,6 +377,10 @@ def make_scatter_plot(selected_survey_unit):
     slope_intercept = pAsString.split("x")[0].replace("\n", "").lstrip()
     slope_intercept = float(slope_intercept)
     accretion_levels = round((slope_intercept * 365), 3)
+
+    # caluclate accreation levels
+
+
 
     # r squared value
     correlation_matrix = np.corrcoef(x_mdates, y_axis)

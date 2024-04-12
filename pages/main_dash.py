@@ -731,10 +731,6 @@ layout = html.Div(
                         profile_line_plot.layout,
 
 
-
-
-
-
                              ],style={'position': 'relative'}),
 
                     xs={"size": 12, "offset": 0},
@@ -999,6 +995,8 @@ def get_selected_charts(
 
         def to_pdf():
 
+            x = spr_to_spr_table
+
             buffer = io.BytesIO()
             doc = SimpleDocTemplate(buffer, pagesize=A4)
 
@@ -1160,6 +1158,48 @@ def get_selected_charts(
 
                 return chart_flowable1
 
+            def add_csa_table():
+                f= spr_to_spr_table
+
+
+                table_data1 = [[k for k in spr_to_spr_table[0].keys()]] + [[v for v in d.values()] for d in spr_to_spr_table]
+                table_data2 = [[k for k in spr_to_baseline_table[0].keys()]] + [[v for v in d.values()] for d in spr_to_baseline_table]
+
+                # Zip the rows from table_data1 and table_data2 to create rows for the combined table
+                #combined_table_data = [row1 + row2 for row1, row2 in zip(table_data1, table_data2)]
+
+                # Combine column headers from both tables
+               # combined_columns = table_data1[0] + table_data2[0]
+
+                combined_data = []
+                for index, value in enumerate(table_data1):
+                    data = value + table_data2[index]
+                    combined_data.append(data)
+
+
+                print(combined_data)
+                print(combined_data)
+
+                # Drop the second 'Profile' column header and its corresponding data
+                filtered_data = [[row[i] for i in range(len(row)) if i != 3] for row in combined_data]
+
+                #combined_table_data = table_data1[1:] + table_data2[1:]
+                table = Table(filtered_data)
+
+
+                # Create a TableStyle instance
+                table_style = TableStyle([
+                    # Bold the first row
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    # Change font size for the first row
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+                ])
+
+                print(table)
+                return Table(filtered_data, style=table_style)
+
+
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
@@ -1177,7 +1217,6 @@ def get_selected_charts(
             proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
-
             content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
                                     state_paragraph, spacer1]
 
@@ -1188,8 +1227,13 @@ def get_selected_charts(
             line_chart_flowable = add_line_plot()
             content_first_page.append(line_chart_flowable)
 
+            # Adding CSA Change Tables
+            csa_table = add_csa_table()
+            content_first_page.append(PageBreak())
+            content_first_page.append(csa_table)
 
 
+            #add_CPA_chart(canvas, doc)
 
             doc.build(
                 content_first_page,
@@ -1199,15 +1243,10 @@ def get_selected_charts(
                     footer(canvas, doc)  # Define the content for subsequent pages
                 ))
 
-
             buffer.seek(0)
             return buffer.getvalue()
-
         pdf_bytes = to_pdf()
 
-
-        # Save the subplot as an image
-        # img_bytes = subplot.to_image(format="png")
 
     return dcc.send_bytes(pdf_bytes, filename='test.pdf')
     # return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")

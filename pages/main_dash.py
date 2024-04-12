@@ -1183,20 +1183,40 @@ def get_selected_charts(
                 # Drop the second 'Profile' column header and its corresponding data
                 filtered_data = [[row[i] for i in range(len(row)) if i != 3] for row in combined_data]
 
-                #combined_table_data = table_data1[1:] + table_data2[1:]
-                table = Table(filtered_data)
 
+
+                # Define a function to map data values to colors based on classified ranges
+                # Define a function to map data values to colors based on classified ranges
+                def get_color(value):
+                    # Define your classified ranges and corresponding colors
+                    ranges = [(0, 10, colors.red), (10, 20, colors.yellow), (20, float('inf'), colors.green)]
+
+                    try:
+                        # Loop through the ranges to find the appropriate color
+                        for start, end, color in ranges:
+                            if int(start) <= int(value) < int(end):
+                                return color
+                    except Exception:
+                        return colors.white
+
+                    # If the value doesn't fall within any range, return a default color
+                    return colors.white
+
+                    # Create a TableStyle instance
 
                 # Create a TableStyle instance
                 table_style = TableStyle([
-                    # Bold the first row
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    # Change font size for the first row
-                    ('FONTSIZE', (0, 0), (-1, -1), 8),
-                    ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Bold the first row
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),  # Change font size for all the rows
+                    ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Background color for the heading row
+                    ('BACKGROUND', (1, 1), (-1, -1),
+                     [get_color(value) for row in combined_data[1:] for value in row[1:]]),
+                    # Background color for other cells
                 ])
 
-                print(table)
+
                 return Table(filtered_data, style=table_style)
 
 

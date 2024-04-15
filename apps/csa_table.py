@@ -399,7 +399,8 @@ layout = html.Div(
         Output("csa_header_store","data"),
         Output("csa_profile_line_colors", 'data')
     ),
-    [Input("selected-df-storage", "data")],
+    [Input("selected-df-storage", "data"),
+    ]
 )
 def make_csa_table(selected_csa_data):
 

@@ -10,8 +10,6 @@ import numpy as np
 from sqlalchemy import create_engine
 
 current_year = datetime.now().year
-
-
 def generate_color_gradient(start_color, end_color, steps):
     """Funtion generates a list of hex of step length"""
 
@@ -83,7 +81,7 @@ layout = html.Div(
 
                 dcc.Graph(
                     id="line_plot",
-                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
+                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'], 'displaylogo': False},
                 ),
             ], ),
 
@@ -103,30 +101,32 @@ layout = html.Div(
             className="mr-3",
             style={"position": "absolute", "bottom": "1%", "right": "8px", "border-radius": "5px"},
         ),
-        dbc.Button(
-            [html.Span(className="bi bi-badge-3d")],
-            size="md",
-            id="3D_plot",
-            n_clicks=0,
-            className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "60px", "border-radius": "5px"},
-        ),
-        dbc.Button(
-            [html.Span(className="bi bi-badge-sd")],
-            size="md",
-            id="2D_plot",
-            n_clicks=0,
-            className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px"},
-        ),
 
-        dbc.Button(
-            [html.Span(className="bi bi-graph-down")],
-            size="md",
-            id="Range_plot",
-            n_clicks=0,
-            className="mr-3",
-            style={"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"},
+        dcc.Checklist(
+            id='Range_plot',
+            options=[
+                {"label": "  Profile Envelope", "value": "show_range"},
+            ],
+            value=['show_range'],  # Default selected option
+            inline=True,
+            style={
+                'position': 'absolute',
+                'top': '10px',  # Adjust as needed
+                'left': '10px',  # Adjust as needed
+                'width': '120px',
+                'height': '25px',
+                'zIndex': 100,
+                'border-radius': 15,
+
+                # 'border': '1px solid grey',
+                'box-shadow': "5px 5px 5px lightblue",
+                'paddingTop': '5px',  # Adjust padding top
+                'paddingRight': '5px',  # Adjust padding right
+                'paddingBottom': '8px',  # Adjust padding bottom
+                'paddingLeft': '8px',  # Adjust padding left
+
+                'fontSize': 13
+            }
         ),
         html.Div([
             dcc.Dropdown(
@@ -228,9 +228,7 @@ layout = html.Div(
     Output("line_plot_model", "figure"),
     Output("line_chart", "data"),
 
-    Output("3D_plot", "style"),  # use this to turn them off if multi select
-    Output("2D_plot", "style"),
-    Output("Range_plot", "style"),
+
 
     Output('month_year_dropdown', 'style'),
     Output('month-dropdown', 'options'),
@@ -239,19 +237,19 @@ layout = html.Div(
 
     Input("survey-unit-dropdown", "value"),
     Input("survey-line-dropdown", "value"),
-    Input("3D_plot", "n_clicks"),
-    Input("2D_plot", "n_clicks"),
-    Input("Range_plot", "n_clicks"),
+
+    Input("Range_plot", "value"),
     Input('selected-value-storage', 'data'),
     Input('multi-select-lines', 'data'),
     Input('month-dropdown', 'value'),
     Input('year-dropdown', 'value'),
+    Input('survey_unit_card', 'children'),
 
     prevent_initial_call=False,
     allow_duplicate=True,
 )
-def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d, n_clicks_range, selected_val_storage,
-                   multi_lines, month_dropdown_val, year_dropdown_val,
+def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_plot_value, selected_val_storage,
+                   multi_lines, month_dropdown_val, year_dropdown_val, survey_unit_card # used for local name
                    ):
     # convert to dict from list
     if selected_val_storage:
@@ -291,23 +289,11 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         # check if multi selection is enabled
         if fixed_val_storage is not None and fixed_val_storage['multi'] == False:
 
-            # check if a chart mode button has been selected, use it to render the correct chart mode
-            trigger = [p["prop_id"] for p in dash.callback_context.triggered][0]
 
             if selected_sur_unit is None or selected_profile is None:
                 raise PreventUpdate
 
-            if trigger:
-                if trigger == "3D_plot.n_clicks":
-                    selection = "3D"
-                elif trigger == "2D_plot.n_clicks":
-                    selection = "2D"
-                elif trigger == 'Range_plot.n_clicks':
-                    selection = "Range"
-                else:
-                    selection = "2D"
-            else:
-                selection = "2D"
+            selection = "2D"
 
             # must sort the data by chainage for it to display correctly
             topo_df = topo_df.sort_values(by=["chainage"])
@@ -390,86 +376,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             elif use_min_plus_1 and not use_max_plus_1:
                 topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= closest_max_chainage_index)]
 
-
-
-            if selection == "3D":
-
-                # create 3D plot
-                surface_elevation = []
-                for x in range(len(topo_df["chainage"])):
-                    surface_elevation.append(master_profile_elevation)
-
-                fig = px.line_3d(
-                    topo_df,
-                    x="chainage",
-                    y="date",
-                    z="elevation_od",
-                    color="date",
-                    custom_data=['date', 'chainage', 'elevation_od'],
-                    category_orders={"date": date_order},
-                    color_discrete_map=custom_color_mapping,
-
-
-                )
-
-                # Changing the style of the three profiles initially loaded
-                fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(width=3))
-                fig.update_traces(selector=dict(name=fig.data[previous_trace_date].name), line=dict(width=3))
-                fig.update_traces(selector=dict(name=fig.data[newest_trace_date].name),
-                                  line=dict(color='green', width=3))
-
-                # Format the label shown in the hover
-                fig.update_traces(
-                    hovertemplate="<b>Date:</b> %{customdata[0]}<br>" +
-                                  "<b>Chainage:</b> %{customdata[1]}<br>" +
-                                  "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>"
-                )
-
-                # Set custom axis labels
-                fig.update_layout(
-                    scene=dict(
-                        xaxis_title="Chainage (m)",
-                        yaxis_title='',
-                        zaxis_title="Elevation (m)",
-                    )
-                )
-
-                fig.update_traces(
-                    line=dict(
-                        width=5,
-                    ),
-                )
-
-                # logic to initially show only the profiles we want
-                for i, trace in enumerate(fig.data):
-                    trace.visible = "legendonly" if i not in initial_visible_traces else True
-
-                custom_color_scale = ["grey", "black"]
-                fig.add_trace(
-                    go.Surface(
-                        x=master_profile_chainage,
-                        y=topo_df["date"],
-                        z=surface_elevation,
-                        showlegend=False,
-                        name="Master Profile",
-                        colorscale=custom_color_scale,
-                        showscale=False,
-                        hoverinfo='none',
-                        hovertemplate=None
-                    )
-                )
-
-                fig.update_layout(
-                    legend=dict(
-                        orientation="v",  # Horizontal orientation
-                        yanchor="top",  # Anchor to the top of the chart
-                        # y=-0.05,  # Adjust the vertical position as needed
-                        xanchor="right",  # Anchor to the left side of the chart
-                        # x=0.01  # Adjust the horizontal position as needed
-                    )
-                )
-
-            elif selection == '2D':
+            if selection == '2D':
                 # Create a 2D line plot
                 fig = px.line(
                     topo_df,
@@ -486,13 +393,12 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 # check how many traces exist, fixing a bug where dogy mp would cause not enough traces to color
                 trace_count = len(fig.data)
 
-
                 # Changing the style of the three profiles initially loaded
-                fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(color='brown', width=3, dash='solid'))
+                fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(color='brown', width=2, dash='solid'))
                 fig.update_traces(selector=dict(name=fig.data[-2].name),
-                                      line=dict(color='blue', width=3, dash='solid'))
+                                      line=dict(color='green', width=2, dash='solid'))
                 fig.update_traces(selector=dict(name=fig.data[-1].name),
-                                      line=dict(color='green', width=3, dash='solid'))
+                                      line=dict(color='blue', width=2, dash='solid'))
 
 
 
@@ -507,140 +413,120 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
                 # logic to initially show only the profiles we want
                 for i, trace in enumerate(fig.data):
                     trace.visible = "legendonly" if i not in initial_visible_traces else True
+                # Set additional traces (range lines) to be at the top of the legend
+                fig.update_layout(legend=dict(traceorder="reversed"))
 
                 fig.add_trace(
                     go.Scatter(
                         x=master_profile_chainage,
                         y=master_profile_elevation,
-                        line=dict(color="red", width=4, dash="dash"),
+                        line=dict(color="red", width=2, dash="dash"),
                         name="Master Profile",
 
                     )
                 )
+                if len(radio_selection_range_plot_value) >= 1:
+                    # Adding the Profile Envelope to the 2D chart, previously its own desperate chart
+                    topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
 
 
-            elif selection == 'Range':
+                    min_chainage = master_profile_chainage[0]
+                    max_chainage = master_profile_chainage[-1]
+                    min_chainage = float(min_chainage)
+                    max_chainage = float(max_chainage)
 
-                topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
+                    min_chainage = int(min_chainage)
+                    max_chainage = int(max_chainage) + 50
+                    merge_df = pd.DataFrame()
 
-                min_chainage = master_profile_chainage[0]
-                max_chainage = master_profile_chainage[-1]
-                min_chainage = float(min_chainage)
-                max_chainage = float(max_chainage)
+                    generated_chainage = list(range(min_chainage, max_chainage, 1))
+                    merge_df['chainage'] = generated_chainage
+                    merge_df['chainage'] = merge_df['chainage'].astype(int)
 
-                min_chainage = int(min_chainage)
-                max_chainage = int(max_chainage) + 50
-                merge_df = pd.DataFrame()
+                    survey_dfs = []  # Assuming this list is supposed to store the results of the merge
 
-                generated_chainage = list(range(min_chainage, max_chainage, 1))
-                merge_df['chainage'] = generated_chainage
-                merge_df['chainage'] = merge_df['chainage'].astype(int)
+                    unique_dates = topo_df['date'].unique()  # Assuming unique_dates is derived from topo_df
 
-                survey_dfs = []  # Assuming this list is supposed to store the results of the merge
+                    for date in unique_dates:
+                        df_filter = topo_df.loc[topo_df['date'] == date].copy()
 
-                unique_dates = topo_df['date'].unique()  # Assuming unique_dates is derived from topo_df
+                        # Round the chainage values
+                        df_filter['chainage'] = df_filter['chainage'].round(0).astype(int)
 
-                for date in unique_dates:
-                    df_filter = topo_df.loc[topo_df['date'] == date].copy()
+                        df_filter = df_filter[['chainage', 'elevation_od']]
 
-                    # Round the chainage values
-                    df_filter['chainage'] = df_filter['chainage'].round(0).astype(int)
+                        survey_dfs.append(df_filter)  # Append the merged result to the list
 
-                    df_filter = df_filter[['chainage', 'elevation_od']]
+                    count = 0
+                    for df in survey_dfs:
+                        merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
+                        merge_df = merge_df.drop_duplicates(subset=['chainage'])
+                        merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
+                        merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='linear',
+                                                                                                          order=5,
+                                                                                                          limit_area='inside',
+                                                                                                          limit=6)
+                        count += 1
+                    merge_df = merge_df.drop_duplicates(
+                        subset=['chainage'])  # bug duplicates are being made for chainage!!!
+                    merge_df = merge_df.set_index('chainage')
+                    max_ele = merge_df.max(axis=1)
+                    average_ele = merge_df.mean(axis=1, skipna=True)
+                    min_ele = merge_df.min(axis=1, skipna=True)
+                    merge_df['Max Elevation'] = max_ele
+                    merge_df['Mean Elevation'] = average_ele
+                    merge_df['Min Elevation'] = min_ele
+                    merge_df = merge_df.reset_index()
 
-                    survey_dfs.append(df_filter)  # Append the merged result to the list
+                    min_ele = merge_df["Min Elevation"]
+                    max_ele = merge_df["Max Elevation"]
+                    chainage = merge_df["chainage"]
 
-                count = 0
-                for df in survey_dfs:
-                    merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
-                    merge_df = merge_df.drop_duplicates(subset=['chainage'])
-                    merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
-                    merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='linear',
-                                                                                                      order=5,
-                                                                                                      limit_area='inside',
-                                                                                                      limit=6)
-                    count += 1
-                merge_df = merge_df.drop_duplicates(
-                    subset=['chainage'])  # bug duplicates are being made for chainage!!!
-                merge_df = merge_df.set_index('chainage')
-                max_ele = merge_df.max(axis=1)
-                average_ele = merge_df.mean(axis=1, skipna=True)
-                min_ele = merge_df.min(axis=1, skipna=True)
-                merge_df['Max Elevation'] = max_ele
-                merge_df['Mean Elevation'] = average_ele
-                merge_df['Min Elevation'] = min_ele
-                merge_df = merge_df.reset_index()
+                    # Add trace for Max Elevation
+                    fig.add_trace(go.Scatter(
+                        x=chainage,
+                        y=max_ele,
+                        mode='lines',
+                        line=dict(color='rgba(0, 0, 0, 0)'),  # Make the line invisible
+                        showlegend=False,
+                        hoverinfo='none'
+                    ))
 
-                fig = px.line(
-                    merge_df,
-                    x="chainage",
-                    y=["Min Elevation", "Mean Elevation", "Max Elevation"],
-                    # color="date",
-                    # color_discrete_map=custom_color_mapping,
-                    template="plotly",
-                    # category_orders={"date": date_order},
-                    # custom_data=['date', 'chainage', 'elevation_od'],)
+                    # Add trace for Min Elevation
+                    fig.add_trace(go.Scatter(
+                        x=chainage,
+                        y=min_ele,
+                        mode='lines',
+                        line=dict(color='rgba(0, 0, 0, 0)'),  # Make the line invisible
+                        fill='tonexty',  # Fill to the next trace (Max Elevation)
+                        fillcolor='rgba(227, 181, 32, 0.3)',  # Fill color with transparency
+                        showlegend=False,
+                        hoverinfo='none'
+                    ))
+
+
+                # Update x-axis tick labels
+                fig.update_layout(
+                    title={
+                        "text": f"<b> CSL: {survey_unit_card} ({selected_sur_unit}) - {selected_profile}</b>",
+                        "y": 0.95,
+                        "x": 0.5,
+                        "xanchor": "center",
+                        "yanchor": "top",
+                    },
+                    title_font={"size": 15, "family": "Helvetica", "color": "blue"},
+                    xaxis_title="Chainage (m)",
+                    yaxis_title="Elevation",
+                    legend_title="",
+                    font=dict(size=12, color="blue", family="Helvetica"),
+
+                    # legend_traceorder="reversed",
+                    legend_title_text=f"",
                 )
 
-                fig.add_trace(
-                    go.Scatter(
-                        x=master_profile_chainage,
-                        y=master_profile_elevation,
-                        line=dict(color="red", width=5, dash="dash"),
-                        name="Master Profile",
-                    )
-                )
 
-            # Customize x and y axis fonts and sizes
-            fig.update_xaxes(
-                title_text="Chainage (m)",
-                title_font=dict(
-                    size=15, family="Helvetica", color="blue"
-                ),  # Customize font size and family
-                tickfont=dict(
-                    size=15, family="Helvetica", color="blue"
-                ),  # Customize tick font size and family
-            )
 
-            # y axis on the line plot is Elevation 0D
-            fig.update_yaxes(
-                title_text="Elevation (m)",
-                title_font=dict(
-                    size=15, family="Helvetica", color="blue"
-                ),  # Customize font size and family
-                tickfont=dict(
-                    size=15, family="Helvetica", color="blue"
-                ),  # Customize tick font size and family
-            )
 
-            # Customize the legend font and size
-            fig.update_layout(
-                legend=dict(
-                    title_font=dict(
-                        size=12, family="Helvetica"
-                    ),  # Customize font size and family
-                    title_text="",  # Remove legend title
-                    font=dict(
-                        size=12, family="Helvetica"
-                    ),  # Customize font size and family for legend labels
-                ),
-                legend_traceorder="reversed",
-                legend_title_text=f"",
-                title={
-                    "text": f"<b>CSL: {selected_sur_unit} {selected_profile}</b>",
-                    "y": 0.96,
-                    "x": 0.5,
-                    "xanchor": "center",
-                    "yanchor": "top",
-                },
-                title_font=dict(size=15, family="Helvetica"),
-                title_x=0.5,
-                font=dict(size=15, color="blue", family="Helvetica"),
-
-            )
-
-            # Add a title to the plot
-            # fig.update_layout(title=f'{selected_profile}', title_font=dict(size=12, family='Helvetica'),title_x=0.5)
 
             # Serialize the figure to JSON
             serialized_fig = fig.to_json()
@@ -648,14 +534,12 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
             # Update the 'cpa' key in the store's data with the serialized figure
             chart_data = {"line_plot": serialized_fig}
 
-            button_3d_style = {"position": "absolute", "top": "1%", "left": "60px", "border-radius": "5px"}
-            button_2d_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px"}
-            button_range_style = {"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"}
+
             month_year_dropdown_style = dict(display='none')
 
 
 
-            return fig, fig, chart_data, button_3d_style, button_2d_style, button_range_style, month_year_dropdown_style, \
+            return fig, fig, chart_data, month_year_dropdown_style, \
                 dash.no_update, dash.no_update, valid_master_profile_date
         else:
             valid_master_profile_date = False
@@ -788,7 +672,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
 
 
 
-            return fig, fig, chart_data, no_style, no_style, no_style, month_year_dropdown_style, month_dropdown_options, year_dropdown_options, valid_master_profile_date
+            return fig, fig, chart_data, month_year_dropdown_style, month_dropdown_options, year_dropdown_options, valid_master_profile_date
     else:
         valid_master_profile_date = True
         fig = px.line()
@@ -798,7 +682,7 @@ def make_line_plot(selected_sur_unit, selected_profile, n_clicks_3d, n_clicks_2d
         button_range_style = {"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"}
         month_year_dropdown_style = dict(display='none')
 
-        return fig, fig, chart_data, button_3d_style, button_2d_style, button_range_style, month_year_dropdown_style, \
+        return fig, fig, chart_data,  month_year_dropdown_style, \
             dash.no_update, dash.no_update, valid_master_profile_date
 
 

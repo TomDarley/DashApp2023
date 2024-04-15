@@ -3814,7 +3814,7 @@ layout = html.Div(
         dcc.Store(
             id="selected-value-storage",
             data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data': None,
-                  'survey_type': 'Interim'},
+                  'survey_type': 'Interim', },
         ),
         dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
         dcc.Store(id= 'survey-points-change-values', data=None),
@@ -3935,7 +3935,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                       'survey-type-dropdown'] or ctx_id is None:
 
         selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE,
-                                 'multi': False, 'box_selected_data': None, 'survey_type': 'Interim'},
+                                 'multi': False, 'box_selected_data': None, 'survey_type': 'Interim', },
 
         return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim'
 

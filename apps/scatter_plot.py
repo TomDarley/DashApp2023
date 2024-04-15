@@ -71,7 +71,7 @@ layout = html.Div(
                         "width": "100%",
                         "height": "60vh", # this will make it bigger
                     },
-                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
+                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','autoscale'], 'displaylogo': False},
 
                 ),
             ],id = 'scatter_plot_card',
@@ -166,10 +166,11 @@ layout = html.Div(
         Output("percent_change", "data"),
 
         Input("survey-unit-dropdown", "value"),
+        Input('survey_unit_card', 'children'),
     ),
     allow_duplicate=True,
 )
-def make_scatter_plot(selected_survey_unit):
+def make_scatter_plot(selected_survey_unit,survey_unit_card):
 
     if selected_survey_unit is None:
         raise PreventUpdate
@@ -464,7 +465,7 @@ def make_scatter_plot(selected_survey_unit):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"<b> CPA: {selected_survey_unit}</b>",
+            "text": f"<b> CPA: {survey_unit_card} ({selected_survey_unit})</b>",
             "y": 0.95,
             "x": 0.5,
             "xanchor": "center",

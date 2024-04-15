@@ -13,7 +13,7 @@ layout = html.Div(
 
 
         dcc.Graph(id="error_plot",
-config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False},
+config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','autoscale'], 'displaylogo': False},
                   ),
         # adding info and max view buttons
         dbc.Button(
@@ -111,9 +111,10 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'd
     Input("selected-df-storage", "data"),
     State("survey-unit-dropdown", "value"),
     Input('error-bar-dropdown', 'value'),
+    Input('survey_unit_card', 'children'),
 
 )
-def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val):
+def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card ):
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -214,7 +215,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val):
     # Update x-axis tick labels
     fig.update_layout(
         title={
-            "text": f"<b>Box Plot: {selected_survey_unit}</b>",
+            "text": f"<b>Box Plot: {survey_unit_card} ({selected_survey_unit})</b>",
             "y": 0.96,
             "x": 0.5,
             "xanchor": "center",

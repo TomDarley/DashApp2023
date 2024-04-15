@@ -1187,10 +1187,6 @@ def get_selected_charts(
             content_first_page.append(chart_flowable)
             line_chart_flowable = add_line_plot()
             content_first_page.append(line_chart_flowable)
-
-
-
-
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (

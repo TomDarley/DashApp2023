@@ -377,6 +377,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                 topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= closest_max_chainage_index)]
 
             if selection == '2D':
+
                 # Create a 2D line plot
                 fig = px.line(
                     topo_df,
@@ -399,8 +400,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                                       line=dict(color='green', width=2, dash='solid'))
                 fig.update_traces(selector=dict(name=fig.data[-1].name),
                                       line=dict(color='blue', width=2, dash='solid'))
-
-
 
 
                 # Format the label shown in the hover
@@ -428,7 +427,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                 if len(radio_selection_range_plot_value) >= 1:
                     # Adding the Profile Envelope to the 2D chart, previously its own desperate chart
                     topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
-
 
                     min_chainage = master_profile_chainage[0]
                     max_chainage = master_profile_chainage[-1]
@@ -462,10 +460,11 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                         merge_df = pd.merge(merge_df, df[["chainage", "elevation_od"]], on="chainage", how="left")
                         merge_df = merge_df.drop_duplicates(subset=['chainage'])
                         merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
-                        merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(method='linear',
-                                                                                                          order=5,
-                                                                                                          limit_area='inside',
-                                                                                                          limit=6)
+                        merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(
+                            method='linear',
+                            order=5,
+                            limit_area='inside',
+                            limit=6)
                         count += 1
                     merge_df = merge_df.drop_duplicates(
                         subset=['chainage'])  # bug duplicates are being made for chainage!!!
@@ -478,31 +477,40 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     merge_df['Min Elevation'] = min_ele
                     merge_df = merge_df.reset_index()
 
-                    min_ele = merge_df["Min Elevation"]
-                    max_ele = merge_df["Max Elevation"]
-                    chainage = merge_df["chainage"]
+                    fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Mean Elevation'],
+                                             line=dict(color='rgba(1,1,1,0.5)', dash='dash'), hoverinfo='x+y',
+                                             # display only x and y values on hover
+                                             hovertemplate='Mean Elevation: %{y}', showlegend=False))
 
-                    # Add trace for Max Elevation
-                    fig.add_trace(go.Scatter(
-                        x=chainage,
-                        y=max_ele,
-                        mode='lines',
-                        line=dict(color='rgba(0, 0, 0, 0)'),  # Make the line invisible
-                        showlegend=False,
-                        hoverinfo='none'
-                    ))
+                    fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Min Elevation'],
+                                             line=dict(color='rgba(0,0,0,0)'), hoverinfo='none', showlegend=False))
+                    fig.add_trace(
+                        go.Scatter(x=merge_df['chainage'], y=merge_df['Max Elevation'], mode='none', fill='tonexty',
+                                   fillcolor='rgba(235, 164, 52, 0.5)', showlegend=False))
 
-                    # Add trace for Min Elevation
-                    fig.add_trace(go.Scatter(
-                        x=chainage,
-                        y=min_ele,
-                        mode='lines',
-                        line=dict(color='rgba(0, 0, 0, 0)'),  # Make the line invisible
-                        fill='tonexty',  # Fill to the next trace (Max Elevation)
-                        fillcolor='rgba(227, 181, 32, 0.3)',  # Fill color with transparency
-                        showlegend=False,
-                        hoverinfo='none'
-                    ))
+
+
+                    # Customize x and y axis fonts and sizes
+                fig.update_xaxes(
+                    title_text="Chainage (m)",
+                    title_font=dict(
+                        size=15, family="Helvetica", color="blue"
+                    ),  # Customize font size and family
+                    tickfont=dict(
+                        size=15, family="Helvetica", color="blue"
+                    ),  # Customize tick font size and family
+                )
+
+                # y axis on the line plot is Elevation 0D
+                fig.update_yaxes(
+                    title_text="Elevation (m)",
+                    title_font=dict(
+                        size=15, family="Helvetica", color="blue"
+                    ),  # Customize font size and family
+                    tickfont=dict(
+                        size=15, family="Helvetica", color="blue"
+                    ),  # Customize tick font size and family
+                )
 
 
                 # Update x-axis tick labels

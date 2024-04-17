@@ -214,10 +214,10 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates"], axis=1)
 
     # new, methodology. We drop all dates where all the data is null. No longer use and average to fill them.
-    df1 = df1.dropna(axis=1, how='all')
+    #df1 = df1.dropna(axis=1, how='all')
 
     # old method of applying an average
-    # df1 = df1.apply(lambda row: row.fillna(row.mean()), axis=1)
+    df1 = df1.apply(lambda row: row.fillna(row.mean()), axis=1)
 
     # Convert column names to datetime objects. need this so we can access the day().
     df1.columns = pd.to_datetime(df1.columns)

@@ -925,9 +925,9 @@ def update_percent_change_card(change_value, change_range_radio_button):
     elif classification_string == 'No Change':
         value = percent_change
         if change_range_radio_button == 'base-spr':
-            comment = f"Baseline to Latest Spring +/- {value} %"
+            comment = f"Baseline to Latest Spring  {value} %"
         else:
-            comment = f"Spring to Latest Spring + +/- {value} %"
+            comment = f"Spring to Latest Spring  {value} %"
 
         comment =  f" +/- {value} %"
 

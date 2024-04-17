@@ -4466,6 +4466,11 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         size_max=25,
     )
 
+    #
+
+    # Update marker by name
+    updated_scatter_trace.update_traces(marker=dict(color='green'), selector=dict(name=set_survey_unit))
+
     # Format the label shown, must have the <extra></extra> to remove the color being shown
     updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "<b>%{customdata[2]}<br>"
                                                       + "%{customdata[1]}" + "<extra></extra>")
@@ -4622,34 +4627,72 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
 
-
-
+        border_trace =None
         # Set the colors and width
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
             colour = "#e8d90c" if profile_line_id in lines_inside_box else "#246673"
             width = 8 if profile_line_id in lines_inside_box else 5
         else:
-            colour = "#e8d90c" if set_profile_line == profile_line_id else percent_change_color_row
-            width = 8 if set_profile_line == profile_line_id else 5
+            if set_profile_line == profile_line_id:
+                colour = percent_change_color_row
+                width = 12
+                dash_style = 'dash'
+                # Create the border line trace
+                border_trace = px.line_mapbox(
+                    line_data,
+                    lat=interpolated_latitudes,
+                    lon=interpolated_longitudes,
+                    hover_name=[custom_data] * len(interpolated_latitudes),
+                    line_group=[custom_data] * len(interpolated_longitudes),
 
-        # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
-        trace = px.line_mapbox(
-            line_data,
-            lat=interpolated_latitudes,
-            lon=interpolated_longitudes,
-            hover_name=[custom_data] * len(interpolated_latitudes),
-            line_group=[custom_data] * len(interpolated_longitudes)
+                )
+                border_trace.update_traces(hoverinfo='none')
+                border_trace.update_traces(line=dict(color='rgba(238, 255, 3,0.4)', width=18, ))
 
-        )
+                # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
+                # Add the LineString trace to the map
+                trace = px.line_mapbox(
+                    line_data,
+                    lat=interpolated_latitudes,
+                    lon=interpolated_longitudes,
+                    hover_name=[custom_data] * len(interpolated_latitudes),
+                    line_group=[custom_data] * len(interpolated_longitudes),
+
+                )
+                trace.update_traces(line=dict(color=percent_change_color_row, width=width, ))
+
+
+
+            else:
+                colour = percent_change_color_row
+                width = 5
+
+                # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
+                trace = px.line_mapbox(
+                    line_data,
+                    lat=interpolated_latitudes,
+                    lon=interpolated_longitudes,
+                    hover_name=[custom_data] * len(interpolated_latitudes),
+                    line_group=[custom_data] * len(interpolated_longitudes),
+
+                )
+
 
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
         trace.update_traces(hovertemplate=f"<b>{custom_data}<b><extra></extra>"),
         trace.update_traces(hoverinfo='none')
 
+
+
         # Update the marker color
-        trace.update_traces(line=dict(color=colour, width=width))
+        trace.update_traces(line=dict(color=colour, width=5,))
+
+        if border_trace:
+            line_traces.append((border_trace))
 
         line_traces.append(trace)
+
+
 
     fig = go.Figure()  # Set the map center to the selected point)
 
@@ -4734,7 +4777,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         'accesstoken': MAPBOX_TOKEN,
         "center": current_center,
         "zoom": current_zoom,
-        },height=800
+        },height=850
       ),
 
 

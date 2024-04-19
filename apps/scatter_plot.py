@@ -224,7 +224,7 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
 
     # Set a threshold for the maximum difference in days to consider columns as close.
     # Check with mark, if this is an issue with Sands, apparently it should already group the dates on export.
-    max_days_diff = 1
+    max_days_diff = 7
 
     # find all columns that have a date that is theshold apart
     result = []

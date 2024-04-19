@@ -363,7 +363,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             use_min_plus_1 = False
             # Find the index position of the value closest to 10
             closest_min_chainage_index = (topo_df['chainage'] - min_chainage).abs().idxmin()
-            next_min_index = closest_min_chainage_index - 100
+            next_min_index = closest_min_chainage_index - 50
             if next_min_index < min_index:
                 use_min_plus_1 = False
             else:
@@ -434,7 +434,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     max_chainage = float(max_chainage)
 
                     min_chainage = int(min_chainage)
-                    max_chainage = int(max_chainage) + 50
+                    max_chainage = int(max_chainage)
                     merge_df = pd.DataFrame()
 
                     generated_chainage = list(range(min_chainage, max_chainage, 1))

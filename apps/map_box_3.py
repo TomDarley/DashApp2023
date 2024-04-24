@@ -3979,6 +3979,9 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 query_profile_lines, conn, geom_col="wkb_geometry"
             )
 
+            # Some sites don't have interims, so if no data is returned grab all profiles instead?
+
+
             profile_line_options = []
 
             for _, row in lines_gdf.iterrows():
@@ -4420,7 +4423,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     survey_points_change_values = gdf.loc[gdf['survey_unit'] == set_survey_unit].to_json()
 
     # set the selected survey unit classification to Selected Unit.
-    gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
+    #gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
     updated_gdf = gdf.copy()
 
     # Extract the coordinates of the selected survey unit
@@ -4447,7 +4450,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         'Selected Unit': "#ffff05"
     }
 
-    # Make the map
+    # Make the map, added to fig object later
     updated_scatter_trace = px.scatter_mapbox(
         updated_gdf,
         lat="lat",
@@ -4466,14 +4469,28 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         size_max=25,
     )
 
-    #
-
-    # Update marker by name
-    updated_scatter_trace.update_traces(marker=dict(color='green'), selector=dict(name=set_survey_unit))
-
     # Format the label shown, must have the <extra></extra> to remove the color being shown
     updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "<b>%{customdata[2]}<br>"
                                                       + "%{customdata[1]}" + "<extra></extra>")
+
+    # Adding the halo, a larger marker with transparency of the selected survey unit. Added to Fig as a trace later
+    selected_survey_point = updated_gdf.loc[updated_gdf['survey_unit'] == set_survey_unit]
+
+    selected_survey_unit_trace = go.Scattermapbox(
+        lat=selected_survey_point["lat"],
+        lon=selected_survey_point["long"],
+        hovertext=selected_survey_point["sur_unit"],
+        hoverinfo="none", # turn off hover data
+        marker=dict(
+            color='#ffff05',
+            size=selected_survey_point["sqrt_size"],
+            sizemode='area',
+            sizeref=1.0 * max(updated_gdf["sqrt_size"]) / (25 ** 2),  # make larger
+            sizemin=20,
+            opacity=1.0
+        ),
+        mode='markers',
+    )
 
     # Logic to set the SQL query to account for user selected survey type
     # If one survey type is selected a str is returned not a list, check for this and convert to a list
@@ -4550,7 +4567,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     else:
         lines_inside_box = []
 
-    # adding each WKT string as trace to the fig as a trace
 
 
     # Getting the colors change colors  mapped to each profile generated in the cpa table .py
@@ -4562,10 +4578,16 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     # Merge line_data with profile_colors_df based on the 'Profile' column
     line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring PCT Color']], on='profile')
     line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring PCT Color']], on='profile')
-    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile')
-    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile')
+    try:
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile')
+    except KeyError as ke:
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Autumn to Autumn % Change']], on='profile')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Autumn % Change']], on='profile')
 
 
+
+    # adding each WKT string as trace to the fig as a trace
     line_traces = []
     for i, row in line_data.iterrows():
         line = row["geometry"]
@@ -4594,13 +4616,27 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         temp_state = change_range_radio_button
         popup_name = None
         if temp_state == 'spr-spr':
-            percent_change_row = row['Spring to Spring % Change']
+            try:
+                percent_change_row = row['Spring to Spring % Change']
+                popup_name = "Spring to Spring (PCT)"
+            except KeyError as ke:
+                percent_change_row = row['Autumn to Autumn % Change']
+                popup_name = "Autumn to Autumn (PCT)"
+
             percent_change_color_row = row['Spring to Spring PCT Color']
-            popup_name ="Spring to Spring (PCT)"
+
+
+
         elif temp_state == 'base-spr':
-            percent_change_row = row['Baseline to Spring % Change']
+            try:
+                percent_change_row = row['Baseline to Spring % Change']
+                popup_name = "Baseline to Spring (PCT)"
+            except KeyError as ke:
+                percent_change_row = row['Baseline to Autumn % Change']
+                popup_name = "Baseline to Autumn (PCT)"
+
             percent_change_color_row = row['Baseline to Spring PCT Color']
-            popup_name = "Baseline to Spring (PCT)"
+
 
 
         if not strategy:
@@ -4622,7 +4658,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                       f"<br>Post Storm: {post_storm.title()}" \
                       f"<br>Strategy: {strategy.title().replace('_', ' ')}" \
                       f"<br>{popup_name}: {percent_change_row} %"
-
 
         # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
@@ -4650,7 +4685,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 border_trace.update_traces(line=dict(color='rgba(238, 255, 3,0.4)', width=18, ))
 
                 # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
-                # Add the LineString trace to the map
+                # Add the LineString trace to the a map
                 trace = px.line_mapbox(
                     line_data,
                     lat=interpolated_latitudes,
@@ -4692,26 +4727,22 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
         line_traces.append(trace)
 
-
-
+    # Here we add the point as traces to the fig. The selected survey unit trace is added below the main traces.
     fig = go.Figure()  # Set the map center to the selected point)
+    fig.add_trace(selected_survey_unit_trace)
+    fig.add_traces(updated_scatter_trace.data)
 
     # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
     for i in range(len(line_traces)):
         fig.add_trace(line_traces[i].data[0])
 
-
-
     fig.update_layout(
-
         margin=dict(l=0, r=0, b=0, t=0),
         showlegend=False,
 
     )
 
-    # Add the scatter trace to the figure
-    fig.add_traces(updated_scatter_trace.data)
-
+    # Logic for controlling the zooming of the map
     old_map_data = map_state
     new_map_data = {"lat": center_lat, "lon": center_lon}
     try:
@@ -4731,10 +4762,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         current_map_position = DEFAULT_MAP_CENTER
     if current_map_zoom is None:
         current_map_zoom =16
-
-    #print(old_map_data)
-    #print(new_map_data)
-    #print(map_relayout_data)
 
     state_to_return = None
     if len(old_map_data.keys()) == 2:
@@ -4779,12 +4806,5 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         "zoom": current_zoom,
         },height=850
       ),
-
-
-
-    print(basemap_selection)
-
-
-    print(survey_points_change_values)
 
     return fig, lines_inside_box, {'is_loading': True} , state_to_return, survey_points_change_values

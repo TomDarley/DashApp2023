@@ -91,7 +91,8 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             ],
             value="Latest",
             id="error-bar-dropdown",
-            multi=False
+            multi=False,
+            style={"border-radius": "10px"},
 
         ),
 
@@ -112,9 +113,10 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
     State("survey-unit-dropdown", "value"),
     Input('error-bar-dropdown', 'value'),
     Input('survey_unit_card', 'children'),
+    Input('survey-line-dropdown', 'value')
 
 )
-def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card ):
+def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card, selected_profile):
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -154,6 +156,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
         template="plotly",
         # height=600,
     )
+
     if drop_down_val == 'Latest' or drop_down_val is None:
         # Calculate the most recent value information
         set_dropdown_val = 'Latest'
@@ -192,15 +195,10 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
                       "<b>CPA:</b> %{customdata[1]}<extra></extra>"  # Include <extra></extra> to remove the legend
     )
 
-    # Modify the box plot traces to show custom error bars
-    for profile in df.index:
-        fig.update_traces(
-            selector=dict(name=profile),
-            boxpoints="all",
-            lowerfence=min_values[profile],
-            uperfence=max_values[profile],
-            showlegend=False,
-        )
+
+
+
+
 
     # Create a custom legend entry with a dummy point and label
     dummy_legend_trace = go.Scatter(

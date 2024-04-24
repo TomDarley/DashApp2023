@@ -232,6 +232,232 @@ style_data_conditional = [
         },
         "backgroundColor": "rgb(0, 57, 128)",
         "color": "white",
+    },{
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} <= -30",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= -30 && {Autumn to Autumn Diff (m2)} <= -15",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= -15 && {Autumn to Autumn Diff (m2)} <= -5",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= -5 && {Autumn to Autumn Diff (m2)} <= 5",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= 5 && {Autumn to Autumn Diff (m2)} <= 15",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= 15 && {Autumn to Autumn Diff (m2)} <= 30",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn Diff (m2)} >= 30",
+            "column_id": "Autumn to Autumn Diff (m2)",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
+    },
+    ################################################################## Baseline to Autumn Diff (m2)
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} <= -30",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= -30 && {Baseline to Autumn Diff (m2)} <= -15",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= -15 && {Baseline to Autumn Diff (m2)} <= -5",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= -5 && {Baseline to Autumn Diff (m2)} <= 5",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= 5 && {Baseline to Autumn Diff (m2)} <= 15",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= 15 && {Baseline to Autumn Diff (m2)} <= 30",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn Diff (m2)} >= 30",
+            "column_id": "Baseline to Autumn Diff (m2)",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
+    },
+    ############################
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} <= -30",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= -30 && {Baseline to Autumn % Change} <= -15",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= -15 && {Baseline to Autumn % Change} <= -5",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= -5 && {Baseline to Autumn % Change} <= 5",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= 5 && {Baseline to Autumn % Change} <= 15",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= 15 && {Baseline to Autumn % Change} <= 30",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Baseline to Autumn % Change} >= 30",
+            "column_id": "Baseline to Autumn % Change",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
+    },########
+
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} <= -30",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "#ff0000",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= -30 && {Autumn to Autumn % Change} <= -15",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "#ff6666",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= -15 && {Autumn to Autumn % Change} <= -5",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "#ff9999",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= -5 && {Autumn to Autumn % Change} <= 5",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "grey",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= 5 && {Autumn to Autumn % Change} <= 15",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "#00ace6",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= 15 && {Autumn to Autumn % Change} <= 30",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "rgb(0, 103, 230)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{Autumn to Autumn % Change} >= 30",
+            "column_id": "Autumn to Autumn % Change",
+        },
+        "backgroundColor": "rgb(0, 57, 128)",
+        "color": "white",
     },
 
 ]
@@ -511,9 +737,17 @@ def make_csa_table(selected_csa_data):
             return 'black'  # Example color for values greater than or equal to 40
 
     df_for_map  = df
-    df_for_map['Spring to Spring PCT Color'] =df_for_map['Spring to Spring % Change'].apply(difference_values_to_color)
-    df_for_map['Baseline to Spring PCT Color'] = df_for_map['Baseline to Spring % Change'].apply(
-        difference_values_to_color)
+
+    if not_enough_springs:
+        df_for_map['Spring to Spring PCT Color'] = df_for_map['Autumn to Autumn % Change'].apply(
+            difference_values_to_color)
+        df_for_map['Baseline to Spring PCT Color'] = df_for_map['Baseline to Autumn % Change'].apply(
+            difference_values_to_color)
+    else:
+        df_for_map['Spring to Spring PCT Color'] = df_for_map['Spring to Spring % Change'].apply(
+            difference_values_to_color)
+        df_for_map['Baseline to Spring PCT Color'] = df_for_map['Baseline to Spring % Change'].apply(
+            difference_values_to_color)
 
     #df_for_map = df_for_map[['Profile', 'Spring to Spring Diff Color', 'Baseline to Spring Diff Color']]
     df_for_map = df_for_map.to_dict()

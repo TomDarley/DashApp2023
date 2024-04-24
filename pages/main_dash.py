@@ -55,6 +55,7 @@ layout = html.Div(
                                         [
                                             html.Div("6aSU12", id='not-faded'),
 
+
                                         ]
                                     )
                                 ],
@@ -536,6 +537,15 @@ layout = html.Div(
                                                 },
                                             ),
                                             html.Div("----", id="trend_card", style={"color": 'black'}),
+                                            dbc.Button(
+                                                        [html.Span(className="bi bi-info-circle-fill")],
+                                                        size="sm",
+                                                        id="overall_trend_open_info",
+                                                        n_clicks=0,
+                                                        className="mr-3",
+                                                        style={"position": "absolute", "top": "8px", "right": "8px", "border-radius": "5px"},
+                                                    ),
+
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -557,6 +567,14 @@ layout = html.Div(
                                                 },
                                             ),
                                             html.Div("----", id="trend_card1"),
+                                            dbc.Button(
+                                                        [html.Span(className="bi bi-info-circle-fill")],
+                                                        size="sm",
+                                                        id="percent_change_open_info",
+                                                        n_clicks=0,
+                                                        className="mr-3",
+                                                        style={"position": "absolute", "top": "8px", "right": "8px", "border-radius": "5px"},
+                                                    ),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -788,6 +806,57 @@ layout = html.Div(
             ],
 
         ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Overall Trend",
+                                               style={"color": "blue"})),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """The overall trend is a calculated by first determining the slope of a linear regression line fitted to the CPA data. The slope is then multiplied by 365 to convert it into an annual rate.""",
+                            style={"font-size": 20}, ),
+
+                    ]
+                ),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close",
+                        id="overall_trend_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
+                    )
+                ),
+            ],
+            id="overall_trend_info_model",
+            is_open=False,
+            fullscreen=False,
+        ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Percent Change (PCT)",
+                                               style={"color": "blue"})),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """Percentage change is determined by computing the absolute value of the difference between the total value of the first available CPA date and dividing it by the value of the most recent CPA date. This result is then multiplied by 100 to represent it as a percentage. When the maps PCT checkbox is activated, this calculation is adjusted to compare the most recent Spring CPA date value with the previous Spring CPA value.
+                           """,
+                            style={"font-size": 20}, ),
+
+                    ]
+                ),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close",
+                        id="percent_change_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
+                    )
+                ),
+            ],
+            id="percent_change_info_model",
+            is_open=False,
+            fullscreen=False,
+        ),
     ],
 )
 
@@ -923,7 +992,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
 
         return html.Span(f"{comment}", style={"color": color_to_use})
     elif classification_string == 'No Change':
-        value = percent_change
+        value = str(percent_change).strip("-")
         if change_range_radio_button == 'base-spr':
             comment = f"Baseline to Latest Spring  {value} %"
         else:
@@ -931,7 +1000,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
 
         comment =  f" +/- {value} %"
 
-    return comment
+        return comment
 
 
 
@@ -1207,3 +1276,27 @@ def get_selected_charts(
 
     return dcc.send_bytes(pdf_bytes, filename='test.pdf')
     # return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")
+
+
+# MODALS
+@callback(
+    Output("overall_trend_info_model", "is_open"),
+    [Input("overall_trend_open_info", "n_clicks"), Input("overall_trend_info_close", "n_clicks")],
+    [State("overall_trend_info_model", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+@callback(
+    Output("percent_change_info_model", "is_open"),
+    [Input("percent_change_open_info", "n_clicks"), Input("percent_change_info_close", "n_clicks")],
+    [State("percent_change_info_model", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+

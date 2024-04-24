@@ -181,7 +181,7 @@ layout = html.Div(
                         ),
 
                         html.P(
-                            """This data can also be displayed in 3D by clicking the 3D icon on the top left of the chart. Minimum, maximum and average elevations of any profile can also be displayed by clicking the line graph icon.""",
+                            """The profile envelope can be displayed or removed using the profile envelope check box. The mean elevation for all profiles is also shown """,
 
                             style={"font-size": 20},
                         ),
@@ -328,8 +328,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             min_chainage = master_profile_chainage[0]
             max_chainage = master_profile_chainage[-1]
-            min_chainage = float(min_chainage)
-            max_chainage = float(max_chainage)
+            min_chainage = float(min_chainage) -5
+            max_chainage = float(max_chainage)+5
 
             # Turned off all profile rendering limits for now.
             # Modifier to make the lines overlap the master profile. How much to show past master profile
@@ -348,13 +348,14 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             #else:
             #    topo_df = topo_df
             topo_df =topo_df.reset_index()
+            topo_df.to_csv(r'C:\Users\darle\Downloads\topo_df.csv')
             max_index = topo_df.index.max()
             min_index = topo_df.index.min()
 
             # Find the index position of the value closest to 10
             use_max_plus_1 = False
             closest_max_chainage_index = (topo_df['chainage'] - max_chainage).abs().idxmin()
-            next_max_index = closest_max_chainage_index + 100
+            next_max_index = closest_max_chainage_index +1
             if next_max_index > max_index:
                 use_max_plus_1 = False
             else:
@@ -363,7 +364,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             use_min_plus_1 = False
             # Find the index position of the value closest to 10
             closest_min_chainage_index = (topo_df['chainage'] - min_chainage).abs().idxmin()
-            next_min_index = closest_min_chainage_index - 50
+            next_min_index = closest_min_chainage_index +1
             if next_min_index < min_index:
                 use_min_plus_1 = False
             else:
@@ -430,8 +431,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
                     min_chainage = master_profile_chainage[0]
                     max_chainage = master_profile_chainage[-1]
-                    min_chainage = float(min_chainage)
-                    max_chainage = float(max_chainage)
+                    min_chainage = float(min_chainage) -5
+                    max_chainage = float(max_chainage) +5
 
                     min_chainage = int(min_chainage)
                     max_chainage = int(max_chainage)
@@ -464,7 +465,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                             method='linear',
                             order=5,
                             limit_area='inside',
-                            limit=6)
+                            limit=200)
                         count += 1
                     merge_df = merge_df.drop_duplicates(
                         subset=['chainage'])  # bug duplicates are being made for chainage!!!

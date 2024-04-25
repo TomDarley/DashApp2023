@@ -113,7 +113,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
     State("survey-unit-dropdown", "value"),
     Input('error-bar-dropdown', 'value'),
     Input('survey_unit_card', 'children'),
-    Input('survey-line-dropdown', 'value')
+    State('survey-line-dropdown', 'value')
 
 )
 def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card, selected_profile):
@@ -146,6 +146,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
     min_values = melted_df.groupby("index")["Value"].min()
     max_values = melted_df.groupby("index")["Value"].max()
 
+
     # Creating the box and whisker plot using Plotly Express
     fig = px.box(
         melted_df,
@@ -154,8 +155,10 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
         title="",
         points=False,
         template="plotly",
+
         # height=600,
     )
+
 
     if drop_down_val == 'Latest' or drop_down_val is None:
         # Calculate the most recent value information
@@ -176,17 +179,21 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
 
     # Add a red scatter point for the most recent values
     for _, row in most_recent_info.iterrows():
+
         popup_text = f"Survey: {format_legend_title}"
         scatter_trace = go.Scatter(
             x=[row["Index"]],
             y=[row["Value"]],
             mode="markers",
-            #text=popup_text,
+            text=popup_text,
             marker=dict(color="red", size=10),
             showlegend=False,
             customdata=[[[row["Index"]],[round(row["Value"],2)]]],
         )
         fig.add_trace(scatter_trace)
+
+    # Enforcing all traces to use the same x-axis
+    fig.update_layout(xaxis=dict(categoryorder='array', categoryarray=melted_df['index'].unique()))
 
 
     # Format the label shown in the hover
@@ -195,9 +202,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
                       "<b>CPA:</b> %{customdata[1]}<extra></extra>"  # Include <extra></extra> to remove the legend
     )
 
-
-
-
+    f = fig.data
 
 
     # Create a custom legend entry with a dummy point and label

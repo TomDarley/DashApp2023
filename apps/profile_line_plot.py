@@ -348,7 +348,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             #else:
             #    topo_df = topo_df
             topo_df =topo_df.reset_index()
-            topo_df.to_csv(r'C:\Users\darle\Downloads\topo_df.csv')
+
             max_index = topo_df.index.max()
             min_index = topo_df.index.min()
 

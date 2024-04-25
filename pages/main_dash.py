@@ -1050,7 +1050,7 @@ def update_highest_cpa_card(highest_data, highest_year):
     State('csa_header_store',"data"),
     State('percent_change', "data"),
 
-    allow_duplicate=True,
+
     prevent_initial_call=True,
 )
 def get_selected_charts(
@@ -1089,26 +1089,27 @@ def get_selected_charts(
                 canvas.drawImage(r"assets\Full-Logo (white sky).png", logo_x,
                                  logo_y, width=logo_width, height=logo_height, mask="auto")
                 canvas.restoreState()
-
-            def footer(canvas, doc):
-                canvas.saveState()
-                canvas.setFont("Helvetica", 9)
-                canvas.drawString(40, 20, f"Page {doc.page}")
-                canvas.restoreState()
-
+#
+            #def footer(canvas, doc):
+            #    canvas.saveState()
+            #    canvas.setFont("Helvetica", 9)
+            #    canvas.drawString(40, 20, f"Page {doc.page}")
+            #    canvas.restoreState()
+#
             def create_paragraph_one():
                 engine = create_engine(
                     "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
                 conn = engine.connect()
 
-                survey_unit = current_survey_unit
                 query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
                 df = pd.read_sql_query(query, conn)
 
                 proforma_text = list(df['proforma'])[0]
 
-                return proforma_text
+                conn.close()
 
+                return proforma_text
+#
             def create_paragraph_two():
                 cal_trend = trend['props']['children']
                 cal_highest = highest_date['props']['children']
@@ -1126,7 +1127,7 @@ def get_selected_charts(
                     f" CPA recorded on {cal_lowest} at {cal_lowest_val}.")
 
                 return state_text
-
+#
             def add_CPA_chart(canvas, doc):
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
 
@@ -1152,12 +1153,12 @@ def get_selected_charts(
                     ),
                     title=''
                 )
-
+#
                 img_bytes = pio.to_image(cpa_figure, format='png')
                 img_io = io.BytesIO(img_bytes)
                 img_reader = ImageReader(img_io)
                 canvas.drawImage(img_reader, 70, 200, width=chart_width, height=chart_height)
-
+#
             def add_error_bar_plot():
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
                 error_figure_data = error_chart.get("error_plot")
@@ -1191,7 +1192,7 @@ def get_selected_charts(
                 chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return chart_flowable
-
+#
             def add_line_plot():
 
                 """Request to add a generator here that makes all the charts for a survey unit?"""
@@ -1228,7 +1229,7 @@ def get_selected_charts(
                 chart_flowable1 = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return chart_flowable1
-
+#
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
@@ -1240,36 +1241,44 @@ def get_selected_charts(
 
             spacer1 = Spacer(1, 20)
             spacer2 = Spacer(1, 10)
-
+#
             title_paragraph = Paragraph(f"<b>{current_survey_unit}-{sur_unit_card}</b>", centered_style)
             proforma_header = Paragraph("Background", header_style)
             proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
+##
+            #content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
+            #                        state_paragraph, spacer1]
 
-            content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
+            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1, state_header, spacer2,
                                     state_paragraph, spacer1]
-
+#
             content_first_page.append(PageBreak())
-            # Create a flowable object for the chart
+            ## Create a flowable object for the chart
             chart_flowable = add_error_bar_plot()
             content_first_page.append(chart_flowable)
             line_chart_flowable = add_line_plot()
             content_first_page.append(line_chart_flowable)
+
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (
-                    header(canvas, doc), add_CPA_chart(canvas, doc), footer(canvas, doc)),
-                onLaterPages=lambda canvas, doc: (
-                    footer(canvas, doc)  # Define the content for subsequent pages
-                ))
+                     add_CPA_chart(canvas, doc),),
+               )
 
-
+            #doc.build(
+            #    content_first_page,
+            #    onFirstPage=lambda canvas, doc: (
+            #                add_CPA_chart(canvas, doc))
+            #    )
+#
+#
             buffer.seek(0)
             return buffer.getvalue()
 
         pdf_bytes = to_pdf()
-
+        # try zipping?
 
         # Save the subplot as an image
         # img_bytes = subplot.to_image(format="png")

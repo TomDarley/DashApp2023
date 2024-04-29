@@ -12,7 +12,7 @@ from sqlalchemy.exc import OperationalError
 import time
 from math import radians, sin, cos, sqrt, atan2
 import base64
-
+from dash import clientside_callback
 
 from dash.exceptions import PreventUpdate
 MAPBOX_TOKEN =  'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
@@ -1938,6 +1938,7 @@ unit_to_options = {
         "6e01640",
     ],
     "6eT7": ["6e01650"],
+
     "7a7A1-2": [
         "7a00042",
         "7a00043",
@@ -3701,6 +3702,11 @@ def establish_connection(retries=3, delay=5):
     return None  # Return None if all attempts fail
 
 fig = go.Figure()
+fig.update_layout(
+
+        #height=850
+
+      ),
 
 
 image_path = r"media/Percent.jpg"
@@ -3709,19 +3715,19 @@ with open(image_path, "rb") as image_file:
 
 layout = html.Div(
     children=[
+
+
         html.Div(
 
             [
+
                 dcc.Graph(
                     id="example-map",
                     # Include your figure here
-                    # figure=fig,
+                     figure=fig,
                     config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False, 'responsive':True},
                     className="map",
-                    style={'position': 'relative','width': '100%', 'height': '100%',
-
-
-                    }
+                    style={'position': 'relative','width': '100%', 'height': '60vh',}
 
                 ),
 
@@ -3818,13 +3824,14 @@ layout = html.Div(
         ),
         dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
         dcc.Store(id= 'survey-points-change-values', data=None),
-        dcc.Location(id="url", refresh=False),  # Add a Location component
+        dcc.Location(id="url", refresh=False), # Add a Location component
+        html.Div(id='verification-output')
+
     ],
     id="mapbox_div",
     style={'position': 'relative','width': '100%', 'height': '100%', }
 )
 
-# Define a callback to update the basemap based on the dropdown selection
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -3841,9 +3848,10 @@ layout = html.Div(
           Input('selected-value-storage', 'data'),
 
           Input("survey-type-dropdown", "value"),
+
          )
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals, ):
+                  selected_val_storage, survey_type_dropdown_vals ):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -3866,6 +3874,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
+
 
     def get_box_selected_data():
 
@@ -3971,6 +3980,11 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 base_sql_query += " AND ".join(conditions)
                 sql_query = base_sql_query
 
+            # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
+            if sur_unit_dropdown_val == "7dPORL3":
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
+
+
             query_profile_lines = sql_query
 
             conn = establish_connection()
@@ -4048,6 +4062,9 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 base_sql_query += " AND ".join(conditions)
                 sql_query = base_sql_query
 
+            # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
+            if sur_unit_dropdown_val == "7dPORL3":
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
             query_profile_lines = sql_query
 
             conn = establish_connection()
@@ -4126,6 +4143,11 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         base_sql_query += " AND ".join(conditions)
                         sql_query = base_sql_query
 
+
+                    # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
+                    if clicked_survey_unit == "7dPORL3":
+                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}'"
+
                     query_profile_lines = sql_query
 
                     conn = establish_connection()
@@ -4198,6 +4220,9 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         base_sql_query += " AND ".join(conditions)
                         sql_query = base_sql_query
 
+                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
+                    if sur_unit_dropdown_val == "7dPORL3":
+                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
                     query_profile_lines = sql_query
 
                     conn = establish_connection()
@@ -4519,8 +4544,15 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         base_sql_query += " AND ".join(conditions)
         sql_query = base_sql_query
 
+
     # query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
     query_profile_lines = sql_query
+
+
+    # ONE OFF LOGIC FOR PORL3 WHICH HAS NO ITERIMS
+    if set_survey_unit == "7dPORL3":
+        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
+        query_profile_lines = sql_query
 
     lines_gdf = gpd.GeoDataFrame.from_postgis(
         query_profile_lines, conn, geom_col="wkb_geometry"
@@ -4804,7 +4836,10 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         'accesstoken': MAPBOX_TOKEN,
         "center": current_center,
         "zoom": current_zoom,
-        },height=850
+
+
+        },#height=
+
       ),
 
     return fig, lines_inside_box, {'is_loading': True} , state_to_return, survey_points_change_values

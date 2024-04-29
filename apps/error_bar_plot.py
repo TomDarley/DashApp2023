@@ -110,13 +110,17 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
     Output('error-bar-dropdown', 'options'),
     Output('error-bar-dropdown', 'value'),
     Input("selected-df-storage", "data"),
-    State("survey-unit-dropdown", "value"),
+    Input("survey-unit-dropdown", "value"),
     Input('error-bar-dropdown', 'value'),
     Input('survey_unit_card', 'children'),
     State('survey-line-dropdown', 'value')
 
+
 )
 def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card, selected_profile):
+    ctx = dash.callback_context
+    ctx_id = dash.callback_context.triggered_id
+
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -159,8 +163,11 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
         # height=600,
     )
 
+    # check if dropdown changed value if it has reset the selection to Latest
 
-    if drop_down_val == 'Latest' or drop_down_val is None:
+
+
+    if drop_down_val == 'Latest' or drop_down_val is None or  ctx_id == 'survey-unit-dropdown':
         # Calculate the most recent value information
         set_dropdown_val = 'Latest'
         format_legend_title = 'Latest'

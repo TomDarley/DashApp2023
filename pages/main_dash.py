@@ -109,6 +109,7 @@ layout = html.Div(
                                                         "label": "6aSU8-1  -  Seaton (Devon)",
                                                         "value": "6aSU8-1",
                                                     },
+
                                                     {
                                                         "label": "6bSU16-3  -  Dawlish Warren",
                                                         "value": "6bSU16-3",
@@ -158,6 +159,13 @@ layout = html.Div(
                                                         "label": "6cSU30-2  -  Hope Cove",
                                                         "value": "6cSU30-2",
                                                     },
+                                                    {
+                                                        "label": "6cSU30-3  -  Mouthwell",
+                                                        "value": "6cSU30-3",
+                                                    },
+
+
+
                                                     {
                                                         "label": "6cSU30-4  -  Thurlestone",
                                                         "value": "6cSU30-4",
@@ -813,7 +821,7 @@ layout = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """The overall trend is a calculated by first determining the slope of a linear regression line fitted to the CPA data. The slope is then multiplied by 365 to convert it into an annual rate.""",
+                            """The overall trend is a calculated by first determining the slope of a linear regression line fitted to the CPA (combined profile area) data. The slope is then multiplied by 365 to convert it into an annual rate.""",
                             style={"font-size": 20}, ),
 
                     ]
@@ -838,7 +846,7 @@ layout = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """Percentage change is determined by computing the absolute value of the difference between the total value of the first available CPA date and dividing it by the value of the most recent CPA date. This result is then multiplied by 100 to represent it as a percentage. When the maps PCT checkbox is activated, this calculation is adjusted to compare the most recent Spring CPA date value with the previous Spring CPA value.
+                            """Percentage change is determined by computing the absolute value of the difference between the total value of the first available CPA (Combined Profile Area) date and dividing it by the value of the most recent CPA date. This result is then multiplied by 100 to represent it as a percentage. When the maps PCT checkbox is activated, this calculation is adjusted to compare the most recent Spring CPA date value with the previous Spring CPA value.
                            """,
                             style={"font-size": 20}, ),
 

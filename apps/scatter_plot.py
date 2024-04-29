@@ -360,7 +360,7 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     num_ticks = 100
     tick_dates = pd.date_range(start=x_min, end=x_max, freq="12M")
     tickvals = mdates.date2num(tick_dates)  # Convert tick dates to number format
-    ticktext = tick_dates.strftime("%Y-%m")
+    ticktext = tick_dates.strftime("%Y")
 
     # linear regression fit
     regline = (

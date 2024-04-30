@@ -1059,13 +1059,14 @@ def update_highest_cpa_card(highest_data, highest_year):
     State('csa_header_store',"data"),
     State('percent_change', "data"),
     State('survey-line-dropdown', "value"),
+    State('example-map', 'figure'),
 
 
     prevent_initial_call=True,
 )
 def get_selected_charts(
         n_clicks, scatter_chart, error_chart, line_chart,
-        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -1139,6 +1140,31 @@ def get_selected_charts(
                     f" CPA recorded on {cal_lowest} at {cal_lowest_val}.")
 
                 return state_text
+
+            def add_map_chart():
+
+                # Serialize the figure to JSON
+                chart_width, chart_height = A4[1] - 400, A4[0] - 250
+                f= map_figure
+                img_bytes = pio.to_image(f, format='png')
+                img = PILImage.open(io.BytesIO(img_bytes))
+
+                # Convert PIL image to byte array
+                with io.BytesIO() as byte_io:
+                    img.save(byte_io, format='PNG')
+                    img_byte_array = byte_io.getvalue()
+
+                # Create a ReportLab Image object
+
+                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+
+                print()
+
+                return chart_flowable
+
+
+
+
 #
             def add_CPA_chart():
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
@@ -1183,7 +1209,6 @@ def get_selected_charts(
 
                 return chart_flowable
 
-#
             def add_error_bar_plot():
                 chart_width, chart_height = A4[1] - 360, A4[0] - 300
                 error_figure_data = error_chart.get("error_plot")
@@ -1367,9 +1392,17 @@ def get_selected_charts(
 
             chart_flowable = add_CPA_chart()
             cpa_chart_title  = Paragraph(figure_captions[0], italic_style)
-            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1,
+
+            # add map
+            map_chart_flowable = add_map_chart()
+
+            # add csa table caption
+            csa_table_caption = Paragraph(figure_captions[3], italic_style)
+
+
+            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1,map_chart_flowable, spacer1 ,csa_table_caption,spacer2,table ,PageBreak(),
                                   state_header, spacer2, state_paragraph, spacer1,chart_flowable, spacer1, cpa_chart_title ]
-#
+
             content_first_page.append(PageBreak())
 
             # Create a flowable object for the error bar chart and add title underneath
@@ -1388,11 +1421,12 @@ def get_selected_charts(
             # add new page
             content_first_page.append(PageBreak())
 
-            # add csa table caption
-            csa_table_caption = Paragraph(figure_captions[3], italic_style)
-            content_first_page.append(csa_table_caption)
-            content_first_page.append(spacer1)
-            content_first_page.append(table)
+
+
+
+
+
+
 
             doc.build(
                 content_first_page,

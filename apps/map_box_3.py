@@ -3715,6 +3715,7 @@ with open(image_path, "rb") as image_file:
 
 layout = html.Div(
     children=[
+        dcc.Store(id= 'map-json'),
 
 
         html.Div(
@@ -4294,6 +4295,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     Output('map-state', 'data'),
     Output('survey-points-change-values', 'data'),
 
+
     Input("selected-value-storage", "data"),
     Input('map-state', "data"),
     State('example-map', "relayoutData"),
@@ -4505,6 +4507,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         lat=selected_survey_point["lat"],
         lon=selected_survey_point["long"],
         hovertext=selected_survey_point["sur_unit"],
+
         hoverinfo="none", # turn off hover data
         marker=dict(
             color='#ffff05',
@@ -4717,6 +4720,18 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 border_trace.update_traces(line=dict(color='rgba(238, 255, 3,0.4)', width=18, ))
 
                 # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
+
+                # generate labels list for text
+                text_list = []
+                text_list.append(profile_line_id)
+                for i in range(len(interpolated_longitudes)-1):
+                    text_list.append(' ')
+
+
+
+
+
+
                 # Add the LineString trace to the a map
                 trace = px.line_mapbox(
                     line_data,
@@ -4724,15 +4739,33 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                     lon=interpolated_longitudes,
                     hover_name=[custom_data] * len(interpolated_latitudes),
                     line_group=[custom_data] * len(interpolated_longitudes),
+                    text=text_list,
+
+
 
                 )
+                trace.update_traces(
+                    textposition="top center",  # Position text at the top center of the markers
+                    textfont=dict(
+                        color="red",  # Set text color to red
+                        size=14,  # Set text size to 12
+                    ),
+                    # Set background color with opacity
+                )
                 trace.update_traces(line=dict(color=percent_change_color_row, width=width, ))
+
 
 
 
             else:
                 colour = percent_change_color_row
                 width = 5
+
+                # generate labels list for text/labels each line is made from multiple points
+                text_list = []
+                text_list.append(profile_line_id)
+                for i in range(len(interpolated_longitudes) - 1):
+                    text_list.append(' ')
 
                 # Add the LineString trace to the map, we have to use hovername to set popup values docs are awful
                 trace = px.line_mapbox(
@@ -4741,7 +4774,16 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                     lon=interpolated_longitudes,
                     hover_name=[custom_data] * len(interpolated_latitudes),
                     line_group=[custom_data] * len(interpolated_longitudes),
+                    text=text_list,
 
+                )
+                trace.update_traces(
+                    textposition="top center",  # Position text at the top center of the markers
+                    textfont=dict(
+                        color="blue",  # Set text color to red
+                        size=14,  # Set text size to 12
+                    ),
+                     # Set background color with opacity
                 )
 
 
@@ -4841,5 +4883,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         },#height=
 
       ),
+
+
 
     return fig, lines_inside_box, {'is_loading': True} , state_to_return, survey_points_change_values

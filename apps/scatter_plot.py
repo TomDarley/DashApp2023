@@ -101,13 +101,13 @@ layout = html.Div(
                         html.P(
                             """This chart represents the combined profile area (CPA m²) trend in cross-sectional area (CSA m²).""",style={"font-size": 20},),
                         html.P(
-                            """ All interim profile areas are combined for each interim and baseline survey conducted to date to provide a survey unit with a single ‘beach area’, referred to as the Combined Profile Area (CPA), to compare using linear trend analysis over a temporal scale. Interim surveys from the spring surveys (blue circles), autumn (red diamonds) and baseline (green squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
+                            """ For every survey unit, profile areas (for the interim profiles from each survey) are combined for each interim and full survey to provide a single ‘beach area’, referred to as the Combined Profile Area (CPA).  This is used for linear trend analysis over a temporal scale.  Interim survey profiles from the spring surveys (green circles), autumn (blue diamonds) and full survey (pink squares) are used.""",
 
                             style={"font-size": 20},
                         ),
 
                         html.P(
-                            """Interim surveys from the spring surveys (green circles), autumn (blue diamonds) and baseline (pink squares). Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’, if fewer than 75% of surveys have been conducted for a particular profile, the profile is omitted.""",
+                            """Where profiles have been missed from a particular survey, the average of all surveys is taken to ensure a consistent ‘beach area’.  If fewer than 50% of surveys have been conducted for a particular profile, the profile is omitted.""",
 
                             style={"font-size": 20},
                         ),

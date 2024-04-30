@@ -40,7 +40,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
                 dbc.ModalBody(
                     [
                         html.P(
-                            """The box plot displays the latest cross-sectional area (CSA m²), min, max, median, upper and lower quartile ranges for all profiles of the selected survey unit""",
+                            """The box plot displays the latest cross-sectional area (CSA m²), min, max, median, upper and lower quartile ranges for all profiles of the selected survey unit.""",
                             style={"font-size": 20}, ),
                         html.P(
                             """This allows comparison of the range of change for each profile. The latest CSA m² area can also be changed to view values from previous surveys using the drop-down icon at the top left of the chart.""",

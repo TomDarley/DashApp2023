@@ -172,7 +172,7 @@ layout = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """This chart represents a cross-section of each beach profile, allowing for a visual comparison of beach change for a certain area across the length of the beach profile""",
+                            """This chart represents a cross-section of each beach profile, allowing for a visual comparison of beach change for a certain area across the length of the beach profile.""",
                             style={"font-size": 20}, ),
                         html.P(
                             """Any number of surveys can be compared by toggling them on or off using the legend function on the right-hand side of the chart. Each profile is displayed against the master profile shown by the dashed red lines, which denotes the seaward boundary of mean low water springs (MLWS) and the landward boundary.""",
@@ -181,7 +181,7 @@ layout = html.Div(
                         ),
 
                         html.P(
-                            """The profile envelope can be displayed or removed using the profile envelope check box. The mean elevation for all profiles is also shown """,
+                            """The profile envelope can be displayed or removed using the profile envelope check box. The mean elevation for all profiles is also shown. """,
 
                             style={"font-size": 20},
                         ),

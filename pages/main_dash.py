@@ -29,6 +29,7 @@ from reportlab.platypus import PageBreak
 import json
 from PIL import Image as PILImage
 from datetime import datetime
+from reportlab.platypus import Image
 dash.register_page(__name__, path="/main_dash")
 
 
@@ -1057,13 +1058,14 @@ def update_highest_cpa_card(highest_data, highest_year):
     State("spr_to_baseline_table", "data"),
     State('csa_header_store',"data"),
     State('percent_change', "data"),
+    State('survey-line-dropdown', "value"),
 
 
     prevent_initial_call=True,
 )
 def get_selected_charts(
         n_clicks, scatter_chart, error_chart, line_chart,
-        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -1129,6 +1131,8 @@ def get_selected_charts(
                 process_state = cal_trend.split(" ")[0]
                 rate = cal_trend.split(process_state)[1].strip()
                 trend_string = f" {process_state} at a rate of {rate} equating to {percent_change} of the average CPA per year."
+                trend_string = trend_string.replace("ˉ", "-")
+
                 state_text = (
                     f"Analysis of the Combined Profile Area (CPA) indicates that {sur_unit_card}  is {trend_string}"
                     f"The highest recorded CPA was recorded on {cal_highest} at {cal_highest_val} and the lowest"
@@ -1136,7 +1140,7 @@ def get_selected_charts(
 
                 return state_text
 #
-            def add_CPA_chart(canvas, doc):
+            def add_CPA_chart():
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
 
                 cpa_figure_data = scatter_chart.get("cpa")
@@ -1147,10 +1151,13 @@ def get_selected_charts(
                 process_state = cal_trend.split(" ")[0]
                 rate = cal_trend.split(process_state)[1].strip()
 
+                wrapped_title = 'Survey Unit {0} Combined Profile Area Chart<br> Erosion Rate: {1} equating to {2} of the average CPA per year'.format(
+                    current_survey_unit, rate, percent_change)
+
                 cpa_figure.update_layout(
                     xaxis=dict(
                         tickfont=dict(color='black'),
-                        title=f'{current_survey_unit} Combined Profile Area Chart\nErosion Rate:{rate} equating to {percent_change} of the average CPA per year',
+                        title=wrapped_title,
                         title_font=dict(color='black', size=12),
                         automargin=True,
                         title_standoff=8
@@ -1163,22 +1170,32 @@ def get_selected_charts(
                 )
 #
                 img_bytes = pio.to_image(cpa_figure, format='png')
-                img_io = io.BytesIO(img_bytes)
-                img_reader = ImageReader(img_io)
-                canvas.drawImage(img_reader, 70, 200, width=chart_width, height=chart_height)
+                img = PILImage.open(io.BytesIO(img_bytes))
+
+                # Convert PIL image to byte array
+                with io.BytesIO() as byte_io:
+                    img.save(byte_io, format='PNG')
+                    img_byte_array = byte_io.getvalue()
+
+                # Create a ReportLab Image object
+
+                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+
+                return chart_flowable
+
 #
             def add_error_bar_plot():
-                chart_width, chart_height = A4[1] - 350, A4[0] - 250
+                chart_width, chart_height = A4[1] - 360, A4[0] - 300
                 error_figure_data = error_chart.get("error_plot")
                 error_figure = go.Figure(json.loads(error_figure_data))
 
                 error_figure.update_layout(
                     xaxis=dict(
                         tickfont=dict(color='black'),
-                        title=f'exgxgfxgfxgfxgfxgfx',
+                        title=f'Box Plot: {current_survey_unit}-{sur_unit_card}',
                         title_font=dict(color='black', size=12),
                         automargin=True,
-                        title_standoff=8
+                        title_standoff=10
                     ),
                     yaxis=dict(
                         tickfont=dict(color='black'),
@@ -1196,7 +1213,7 @@ def get_selected_charts(
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-                from reportlab.platypus import Image
+
                 chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return chart_flowable
@@ -1205,17 +1222,17 @@ def get_selected_charts(
 
                 """Request to add a generator here that makes all the charts for a survey unit?"""
 
-                chart_width, chart_height = A4[1] - 350, A4[0] - 280
+                chart_width, chart_height = A4[1] - 360, A4[0] - 280
                 line_figure_data = line_chart.get("line_plot")
                 line_figure = go.Figure(json.loads(line_figure_data))
 
                 line_figure.update_layout(
                     xaxis=dict(
                         tickfont=dict(color='black'),
-                        title=f'exgxgfxgfxgfxgfxgfx',
+                        title=f'Cross Sectional Line Plot: {sur_unit_card}-({current_survey_unit})-{selected_profile}',
                         title_font=dict(color='black', size=12),
                         automargin=True,
-                        title_standoff=8
+                        title_standoff=10
                     ),
                     yaxis=dict(
                         tickfont=dict(color='black'),
@@ -1223,6 +1240,13 @@ def get_selected_charts(
                     ),
                     title=''
                 )
+                # Show only the first, second, and last traces in the legend, this may cause a crash!!
+                for i, trace in enumerate(line_figure.data):
+                    t= len(line_figure.data)
+                    print(t)
+                    if i not in [0, len(line_figure.data) - 6,len(line_figure.data) - 5,len(line_figure.data) - 4]:
+                        trace.showlegend = False
+
 
                 img_bytes = pio.to_image(line_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
@@ -1237,7 +1261,7 @@ def get_selected_charts(
                 chart_flowable1 = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return chart_flowable1
-#
+
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
@@ -1247,32 +1271,133 @@ def get_selected_charts(
 
             wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, wordWrap='CJK')
 
+            # Define the paragraph style with italic
+            # Define the paragraph style with italic
+            italic_style = ParagraphStyle(
+                name='Italic',
+                fontName='Helvetica-Oblique',  # Use Helvetica-Oblique for italic style
+                fontSize=10,
+                textColor='grey',
+                italic=True,  # Set italic to True
+                alignment = 1
+            )
+
             spacer1 = Spacer(1, 20)
             spacer2 = Spacer(1, 10)
-#
+
+            # Extract the date string from the data structure
+            highest_date_string = highest_date['props']['children'].split('-')[0]
+            lowest_date_string = "2007"
+
+            figure_captions = [
+                f"Figure 1 - The Combined Profile Area (CPA) for survey unit {current_survey_unit}, including every spring (red), summer (yellow) and autumn (green) survey completed between {lowest_date_string} and {highest_date_string}.",
+                f"Figure 2 - Box Plot of the Cross Sectional area of each interim profile, comparing the current area of the profile (red dot), with the maximum and minimum values 2007 and {highest_date_string}",
+                f"Figure 3 - Cross Sectional area of interim profile {selected_profile},comparing the values recorded during each interim survey between 2007 and {highest_date_string}",
+                f"Table 1 - Cross Sectional are change in m2 and percentage comparing spring interim to spring interim ({csa_table_headers.get('spr_spr')}) and baseline to lastest spring interim 9{csa_table_headers.get('baseline_spr')}) "]
+
             title_paragraph = Paragraph(f"<b>{current_survey_unit}-{sur_unit_card}</b>", centered_style)
             proforma_header = Paragraph("Background", header_style)
             proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
-##
-            #content_first_page =  [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1, state_header, spacer2,
-            #                        state_paragraph, spacer1]
 
-            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1, state_header, spacer2,
-                                    state_paragraph, spacer1]
+            # CREATE THE CSA TABLE
+            table_data = [["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change",
+                           "Baseline to Spring Diff (m2)", "Baseline to Spring % Change"]]
+
+            for spring_row, baseline_row in zip(spr_to_spr_table, spr_to_baseline_table):
+                profile = spring_row['Profile']
+                spring_diff = spring_row.get('Spring to Spring Diff (m2)', '')
+                spring_percent_change = spring_row.get('Spring to Spring % Change', '')
+                baseline_diff = baseline_row.get('Baseline to Spring Diff (m2)', '')
+                baseline_percent_change = baseline_row.get('Baseline to Spring % Change', '')
+                table_data.append([profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
+
+            spanned_row = ['', csa_table_headers.get('spr_spr'), csa_table_headers.get('spr_spr'), csa_table_headers.get('baseline_spr'), csa_table_headers.get('baseline_spr')]
+            table_data.insert(0, spanned_row)
+
+            # Define table style
+            style = TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.white),
+                                ('SPAN', (1, 0), (2, 0)),
+                                ('SPAN', (3, 0), (4, 0)),
+                                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                                ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+                                ('FONTSIZE', (0, 0), (-1, 0), 8),  # Font size for the first row
+                                ('FONTSIZE', (0, 1), (-1, 1), 8),
+                                ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
+                                ('GRID', (0, 0), (-1, -1), 1, colors.darkgray),
+
+                                ])
+
+            # Define column widths
+            column_widths = [50, 110, 110, 115, 115]
+
+            # Create table object
+            table = Table(table_data, colWidths=column_widths)
+            table.setStyle(style)
+
+            # Apply conditional formatting to the second column
+            for row_index, row in enumerate(table_data[1:], start=1):  # Skip header row
+                for col_index, cell_value in enumerate(row[1:], start=1):  # Iterate over columns 2, 3, 4, and 5
+                    if isinstance(cell_value, (int, float)):
+                        if cell_value > 30:
+                            bg_color = 'rgb(0, 57, 128)'
+                        elif 15 <= cell_value <= 30:
+                            bg_color = 'rgb(0, 103, 230)'
+                        elif 5 <= cell_value <= 15:
+                            bg_color = '#00ACE6'
+                        elif -5 <= cell_value <= 5:
+                            bg_color = colors.grey
+                        elif -15 <= cell_value <= -5:
+                            bg_color = '#FF9999'
+                        elif -30 <= cell_value <= -15:
+                            bg_color = '#FF6666'
+                        elif cell_value < -30:
+                            bg_color = '#FF0000'
+                        else:
+                            bg_color = None
+
+                        if bg_color:
+                            table.setStyle(TableStyle([
+                                ('BACKGROUND', (col_index, row_index), (col_index, row_index), bg_color),
+                                ('TEXTCOLOR', (col_index, row_index), (col_index, row_index), colors.white)
+                            ]))
+
+            chart_flowable = add_CPA_chart()
+            cpa_chart_title  = Paragraph(figure_captions[0], italic_style)
+            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1,
+                                  state_header, spacer2, state_paragraph, spacer1,chart_flowable, spacer1, cpa_chart_title ]
 #
             content_first_page.append(PageBreak())
-            ## Create a flowable object for the chart
+
+            # Create a flowable object for the error bar chart and add title underneath
             chart_flowable = add_error_bar_plot()
             content_first_page.append(chart_flowable)
+            error_chart_title = Paragraph(figure_captions[1], italic_style)
+            content_first_page.append(error_chart_title)
+
+            # Create a flowable object for the line  chart and add title underneath
             line_chart_flowable = add_line_plot()
             content_first_page.append(line_chart_flowable)
+            line_chart_title = Paragraph(figure_captions[2], italic_style)
+            content_first_page.append(line_chart_title)
+
+
+            # add new page
+            content_first_page.append(PageBreak())
+
+            # add csa table caption
+            csa_table_caption = Paragraph(figure_captions[3], italic_style)
+            content_first_page.append(csa_table_caption)
+            content_first_page.append(spacer1)
+            content_first_page.append(table)
 
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (
-                     add_CPA_chart(canvas, doc),),
+                     ),
                )
 
             #doc.build(

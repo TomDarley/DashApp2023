@@ -465,7 +465,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                             method='linear',
                             order=5,
                             limit_area='inside',
-                            limit=200)
+                            limit=100)
                         count += 1
                     merge_df = merge_df.drop_duplicates(
                         subset=['chainage'])  # bug duplicates are being made for chainage!!!
@@ -533,20 +533,13 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     legend_title_text=f"",
                 )
 
-
-
-
-
             # Serialize the figure to JSON
             serialized_fig = fig.to_json()
 
             # Update the 'cpa' key in the store's data with the serialized figure
             chart_data = {"line_plot": serialized_fig}
 
-
             month_year_dropdown_style = dict(display='none')
-
-
 
             return fig, fig, chart_data, month_year_dropdown_style, \
                 dash.no_update, dash.no_update, valid_master_profile_date
@@ -554,7 +547,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             valid_master_profile_date = False
             # Make the multi-profile line plot here....
 
-            # Get the proforma text from the database
+            # Get the data for the selected lines from the database
             engine = create_engine(
                 "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
             conn = engine.connect()

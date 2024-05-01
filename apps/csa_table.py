@@ -34,8 +34,8 @@ def handle_survey_dates(df):
     if autumn_count > other_count:
         is_scilly_unit = True
 
-    print(f"Is Scilly Unit: {is_scilly_unit}")
-    print(f"First Survey: {first_survey}")
+    #print(f"Is Scilly Unit: {is_scilly_unit}")
+    #print(f"First Survey: {first_survey}")
 
     if not is_scilly_unit:
         # Logic to check if the first survey is an Autumn if it is keep removing dates until the next date is not an autumn
@@ -46,7 +46,7 @@ def handle_survey_dates(df):
             except Exception as e:
                 print(e)
 
-        print(f"Latest Survey: {latest_survey}")
+        #print(f"Latest Survey: {latest_survey}")
         all_dates_most_recent_removed = all_dates[:-1]
         next_spr_or_baseline = all_dates_most_recent_removed[-1]
 
@@ -56,7 +56,7 @@ def handle_survey_dates(df):
                 next_spr_or_baseline = all_dates_most_recent_removed[-1]
             except Exception as e:
                 print(e)
-        print(f"Next Spring or Baseline: {next_spr_or_baseline}")
+        #print(f"Next Spring or Baseline: {next_spr_or_baseline}")
 
     elif is_scilly_unit:
         next_spr_or_baseline = all_dates[-2]

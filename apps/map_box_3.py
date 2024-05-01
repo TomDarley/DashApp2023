@@ -4755,8 +4755,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 trace.update_traces(line=dict(color=percent_change_color_row, width=width, ))
 
 
-
-
             else:
                 colour = percent_change_color_row
                 width = 5

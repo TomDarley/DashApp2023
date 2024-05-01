@@ -971,7 +971,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
 
     comment = None
 
-    print(classification)
+
     color_mapping = {
         'High Erosion': "#ff0000",
         'Mild Erosion': "#ff6666",
@@ -1158,7 +1158,7 @@ def get_selected_charts(
 
                 chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
-                print()
+
 
                 return chart_flowable
 
@@ -1268,7 +1268,7 @@ def get_selected_charts(
                 # Show only the first, second, and last traces in the legend, this may cause a crash!!
                 for i, trace in enumerate(line_figure.data):
                     t= len(line_figure.data)
-                    print(t)
+
                     if i not in [0, len(line_figure.data) - 6,len(line_figure.data) - 5,len(line_figure.data) - 4]:
                         trace.showlegend = False
 

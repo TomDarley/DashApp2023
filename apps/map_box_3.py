@@ -4374,7 +4374,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
         if change_range_radio_button == "spr-spr":
             import datetime
-            spring_months =[1,2,3,4,5,6]
+            spring_months =[1,2,3,4,5,6,7,8,9,10,11,12]
             #df1 = df1.apply(pd.to_datetime, unit='s')
             # Extract month from each datetime column
             spring_month_columns = []

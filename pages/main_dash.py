@@ -112,6 +112,11 @@ layout = html.Div(
                                                     },
 
                                                     {
+                                                        "label": "6aSU8-2  -  Beer",
+                                                        "value": "6aSU8-2",
+                                                    },
+
+                                                    {
                                                         "label": "6bSU16-3  -  Dawlish Warren",
                                                         "value": "6bSU16-3",
                                                     },
@@ -271,9 +276,15 @@ layout = html.Div(
                                                     },
                                                     {"label": "6eB3-1  -  The Town", "value": "6eB3-1"},
                                                     {
-                                                        "label": "6eB3-2 & 6eB3-3  -  Green Bay",
-                                                        "value": "6eB3-2 & 6eB3-3",
+                                                        "label": "6eB3-2  -  Green Bay",
+                                                        "value": "6eB3-2",
                                                     },
+{
+                                                        "label": "6eB3-3  -  Green Bay B",
+                                                        "value": "6eB3-3",
+                                                    },
+
+
                                                     {"label": "6eB4  -  Rushy Bay", "value": "6eB4"},
                                                     {"label": "6eM12  -  Old Town", "value": "6eM12"},
                                                     {"label": "6eM1-3  -  Hugh Town", "value": "6eM1-3"},

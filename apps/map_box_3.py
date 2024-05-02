@@ -3982,7 +3982,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 sql_query = base_sql_query
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-            if sur_unit_dropdown_val == "7dPORL3":
+            if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
                 sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
 
 
@@ -4064,7 +4064,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 sql_query = base_sql_query
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-            if sur_unit_dropdown_val == "7dPORL3":
+            if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
                 sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
             query_profile_lines = sql_query
 
@@ -4146,7 +4146,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
 
                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-                    if clicked_survey_unit == "7dPORL3":
+                    if clicked_survey_unit == "7dPORL3" or clicked_survey_unit == "6aSU6-1":
                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}'"
 
                     query_profile_lines = sql_query
@@ -4222,7 +4222,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         sql_query = base_sql_query
 
                      # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-                    if sur_unit_dropdown_val == "7dPORL3":
+                    if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
                          sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
                     query_profile_lines = sql_query
 
@@ -4553,7 +4553,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
 
     # ONE OFF LOGIC FOR PORL3 WHICH HAS NO ITERIMS
-    if set_survey_unit == "7dPORL3":
+    if set_survey_unit == "7dPORL3" or  set_survey_unit == "6aSU6-1":
         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
         query_profile_lines = sql_query
 
@@ -4610,15 +4610,25 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # join the colors to the line_data df
 
-    # Merge line_data with profile_colors_df based on the 'Profile' column
-    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring PCT Color']], on='profile')
-    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring PCT Color']], on='profile')
+    # Merge line_data with profile_colors_df based on the 'Profile' column, if no merge can be done set the color to white for the line
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring PCT Color']], on='profile',
+                         how='left')
+    line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring PCT Color']], on='profile',
+                         how='left')
+
+    # Fill missing values with white
+    line_data['Baseline to Spring PCT Color'].fillna('white', inplace=True)
+
+    # Fill missing values with white
+    line_data['Spring to Spring PCT Color'].fillna('white', inplace=True)
+
+
     try:
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile')
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile', how= 'left')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile',how= 'left')
     except KeyError as ke:
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Autumn to Autumn % Change']], on='profile')
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Autumn % Change']], on='profile')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Autumn to Autumn % Change']], on='profile',how= 'left')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Autumn % Change']], on='profile',how= 'left')
 
 
 

@@ -4738,10 +4738,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                     text_list.append(' ')
 
 
-
-
-
-
                 # Add the LineString trace to the a map
                 trace = px.line_mapbox(
                     line_data,

@@ -698,68 +698,9 @@ def make_csa_table(selected_csa_data):
 
     is_scilly_unit, latest_survey, first_survey, next_spr_or_baseline = handle_survey_dates(df)
 
-    ## ranges used to decide the survey type
-    #spring_range = [1, 2, 3, 4]
-    #summer_range = [5, 6, 7, 8]
-    #autumn_range = [9, 10, 11, 12]
-    #all_dates = []
-#
-    #classify_dates = {"Spring": [], "Summer": [], "Autumn": []}
-    #for x in df.columns:
-    #    to_date = datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date()
-#
-    #    all_dates.append(to_date)
-    #    if to_date.month in spring_range:
-    #        classify_dates["Spring"].append(to_date)
-    #    elif to_date.month in summer_range:
-    #        classify_dates["Summer"].append(to_date)
-    #    elif to_date.month in autumn_range:
-    #        classify_dates["Autumn"].append(to_date)
-#
-    ## get the target columns using dates
-    #latest_survey = max(all_dates)
-    #first_survey = min(all_dates)
-#
-    ## bool holds if a second to last spring exists
-    #no_second_to_last_spring = False
-#
-    ## We look for the second to last spring date found, in try as might not be one
-    #try:
-    #    latest_spring = sorted(classify_dates.get("Spring"), reverse=False)[-1]
-    #    no_second_to_last_spring = False
-    #except Exception:
-    #    no_second_to_last_spring = True
-    #    pass
-#
-    ## Scillies are surveyed in the autumn we handle this here. Swap to look for autumns.
-    #not_enough_springs = False
-    #try:
-    #    last_years_spring = sorted(classify_dates.get("Spring"), reverse=False)[-2]
-#
-    #except IndexError as ie:
-    #    # index error will be thrown as no springs oo look for.
-    #    print(ie)
-    #    not_enough_springs = True
-#
-    ## logic to catch if springs exist but not
-    #if latest_survey.month in  autumn_range and first_survey.month in autumn_range:
-    #    not_enough_springs = True
-#
-#
-    #if not_enough_springs:
-    #    last_years_spring = sorted(classify_dates.get("Autumn"), reverse=False)[-2]
-    #    latest_spring = sorted(classify_dates.get("Autumn"), reverse=False)[-1]
-
     cols = list(df.columns.astype(str))
     df = df.set_axis(cols, axis=1)
     df = df.reset_index()
-
-    #df = df[["index", first_survey, next_spr_or_baseline, latest_survey]]
-
-    #is_scilly_unit, latest_survey, first_survey, next_spr_or_baseline
-
-    # get the target date columns only
-    #df = df[["index", str(first_survey), str(last_years_spring), str(latest_spring)]]
 
     df = df[["index", str(first_survey), str(next_spr_or_baseline), str(latest_survey)]]
 

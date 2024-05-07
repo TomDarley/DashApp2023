@@ -1133,7 +1133,16 @@ def get_selected_charts(
                 return proforma_text
 #
             def create_paragraph_two():
-                cal_trend = trend['props']['children']
+
+                # try statement when selecting Spring to Spring from map checkbox tend dict returns a list not a dict
+                try:
+                    if isinstance(trend, list):
+                        cal_trend = trend[0]['props']['children']
+                    else:
+                        cal_trend = trend['props']['children']
+                except TypeError as te:
+                    pass
+
                 cal_highest = highest_date['props']['children']
                 cal_lowest = lowest_date['props']['children']
                 cal_highest_val = f"{round(highest_val, 2)}m²"
@@ -1183,7 +1192,15 @@ def get_selected_charts(
                 cpa_figure_data = scatter_chart.get("cpa")
                 cpa_figure = go.Figure(json.loads(cpa_figure_data), layout=layout)
 
-                cal_trend = trend['props']['children']
+                # try statement when selecting Spring to Spring from map checkbox tend dict returns a list not a dict
+                try:
+                    if isinstance(trend, list):
+                        cal_trend = trend[0]['props']['children']
+                    else:
+                        cal_trend = trend['props']['children']
+                except TypeError as te:
+                    pass
+
                 cal_trend = cal_trend.lower().strip()
                 process_state = cal_trend.split(" ")[0]
                 rate = cal_trend.split(process_state)[1].strip()
@@ -1431,13 +1448,6 @@ def get_selected_charts(
 
             # add new page
             content_first_page.append(PageBreak())
-
-
-
-
-
-
-
 
             doc.build(
                 content_first_page,

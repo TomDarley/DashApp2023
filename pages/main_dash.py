@@ -1416,17 +1416,38 @@ def get_selected_charts(
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
 
-            # CREATE THE CSA TABLE
-            table_data = [["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change",
-                           "Baseline to Spring Diff (m2)", "Baseline to Spring % Change"]]
+            check_if_autumns_used =  [d for d in spr_to_spr_table if 'Autumn' in str(d.keys()) ]
 
-            for spring_row, baseline_row in zip(spr_to_spr_table, spr_to_baseline_table):
-                profile = spring_row['Profile']
-                spring_diff = spring_row.get('Spring to Spring Diff (m2)', '')
-                spring_percent_change = spring_row.get('Spring to Spring % Change', '')
-                baseline_diff = baseline_row.get('Baseline to Spring Diff (m2)', '')
-                baseline_percent_change = baseline_row.get('Baseline to Spring % Change', '')
-                table_data.append([profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
+
+
+            if len(check_if_autumns_used) == 0:
+
+                # CREATE THE CSA TABLE
+                table_data = [["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change",
+                               "Baseline to Spring Diff (m2)", "Baseline to Spring % Change"]]
+
+                for spring_row, baseline_row in zip(spr_to_spr_table, spr_to_baseline_table):
+                    profile = spring_row['Profile']
+                    spring_diff = spring_row.get('Spring to Spring Diff (m2)', '')
+                    spring_percent_change = spring_row.get('Spring to Spring % Change', '')
+                    baseline_diff = baseline_row.get('Baseline to Spring Diff (m2)', '')
+                    baseline_percent_change = baseline_row.get('Baseline to Spring % Change', '')
+                    table_data.append([profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
+            else:
+
+                # CREATE THE CSA TABLE
+                table_data = [["Profile", "Autumn to Autumn Diff (m2)", "Autumn to Autumn % Change",
+                               "Baseline to Autumn Diff (m2)", "Baseline to Autumn % Change"]]
+
+                for spring_row, baseline_row in zip(spr_to_spr_table, spr_to_baseline_table):
+                    profile = spring_row['Profile']
+                    spring_diff = spring_row.get('Autumn to Autumn Diff (m2)', '')
+                    spring_percent_change = spring_row.get('Autumn to Autumn % Change', '')
+                    baseline_diff = baseline_row.get('Baseline to Autumn Diff (m2)', '')
+                    baseline_percent_change = baseline_row.get('Baseline to Autumn % Change', '')
+                    table_data.append(
+                        [profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
+
 
             spanned_row = ['', csa_table_headers.get('spr_spr'), csa_table_headers.get('spr_spr'), csa_table_headers.get('baseline_spr'), csa_table_headers.get('baseline_spr')]
             table_data.insert(0, spanned_row)
@@ -1440,7 +1461,7 @@ def get_selected_charts(
                                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                                 ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
                                 ('FONTSIZE', (0, 0), (-1, 0), 8),  # Font size for the first row
-                                ('FONTSIZE', (0, 1), (-1, 1), 8),
+                                ('FONTSIZE', (0, 1), (-1, 1), 7),
                                 ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
                                 ('GRID', (0, 0), (-1, -1), 1, colors.darkgray),
 

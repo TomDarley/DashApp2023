@@ -944,57 +944,27 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
     Output("trend_card", "children"),
 
     Input("change_rate", "data"),
-    Input("survey-points-change-values", 'data'),
-    Input("change_range_radio_button", 'value'),
-
 
 )
-def update_trend_card(trend,survey_points_change_values,change_range_radio_button, ):
+def update_trend_card(trend):
     """Callback grabs the trend data from the change rate store found in the scatter plot page.
     Formats the output string"""
 
-    # Load JSON into DataFrame
-    with StringIO(survey_points_change_values) as json_data:
-        change_values = pd.read_json(json_data)
 
-    classification = list(change_values['features'])[0]
-    classification_string = classification['properties']['classification']
-
-    color_mapping = {
-        'High Erosion': "#ff0000",
-        'Mild Erosion': "#ff6666",
-        'Low Erosion': "#ff9999",
-        'No Change': "#4f4f54",
-        'Low Accretion': "#00ace6",
-        'Mild Accretion': "#34c3eb",
-        'High Accretion': "rgb(0, 57, 128)",
-        'Selected Unit': "#ffff05"
-    }
-    if change_range_radio_button != "spr-spr":
-        color_to_use = color_mapping[classification_string]
 
 
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
-            if change_range_radio_button != "spr-spr":
+            return html.Span(f"{comment}", style={"color": 'green'})
 
-                return html.Span(f"{comment}", style={"color": color_to_use})
-            else:
-                return html.Span(f"{comment}"),
 
 
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Eroding {value}"
-            if change_range_radio_button != "spr-spr":
-
-                return html.Span(f"{comment}", style={"color": color_to_use})
-            else:
-                return html.Span(f"{comment}"),
-
-
+            return html.Span(f"{comment}", style={"color": 'red'})
 
     else:
         return f"{trend}"

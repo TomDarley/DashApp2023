@@ -8,6 +8,8 @@ from dash.exceptions import PreventUpdate
 from datetime import datetime
 import numpy as np
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
+import time
 
 current_year = datetime.now().year
 def generate_color_gradient(start_color, end_color, steps):
@@ -68,6 +70,37 @@ def generate_custom_colors(num_colors, dates):
     new_list += color_names[-first_last:]  # Take the last element from the original list
 
     return new_list
+
+
+def establish_connection(retries=3, delay=5):
+
+    """Function attempts to connect to the database. It will retry 3 times before giving up"""
+
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Attempt to create an engine and connect to the database
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
+            )
+            conn = engine.connect()
+
+            # If the connection is successful, return the connection object
+            return conn
+
+        except OperationalError as e:
+            # Handle the case where a connection cannot be established
+            print(f"Error connecting to the database: {e}")
+            attempts += 1
+
+            if attempts < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Max retry attempts reached. Giving up.")
+                # Optionally, you can raise an exception, log the error, or take other appropriate actions
+
+    return None
 
 
 layout = html.Div(
@@ -261,21 +294,18 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     else:
         fixed_val_storage = None
 
-
-
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
-    engine = create_engine(
-        "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-    conn = engine.connect()
+    conn = establish_connection()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
 
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
-
     # get mp data as df
     mp_df = pd.read_sql_query(master_profile_query, conn)
+
+    conn.close()
 
     # Drop/filter for any mp_df that has less than three columns. One col is the profile names, all others are profile
     # data point.
@@ -322,38 +352,22 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             initial_visible_traces = [first_trace_date, newest_trace_date, previous_trace_date]
 
             # Load master profile data from DB, extract chainage and elevation
-
             master_profile_chainage = list(mp_df['chainage'])
             master_profile_elevation = list(mp_df['elevation'])
 
+            # isolate the min max chainage for profile
             min_chainage = master_profile_chainage[0]
             max_chainage = master_profile_chainage[-1]
             min_chainage = float(min_chainage) -5
             max_chainage = float(max_chainage)+5
 
-            # Turned off all profile rendering limits for now.
-            # Modifier to make the lines overlap the master profile. How much to show past master profile
-            #modifier_percent = 0.1
-#
-            #chainge_overshoot = max_chainage * modifier_percent
-#
-            #min_chainage = int(min_chainage) - chainge_overshoot  #-200
-            #max_chainage = int(max_chainage) + chainge_overshoot  #+ 200
-#
-            ## there are cases where the data is filtered so much by a dodgy mp that the number tracing logic breaks
-            ## check if number of unique dates == number of traces before adding a filter.
-            #topo_df_filter = topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
-            #if len(np.unique(topo_df_filter["date"]))>=3:
-            #    topo_df= topo_df.loc[(topo_df['chainage'] >= min_chainage) & (topo_df['chainage'] <= max_chainage)]
-            #else:
-            #    topo_df = topo_df
-            topo_df =topo_df.reset_index()
+            # locate the index position of max an min chainge
+            topo_df = topo_df.reset_index()
 
             max_index = topo_df.index.max()
             min_index = topo_df.index.min()
 
             # Find the index position of the value closest to 10
-            use_max_plus_1 = False
             closest_max_chainage_index = (topo_df['chainage'] - max_chainage).abs().idxmin()
             next_max_index = closest_max_chainage_index +1
             if next_max_index > max_index:
@@ -361,7 +375,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             else:
                 use_max_plus_1 = True
 
-            use_min_plus_1 = False
             # Find the index position of the value closest to 10
             closest_min_chainage_index = (topo_df['chainage'] - min_chainage).abs().idxmin()
             next_min_index = closest_min_chainage_index +1
@@ -377,6 +390,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             elif use_min_plus_1 and not use_max_plus_1:
                 topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= closest_max_chainage_index)]
 
+            # disabled all other options so will always run in 2D
             if selection == '2D':
 
                 # Create a 2D line plot
@@ -392,16 +406,12 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
                 )
 
-                # check how many traces exist, fixing a bug where dogy mp would cause not enough traces to color
-                trace_count = len(fig.data)
 
                 # Changing the style of the three profiles initially loaded
-                fig.update_traces(selector=dict(name=fig.data[0].name), line=dict(color='brown', width=2, dash='solid'))
-                fig.update_traces(selector=dict(name=fig.data[-2].name),
-                                      line=dict(color='green', width=2, dash='solid'))
-                fig.update_traces(selector=dict(name=fig.data[-1].name),
-                                      line=dict(color='blue', width=2, dash='solid'))
-
+                profile_names = [fig.data[0].name, fig.data[-2].name, fig.data[-1].name]
+                profile_colors = ['brown', 'green', 'blue']
+                for name, color in zip(profile_names, profile_colors):
+                    fig.update_traces(selector=dict(name=name), line=dict(color=color, width=2, dash='solid'))
 
                 # Format the label shown in the hover
                 fig.update_traces(
@@ -465,7 +475,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                             method='linear',
                             order=5,
                             limit_area='inside',
-                            limit=100)
+                            limit=20)
                         count += 1
                     merge_df = merge_df.drop_duplicates(
                         subset=['chainage'])  # bug duplicates are being made for chainage!!!
@@ -488,8 +498,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     fig.add_trace(
                         go.Scatter(x=merge_df['chainage'], y=merge_df['Max Elevation'], mode='none', fill='tonexty',
                                    fillcolor='rgba(235, 164, 52, 0.5)', showlegend=False))
-
-
 
                     # Customize x and y axis fonts and sizes
                 fig.update_xaxes(

@@ -30,7 +30,43 @@ import json
 from PIL import Image as PILImage
 from datetime import datetime
 from reportlab.platypus import Image
+from sqlalchemy.exc import OperationalError
+import time
+from reportlab.lib.units import mm
+import base64
+
+
 dash.register_page(__name__, path="/main_dash")
+
+def establish_connection(retries=3, delay=5):
+
+    """Function attempts to connect to the database. It will retry 3 times before giving up"""
+
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Attempt to create an engine and connect to the database
+            engine = create_engine(
+                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres"
+            )
+            conn = engine.connect()
+
+            # If the connection is successful, return the connection object
+            return conn
+
+        except OperationalError as e:
+            # Handle the case where a connection cannot be established
+            print(f"Error connecting to the database: {e}")
+            attempts += 1
+
+            if attempts < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("Max retry attempts reached. Giving up.")
+                # Optionally, you can raise an exception, log the error, or take other appropriate actions
+
+    return None  # Return None if all attempts fail
 
 
 
@@ -648,8 +684,9 @@ layout = html.Div(
                                                 id="report-card-title",
                                                 style={
                                                     "color": "blue",
-                                                    "margin-bottom": "5px",
+                                                    "margin-bottom": "10px",
                                                     "font-weight": 'bold'
+
                                                 },
                                             ),
                                             #dcc.Checklist(
@@ -674,6 +711,7 @@ layout = html.Div(
                                             #    # inline=True,
 
                                             #),
+
                                             dbc.Button(
                                                 "Generate Report",
                                                 id="download-charts-button",
@@ -1104,25 +1142,38 @@ def get_selected_charts(
                 canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
                 canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
-                logo_width = 1.5 * inch
-                logo_height = 0.5 * inch
-                logo_x = A4[0] - inch - logo_width
-                logo_y = A4[1] - 40
-                canvas.drawImage(r"assets\Full-Logo (white sky).png", logo_x,
-                                 logo_y, width=logo_width, height=logo_height, mask="auto")
-                canvas.restoreState()
-#
-            #def footer(canvas, doc):
-            #    canvas.saveState()
-            #    canvas.setFont("Helvetica", 9)
-            #    canvas.drawString(40, 20, f"Page {doc.page}")
-            #    canvas.restoreState()
+
+                # Logo will not load issue
+                #logo_width = 1.5 * inch
+                #logo_height = 0.5 * inch
+                #logo_x = A4[0] - inch - logo_width
+                #logo_y = A4[1] - 40
+                #canvas.drawImage(encoded_image, logo_x,
+                #                 logo_y, width=logo_width, height=logo_height, mask="auto")
+
+            def addPageNumber(canvas, doc):
+
+                """
+                Add the page number
+                """
+                current_datetime = datetime.now()
+
+                # Convert the datetime object to a string
+                current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+
+                canvas.saveState()
+                canvas.setFont("Helvetica", 10)
+                canvas.setFillColor(colors.grey)
+                canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
+
+                page_num = canvas.getPageNumber()
+                text = f"Page {page_num}"
+                canvas.drawRightString(200 * mm, 20 * mm, text)
+
 #
             def create_paragraph_one():
-                engine = create_engine(
-                    "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-                conn = engine.connect()
 
+                conn = establish_connection()
                 query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
                 df = pd.read_sql_query(query, conn)
 
@@ -1175,17 +1226,10 @@ def get_selected_charts(
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-
                 chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
-
-
 
                 return chart_flowable
 
-
-
-
-#
             def add_CPA_chart():
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
 
@@ -1322,9 +1366,8 @@ def get_selected_charts(
             header_style = ParagraphStyle(name='HeaderStyle', parent=style)
             header_style.fontName = 'Helvetica-Bold'
 
-            wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, wordWrap='CJK')
+            wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style,  alignment=4)
 
-            # Define the paragraph style with italic
             # Define the paragraph style with italic
             italic_style = ParagraphStyle(
                 name='Italic',
@@ -1427,11 +1470,10 @@ def get_selected_charts(
             # add csa table caption
             csa_table_caption = Paragraph(figure_captions[3], italic_style)
 
-
-            content_first_page = [title_paragraph,spacer1, proforma_header,spacer2, proforma_paragraph,spacer1,map_chart_flowable, spacer1 ,csa_table_caption,spacer2,table ,PageBreak(),
-                                  state_header, spacer2, state_paragraph, spacer1,chart_flowable, spacer1, cpa_chart_title ]
-
-            content_first_page.append(PageBreak())
+            content_first_page = [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1,
+                                  map_chart_flowable, spacer1, csa_table_caption, spacer2, table, PageBreak(),
+                                  state_header, spacer2, state_paragraph, spacer1, chart_flowable, spacer1,
+                                  cpa_chart_title, PageBreak()]
 
             # Create a flowable object for the error bar chart and add title underneath
             chart_flowable = add_error_bar_plot()
@@ -1445,23 +1487,14 @@ def get_selected_charts(
             line_chart_title = Paragraph(figure_captions[2], italic_style)
             content_first_page.append(line_chart_title)
 
-
             # add new page
             content_first_page.append(PageBreak())
 
             doc.build(
                 content_first_page,
-                onFirstPage=lambda canvas, doc: (
-                     ),
+                onFirstPage=addPageNumber, onLaterPages=addPageNumber
                )
 
-            #doc.build(
-            #    content_first_page,
-            #    onFirstPage=lambda canvas, doc: (
-            #                add_CPA_chart(canvas, doc))
-            #    )
-#
-#
             buffer.seek(0)
             return buffer.getvalue()
 

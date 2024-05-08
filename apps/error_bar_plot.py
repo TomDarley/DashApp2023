@@ -92,7 +92,10 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             value="Latest",
             id="error-bar-dropdown",
             multi=False,
-            style={"border-radius": "10px"},
+            style={"border-radius": "10px",
+                   "fontSize": "14px",
+                    "width": "120px",
+                    "height": "30px"}
 
         ),
 

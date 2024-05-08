@@ -114,7 +114,7 @@ layout = html.Div(
 
                 dcc.Graph(
                     id="line_plot",
-                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'], 'displaylogo': False},
+                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale',], 'displaylogo': False},
                 ),
             ], ),
 
@@ -161,43 +161,6 @@ layout = html.Div(
                 'fontSize': 13
             }
         ),
-        html.Div([
-            dcc.Dropdown(
-                options=[
-                    {"label": "Spring", "value": "spring"},
-                    {"label": "Summer", "value": "summer"},
-                    {"label": "Autumn", "value": "autumn"},
-                    {"label": "Winter", "value": "winter"}
-                ],
-
-                id='month-dropdown',
-                value='summer',
-                multi=True
-            ),
-
-            dcc.Dropdown(
-                options=[
-                    {"label": f"{current_year}", "value": f"{current_year}"},
-                    {"label": f"{current_year - 1}", "value": f"{current_year - 1}"},
-                    {"label": f"{current_year - 2}", "value": f"{current_year - 2}"},
-                    {"label": f"{current_year - 3}", "value": f"{current_year - 3}"},
-                    {"label": f"{current_year - 4}", "value": f"{current_year - 4}"},
-                    {"label": f"{current_year - 5}", "value": f"{current_year - 5}"},
-                    {"label": f"{current_year - 6}", "value": f"{current_year - 6}"},
-                    {"label": f"{current_year - 7}", "value": f"{current_year - 7}"},
-                    {"label": f"{current_year - 8}", "value": f"{current_year - 8}"},
-                    {"label": f"{current_year - 9}", "value": f"{current_year - 9}"},
-                    {"label": f"{current_year - 10}", "value": f"{current_year - 10}"},
-
-                ],
-
-                id='year-dropdown',
-                value=f"{current_year}",
-                multi=True
-            ),
-
-        ], id='month_year_dropdown',
-            style={'display': 'block'}),
 
         dbc.Modal(
             [
@@ -260,12 +223,6 @@ layout = html.Div(
     Output("line_plot", "figure"),
     Output("line_plot_model", "figure"),
     Output("line_chart", "data"),
-
-
-
-    Output('month_year_dropdown', 'style'),
-    Output('month-dropdown', 'options'),
-    Output('year-dropdown', 'options'),
     Output('mp-alert', 'is_open'),
 
     Input("survey-unit-dropdown", "value"),
@@ -273,16 +230,13 @@ layout = html.Div(
 
     Input("Range_plot", "value"),
     Input('selected-value-storage', 'data'),
-    Input('multi-select-lines', 'data'),
-    Input('month-dropdown', 'value'),
-    Input('year-dropdown', 'value'),
     Input('survey_unit_card', 'children'),
 
     prevent_initial_call=False,
     allow_duplicate=True,
 )
 def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_plot_value, selected_val_storage,
-                   multi_lines, month_dropdown_val, year_dropdown_val, survey_unit_card # used for local name
+                   survey_unit_card # used for local name
                    ):
     # convert to dict from list
     if selected_val_storage:
@@ -549,140 +503,17 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             month_year_dropdown_style = dict(display='none')
 
-            return fig, fig, chart_data, month_year_dropdown_style, \
-                dash.no_update, dash.no_update, valid_master_profile_date
+            return fig, fig, chart_data, valid_master_profile_date
         else:
             valid_master_profile_date = False
-            # Make the multi-profile line plot here....
-
-            # Get the data for the selected lines from the database
-            engine = create_engine(
-                "postgresql://postgres:Plymouth_C0@swcm-dashboard.crh7kxty9yzh.eu-west-2.rds.amazonaws.com:5432/postgres")
-            conn = engine.connect()
-
-            # Load topo data from DB
-            topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile IN {multi_lines}".replace(
-                "[", "(").replace("]", ")")  # Modify this query according to your table
-            topo_df = pd.read_sql_query(topo_query, conn)
-
-            # must sort the data by chainage for it to display correctly
-            topo_df = topo_df.sort_values(by=["chainage"])
-
-            # get a list of survey dates and order them, this list is then used to order the date traces in the legend
-            dates = topo_df["date"].sort_values(ascending=True)
-            date_order = []
-            for item in dates:
-                if item not in date_order:
-                    date_order.append(item)
-
-            spring_range = [1, 2, 3, 4]
-
-            summer_range = [5, 6, 7, 8]
-
-            autumn_range = [9, 10, 11, 12]
-
-            # Function to determine the season based on the month
-            def get_season(month):
-                if month in spring_range:
-                    return 'spring'
-                elif month in summer_range:
-                    return 'summer'
-                elif month in autumn_range:
-                    return 'autumn'
-                else:
-                    return 'winter'
-
-            # add season as column to the df
-            topo_df['season'] = topo_df['month'].apply(get_season)
-
-            # get a list of unique years and month sorted, we are dynamically generating the dropdown values
-            years = sorted(list(topo_df['year'].unique().astype(int)))
-            months = list(topo_df['season'].unique())
-
-            def make_options(unique_vals: list):
-                """Function makes a options dict, one that dash dropdown can ingest """
-
-                options = [{'label': str(item), 'value': item} for item in unique_vals]
-                return options
-
-            # make the options dicts for the dropdowns
-            year_dropdown_options = make_options(years)
-            month_dropdown_options = make_options(months)
-
-            # setting the inital dropdown values
-            latest_year = year_dropdown_val
-            if isinstance(latest_year, list):
-                latest_year = list([int(x) for x in latest_year])
-            else:
-                latest_year = int(year_dropdown_val)
-
-            latest_month = month_dropdown_val
-            if isinstance(latest_year, list) and isinstance(latest_month, list):
-                filtered_df = topo_df[
-                    (topo_df['year'].isin(latest_year)) & (topo_df['season'].isin(latest_month))].copy()
-            elif isinstance(latest_year, list) and isinstance(latest_month, str):
-                filtered_df = topo_df[(topo_df['year'].isin(latest_year)) & (topo_df['season'] == latest_month)].copy()
-            elif isinstance(latest_year, int) and isinstance(latest_month, list):
-                filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'].isin(latest_month))].copy()
-            elif isinstance(latest_year, int) and isinstance(latest_month, str):
-                filtered_df = topo_df[(topo_df['year'] == latest_year) & (topo_df['season'] == latest_month)].copy()
-            else:
-                filtered_df = None
-
-            # plot the data selected
-            filtered_df['Selected Profiles'] = filtered_df['reg_id'].astype(str) + ' : ' + filtered_df['date'].astype(
-                str)
-            filtered_df.rename(columns={'date': 'Selected Dates'}, inplace=True)
-            fig = px.line_3d(
-                filtered_df,
-                x="chainage",
-                y="reg_id",
-                z="elevation_od",
-                line_group="Selected Profiles",
-                color="Selected Dates",
-                custom_data=['Selected Dates', 'chainage', 'elevation_od', 'reg_id'],
-                template="plotly",
-                # category_orders={"date": date_order},
-                # color_discrete_map=custom_color_mapping,
-
-            )
-            # Changing the style of the three profiles initially loaded
-            # Format the label shown in the hover
-            fig.update_traces(
-                hovertemplate="<b>Profile:</b> %{customdata[3]}<br>" + "<b>Date:</b> %{customdata[0]}<br>" +
-                              "<b>Chainage:</b> %{customdata[1]}<br>" +
-                              "<b>Elevation OD:</b> %{customdata[2]}<br><b><extra></extra>",
-                line=dict(width=4)
-            )
-
-            # Set custom axis labels
-            fig.update_layout(
-                scene=dict(
-                    xaxis_title="Chainage (m)",
-                    yaxis_title="Profile",
-                    zaxis_title="Elevation (m)",
-                ),
-                title=f"<b>CSL: {selected_sur_unit}</b>",
-                title_x=0.5,  # Set the x position of the title to the center
-                title_y=0.95,
-                title_font=dict(color="blue", size=15, family="Arial"),
-            )
-
-            # position the dropdown in top left of the container
-            month_year_dropdown_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px",
-                                         "width": "200px"}
-
-            no_style = {'display': 'none'}
-
-            # Serialize the figure to JSON
-            serialized_fig = fig.to_json()
-
-            # Update the 'cpa' key in the store's data with the serialized figure, this is used in the modal
-            chart_data = {"line_plot": serialized_fig}
+            fig = px.line()
+            chart_data = None
+            pass
 
 
 
-            return fig, fig, chart_data, month_year_dropdown_style, month_dropdown_options, year_dropdown_options, valid_master_profile_date
+
+            return fig, fig, chart_data, valid_master_profile_date
     else:
         valid_master_profile_date = True
         fig = px.line()

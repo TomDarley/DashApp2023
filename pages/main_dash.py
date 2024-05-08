@@ -1141,16 +1141,37 @@ def get_selected_charts(
                 canvas.saveState()
                 canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
-                canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
 
-                # Logo will not load issue
-                #logo_width = 1.5 * inch
-                #logo_height = 0.5 * inch
-                #logo_x = A4[0] - inch - logo_width
-                #logo_y = A4[1] - 40
-                #canvas.drawImage(encoded_image, logo_x,
-                #                 logo_y, width=logo_width, height=logo_height, mask="auto")
+                # Define the width of the page
+                page_width, _ = A4
 
+                # Calculate the position for the text to be on the right-hand side
+                text_width = canvas.stringWidth(f"SWCM Generated Report {current_datetime_str}")
+                text_x = page_width - text_width - 40
+
+                # Draw the text on the right-hand side
+                canvas.drawString(text_x, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
+
+                # Logo is now stored database side as apprunner does not support local dir calls
+                conn = establish_connection()
+                query = "SELECT image_data FROM images WHERE id = 1"
+                df = pd.read_sql_query(query, conn)
+                conn.close()
+
+                # Read the image data from the row
+                image_data = df['image_data'][0]
+
+                # Open the image using PIL
+                image = PILImage.open(io.BytesIO(image_data))
+
+                # Define the size and position of the image on the canvas
+                logo_width = 1.5 * inch
+                logo_height = 0.5 * inch
+                logo_x = 40  # Adjusted to align with the left-hand side
+                logo_y = A4[1] - 40
+
+                # Draw the image onto the canvas
+                canvas.drawInlineImage(image, logo_x, logo_y, width=logo_width, height=logo_height)
             def addPageNumber(canvas, doc):
 
                 """
@@ -1164,10 +1185,12 @@ def get_selected_charts(
                 canvas.saveState()
                 canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
-                canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
+
 
                 page_num = canvas.getPageNumber()
                 text = f"Page {page_num}"
+                if page_num != 1:
+                    canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
                 canvas.drawRightString(200 * mm, 20 * mm, text)
 
 #
@@ -1282,7 +1305,7 @@ def get_selected_charts(
                 return chart_flowable
 
             def add_error_bar_plot():
-                chart_width, chart_height = A4[1] - 360, A4[0] - 300
+                chart_width, chart_height = A4[1] - 340, A4[0] - 300
                 error_figure_data = error_chart.get("error_plot")
                 error_figure = go.Figure(json.loads(error_figure_data))
 
@@ -1319,7 +1342,7 @@ def get_selected_charts(
 
                 """Request to add a generator here that makes all the charts for a survey unit?"""
 
-                chart_width, chart_height = A4[1] - 360, A4[0] - 280
+                chart_width, chart_height = A4[1] - 320, A4[0] - 280
                 line_figure_data = line_chart.get("line_plot")
                 line_figure = go.Figure(json.loads(line_figure_data))
 
@@ -1478,6 +1501,7 @@ def get_selected_charts(
             # Create a flowable object for the error bar chart and add title underneath
             chart_flowable = add_error_bar_plot()
             content_first_page.append(chart_flowable)
+            content_first_page.append(spacer1)
             error_chart_title = Paragraph(figure_captions[1], italic_style)
             content_first_page.append(error_chart_title)
 
@@ -1492,17 +1516,15 @@ def get_selected_charts(
 
             doc.build(
                 content_first_page,
-                onFirstPage=addPageNumber, onLaterPages=addPageNumber
-               )
+                onFirstPage=lambda canvas, doc: (header(canvas, doc),
+                addPageNumber(canvas, doc)),
+                onLaterPages=addPageNumber
+            )
 
             buffer.seek(0)
             return buffer.getvalue()
 
         pdf_bytes = to_pdf()
-        # try zipping?
-
-        # Save the subplot as an image
-        # img_bytes = subplot.to_image(format="png")
 
     return dcc.send_bytes(pdf_bytes, filename='test.pdf')
     # return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")

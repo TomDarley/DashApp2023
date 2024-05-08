@@ -3702,11 +3702,7 @@ def establish_connection(retries=3, delay=5):
     return None  # Return None if all attempts fail
 
 fig = go.Figure()
-fig.update_layout(
 
-        #height=850
-
-      ),
 
 
 image_path = r"media/Percent.jpg"
@@ -3725,8 +3721,8 @@ layout = html.Div(
                 dcc.Graph(
                     id="example-map",
                     # Include your figure here
-                     figure=fig,
-                    config={'modeBarButtonsToRemove': ['lasso2d'], 'displaylogo': False, 'responsive':True},
+                    figure=fig,
+                    config={'modeBarButtonsToRemove': ['lasso2d','select2d'], 'displaylogo': False, 'responsive':True},
                     className="map",
                     style={'position': 'relative','width': '100%', 'height': '60vh',}
 
@@ -4712,7 +4708,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
             colour = "#e8d90c" if profile_line_id in lines_inside_box else "#246673"
             width = 8 if profile_line_id in lines_inside_box else 5
+
         else:
+            # controlling the style of the selected line in the map
             if set_profile_line == profile_line_id:
                 colour = percent_change_color_row
                 width = 12
@@ -4750,14 +4748,40 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
 
                 )
-                trace.update_traces(
-                    textposition="top center",  # Position text at the top center of the markers
-                    textfont=dict(
-                        color="red",  # Set text color to red
-                        size=14,  # Set text size to 12
-                    ),
-                    # Set background color with opacity
-                )
+                # controlling the color of the labels in for the lines, based on basemap selection
+                if basemap_selection == None:
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="red",  # Set text color to red
+                            size=15,
+
+
+                        ),
+                        # Set background color with opacity
+                    )
+                elif basemap_selection == 'satellite-streets':
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="yellow",  # Set text color to red
+                            size=15,  # Set text size to 12
+                        ),
+                        # Set background color with opacity
+                    )
+                elif basemap_selection == 'open-street-map':
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="red",  # Set text color to red
+                            size=15,  # Set text size to 12
+                        ),
+                        # Set background color with opacity
+                    )
+
+
+
+
                 trace.update_traces(line=dict(color=percent_change_color_row, width=width, ))
 
 
@@ -4781,14 +4805,37 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                     text=text_list,
 
                 )
-                trace.update_traces(
-                    textposition="top center",  # Position text at the top center of the markers
-                    textfont=dict(
-                        color="blue",  # Set text color to red
-                        size=14,  # Set text size to 12
-                    ),
-                     # Set background color with opacity
-                )
+
+                # controlling the color of the labels in for the lines, based on basemap selection
+                if basemap_selection == None:
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="blue",  # Set text color to red
+                            size=14,  # Set text size to 12
+                        ),
+                        # Set background color with opacity
+                    )
+                elif basemap_selection == 'satellite-streets':
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="white",  # Set text color to red
+                            size=15,  # Set text size to 12
+                        ),
+                        # Set background color with opacity
+                    )
+                elif basemap_selection == 'open-street-map':
+                    trace.update_traces(
+                        textposition="top center",  # Position text at the top center of the markers
+                        textfont=dict(
+                            color="blue",  # Set text color to red
+                            size=14,  # Set text size to 12
+                        ),
+                        # Set background color with opacity
+                    )
+
+
 
 
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown

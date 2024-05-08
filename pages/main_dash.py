@@ -1,12 +1,12 @@
 import dash
-from dash import html, callback, Input, Output, State
+from dash import html, callback, Input, Output, State, dcc
 from apps import scatter_plot
 from apps import error_bar_plot
 from apps import map_box_3
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
-from dash import dcc
+
 import json
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
@@ -689,6 +689,21 @@ layout = html.Div(
 
                                                 },
                                             ),
+
+
+                            dcc.Loading(
+                                id='report_gen_loader',
+                                children=[html.Div("", style={
+                                    "backgroundColor": "rgba(0, 0, 0, 0)",
+                                    'width': '10px',
+                                    'height': '1px',
+                                    "zIndex": -1
+                                })],
+                                style={'position': 'relative','margin-left': '20px' },
+                                loading_state={'is_loading': True},
+                                type="circle",
+                            ),
+
                                             #dcc.Checklist(
                                             #    id="download-check-list",
                                             #    options=[
@@ -712,15 +727,17 @@ layout = html.Div(
 
                                             #),
 
-                                            dbc.Button(
-                                                "Generate Report",
-                                                id="download-charts-button",
-                                                n_clicks=0,
-                                                size="sm",
-                                                style={"border-radius": "10px"},
-                                                className='mr-3',
 
-                                            ),
+
+                                        dbc.Button(
+                                            "Generate Report",
+                                            id="download-charts-button",
+                                            n_clicks=0,
+                                            size="sm",
+                                            style={"border-radius": "10px"},
+                                            className='mr-3',
+                                        ),
+
                                         ]
                                     )
                                 ],
@@ -1057,9 +1074,16 @@ def update_highest_cpa_card(highest_data, highest_year):
         return html.Span(f"{comment}", style={"color": "green"})
 
 
+
+
+
+
+
+
 @callback(
 
     Output("download", "data"),
+    Output('report_gen_loader',"loading_state" ),
     Input("download-charts-button", "n_clicks"),
     #State("download-check-list", "value"),
     State("scatter_chart", "data"),
@@ -1081,11 +1105,12 @@ def update_highest_cpa_card(highest_data, highest_year):
     State('example-map', 'figure'),
 
 
+
     prevent_initial_call=True,
 )
 def get_selected_charts(
         n_clicks, scatter_chart, error_chart, line_chart,
-        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure,
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -1095,6 +1120,7 @@ def get_selected_charts(
     if n_clicks is None:
         return dash.no_update
     else:
+
 
         def to_pdf():
 
@@ -1496,7 +1522,7 @@ def get_selected_charts(
 
         pdf_bytes = to_pdf()
 
-    return dcc.send_bytes(pdf_bytes, filename='test.pdf')
+    return dcc.send_bytes(pdf_bytes, filename='test.pdf'), {'is_loading': True}
     # return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")
 
 

@@ -3738,7 +3738,7 @@ layout = html.Div(
                 dcc.Dropdown(
                     id='basemap-dropdown',
                     options=BASEMAPS,
-                    value=None, # Set the initial value
+                    value='open-street-map', # Set the initial value
                     style={'font-size':13,
                            'position':'relative',
                            'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",

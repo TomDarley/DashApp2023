@@ -15,9 +15,10 @@ import base64
 from dash import clientside_callback
 
 from dash.exceptions import PreventUpdate
-MAPBOX_TOKEN =  'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
-# tdarley01
-# Plymouth-CO
+
+MAPBOX_TOKEN = 'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
+
+# holds every survey unit with every profile. This could/should be made from the db directly.
 unit_to_options = {
     "6aSU10": [
         "6a01440",
@@ -3643,20 +3644,37 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
                                 {'label': "6a01621", 'value': "6a01621"},
                                 {'label': "6a01624", 'value': "6a01624"}]
 
-
-DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon":-4.096976854933279}
+DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon": -4.096976854933279}
 
 # Define the basemap options
 BASEMAPS = [
     {'label': 'OpenStreetMap', 'value': 'open-street-map'},
     {'label': 'Satellite', 'value': 'satellite-streets'},
-    # Add more basemap options as needed
 ]
 
 
 def haversine(lat1, lon1, lat2, lon2):
-    # Radius of the Earth in meters
-    R = 6371000.0
+    """
+        Calculate the great-circle distance between two points on the Earth's surface using the Haversine formula.
+        Used in the map to control the zooming and position of the map when the callback is triggered.
+
+        Parameters:
+            lat1 (float): Latitude of the first point in degrees.
+            lon1 (float): Longitude of the first point in degrees.
+            lat2 (float): Latitude of the second point in degrees.
+            lon2 (float): Longitude of the second point in degrees.
+
+        Returns:
+            float: The distance between the two points in meters.
+
+        Details:
+            This function calculates the distance between two points on the Earth's surface using the Haversine formula,
+            which takes into account the curvature of the Earth. The function assumes the Earth is a perfect sphere with
+            a radius of 6371000 meters. Latitude and longitude values must be provided in decimal degrees.
+        """
+
+    # radius of the Earth in meters
+    r = 6371000.0
 
     # Convert latitude and longitude from degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -3665,10 +3683,10 @@ def haversine(lat1, lon1, lat2, lon2):
     dlat = lat2 - lat1
     dlon = lon2 - lon1
 
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
-    distance = R * c
+    distance = r * c
     return distance
 
 
@@ -3701,19 +3719,22 @@ def establish_connection(retries=3, delay=5):
 
     return None  # Return None if all attempts fail
 
+
+# empty fig object which becomes the map
 fig = go.Figure()
 
-
-
+# loading in the map key which is an image and converting it encoded image. Required to be used.
 image_path = r"media/Percent.jpg"
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
 layout = html.Div(
     children=[
-        dcc.Store(id= 'map-json'),
 
+        # store that holds the map data as json. Used in the report generation to add map.
+        dcc.Store(id='map-json'),
 
+        # div that holds the map
         html.Div(
 
             [
@@ -3722,9 +3743,10 @@ layout = html.Div(
                     id="example-map",
                     # Include your figure here
                     figure=fig,
-                    config={'modeBarButtonsToRemove': ['lasso2d','select2d'], 'displaylogo': False, 'responsive':True},
+                    config={'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False,
+                            'responsive': True},
                     className="map",
-                    style={'position': 'relative','width': '100%', 'height': '60vh',}
+                    style={'position': 'relative', 'width': '100%', 'height': '60vh', }
 
                 ),
 
@@ -3733,40 +3755,38 @@ layout = html.Div(
         ),
 
         html.Div(children=[
+
             html.Div([
 
+                # adding the basemap selection dropdown
                 dcc.Dropdown(
                     id='basemap-dropdown',
                     options=BASEMAPS,
-                    value='open-street-map', # Set the initial value
-                    style={'font-size':13,
-                           'position':'relative',
+                    value='open-street-map',  # Set the initial value
+                    style={'font-size': 13,
+                           'position': 'relative',
                            'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
                            'width': '170px',
                            'height': '30px',
 
                            # Adjust padding left
                            },
-                    placeholder= 'Select Basemap',
+                    placeholder='Select Basemap',
                     clearable=False
-
 
                 ),
 
             ], style={
-                    'position': 'absolute',
-                    'top': 60,
-                    'left': 13,
-                    'width': '171px',
-                    'height': '35px',
-                    'zIndex': 100,
+                'position': 'absolute',
+                'top': 60,
+                'left': 13,
+                'width': '171px',
+                'height': '35px',
+                'zIndex': 100,
 
+            }),
 
-
-
-
-                }),
-
+            # adding the map key image
             html.Img(
                 src=f"data:image/jpeg;base64,{encoded_image}",
                 style={
@@ -3784,6 +3804,7 @@ layout = html.Div(
                 }
             ),
 
+            # adding the radio buttons for changing comparison
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
@@ -3800,7 +3821,7 @@ layout = html.Div(
                     'zIndex': 100,
                     'border-radius': 15,
 
-                    #'border': '1px solid grey',
+                    # 'border': '1px solid grey',
                     'box-shadow': "5px 5px 5px lightblue",
                     'paddingTop': '5px',  # Adjust padding top
                     'paddingRight': '5px',  # Adjust padding right
@@ -3813,22 +3834,29 @@ layout = html.Div(
 
         ]),
 
+        # store holds the current set map center, used to control the map reset and zooming logics
         dcc.Store(id='map-state', data={'center': None}),
+
+        # store holds selected items in the map or dropdowns, used in the logic to update the app.
         dcc.Store(
             id="selected-value-storage",
             data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data': None,
                   'survey_type': 'Interim', },
         ),
-        dcc.Store(id='multi-select-lines'),  # Holds the percent change for each sur unit as a df
-        dcc.Store(id= 'survey-points-change-values', data=None),
-        dcc.Location(id="url", refresh=False), # Add a Location component
-        html.Div(id='verification-output')
+
+        # No longer used, been removed was used for multiple line selection
+        dcc.Store(id='multi-select-lines'),
+
+        # holds the old and set survey point value.
+        dcc.Store(id='survey-points-change-values', data=None),
+
+        # Update and track the current window.location object through the window.history state.
+        #dcc.Location(id="url", refresh=False),  # Add a Location component
 
     ],
     id="mapbox_div",
-    style={'position': 'relative','width': '100%', 'height': '100%', }
+    style={'position': 'relative', 'width': '100%', 'height': '100%', }
 )
-
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -3846,9 +3874,9 @@ layout = html.Div(
 
           Input("survey-type-dropdown", "value"),
 
-         )
+          )
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals ):
+                  selected_val_storage, survey_type_dropdown_vals):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -3872,12 +3900,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
 
-
     def get_box_selected_data():
 
         """Function returns if user has used box selection in the map. When box select is used 'selectedData'
            prop from the map becomes populated. Note this is different from when a mouse click is used clickData'.
-           If box select used, returns list of box coordinates, else returns None
+           If box select used, returns list of box coordinates, else returns None. Box select has been disabled and
+           multi select is no longer a thing.
 
            box_selected_data -> 'example-map', 'selectedData'
 
@@ -3981,7 +4009,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
                 sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
 
-
             query_profile_lines = sql_query
 
             conn = establish_connection()
@@ -3991,7 +4018,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             )
 
             # Some sites don't have interims, so if no data is returned grab all profiles instead?
-
 
             profile_line_options = []
 
@@ -4140,7 +4166,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         base_sql_query += " AND ".join(conditions)
                         sql_query = base_sql_query
 
-
                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
                     if clicked_survey_unit == "7dPORL3" or clicked_survey_unit == "6aSU6-1":
                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}'"
@@ -4177,14 +4202,14 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          , cal_profile_line_options)
 
                 return selected_value_result, cal_profile_line_options, clicked_survey_unit, \
-                profile_line_value, None, dash.no_update
+                    profile_line_value, None, dash.no_update
 
             # if the lines (profile lines) were clicked:
             elif line:
                 clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[
                     1].replace(" ", "")
 
-                #prof_line_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
+                # prof_line_dropdown_options = unit_to_options.get(sur_unit_dropdown_val, [])
 
                 def get_new_profile_options():
 
@@ -4217,9 +4242,9 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         base_sql_query += " AND ".join(conditions)
                         sql_query = base_sql_query
 
-                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
+                    # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
                     if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
-                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
+                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
                     query_profile_lines = sql_query
 
                     conn = establish_connection()
@@ -4291,27 +4316,49 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     Output('map-state', 'data'),
     Output('survey-points-change-values', 'data'),
 
-
     Input("selected-value-storage", "data"),
     Input('map-state', "data"),
     State('example-map', "relayoutData"),
-    Input('csa_profile_line_colors', 'data'), # this is the colors mapped to profile.
+    Input('csa_profile_line_colors', 'data'),  # this is the colors mapped to profile.
     Input('change_range_radio_button', 'value'),
     Input('basemap-dropdown', 'value'),
     prevent_initial_call=False,
 )
-def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors, change_range_radio_button, basemap_selection):
-    """Function controls the re-loading of the map. Takes in the value store which contains two values, selected survey
-    unit and the selected profile line. It then highlights the selected survey unit, zooms to it and renders the
-    relevant profile lines. The selected profile line is then used isolate and style to show which one is selected
-    to the user."""
+def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors,
+               change_range_radio_button, basemap_selection):
+    """
+       Update the map visualization based on user-selected options.
 
-    # print(current_selected_sur_and_prof)
+       Parameters:
+           current_selected_sur_and_prof (dict): Dictionary containing the currently selected survey unit
+               and profile line.
+           map_state (dict): Current state of the map.
+           map_relayout_data (dict): Data containing the layout information of the map.
+           csa_profile_line_colors (dict): Data containing colors mapped to profile lines. From cpa table app.
+           change_range_radio_button (str): Value indicating the selected change range radio button.
+           basemap_selection (str): Value indicating the selected basemap option.
 
-    # print(current_selected_sur_and_prof)
+       Returns:
+           tuple: A tuple containing multiple outputs for updating the map visualization.
+               - figure (dict): Updated figure data for the example map.
+               - multi-select-lines (list): List holding the IDs of selected profile lines.
+               - loading_state (dict): Loading state for the test_loader component.
+               - map_state (dict): Updated state of the map.
+               - survey-points-change-values (dict): Data containing changes in survey points.
+
+       Details:
+           This function controls the dynamic reloading of the map visualization based on user-selected options.
+           It takes in parameters such as the selected survey unit, profile line, map state, layout data,
+           profile line colors, change range radio button value, and basemap selection. It then updates the map
+           accordingly, highlighting the selected survey unit, zooming to it, rendering relevant profile lines,
+           and styling the selected profile line to indicate it to the user.
+       """
+
+    # this is now redundant as multi select has been disabled
     if isinstance(current_selected_sur_and_prof, list):
         current_selected_sur_and_prof = current_selected_sur_and_prof[0]
 
+    # extract current selected survey point data.
     set_survey_unit = current_selected_sur_and_prof.get('survey_unit')
     set_profile_line = current_selected_sur_and_prof["profile_line"]
     set_survey_types = current_selected_sur_and_prof["survey_type"]
@@ -4331,11 +4378,31 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     gdf["long"] = gdf["wkb_geometry"].x
     gdf["size"] = 15
 
-    query = f"SELECT * FROM cpa_table"  # Modify this query according to your table
+    # extract cpa data from aws database, needed to color the survey units
+    query = f"SELECT * FROM cpa_table"
     cpa_df = pd.read_sql_query(query, conn)
     cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
     def calculate_difference(group):
+
+        """
+            Calculate the difference in area values within each group.
+
+            Parameters:
+                group (DataFrame): A group of data containing survey dates, profile, and area values.
+                change_range_radio_button (str): The selected change range radio button value.
+
+            Returns:
+                DataFrame: A DataFrame containing the calculated differences in area values.
+
+            Details:
+                This function calculates the difference in area values within each group of data.
+                It takes into account the selected change range radio button value to determine the
+                calculation method. If "base-spr" is selected, it calculates the difference between
+                the first and last survey dates. If "spr-spr" is selected, it calculates the difference
+                between consecutive spring survey dates. The results are returned as a DataFrame with
+                the calculated differences and the survey unit as the index.
+        """
 
         master_df = group[["date", "profile", "area"]]
 
@@ -4354,10 +4421,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         df1 = df1.tail(1)
 
         # logic to calculate the difference based on change_range_radio_button selection
-
-        if change_range_radio_button  == "base-spr":
-
-
+        if change_range_radio_button == "base-spr":
             first_column_value = df1.iloc[0, 0]
             last_column_index = df1.shape[1] - 1
             last_column_value = df1.iloc[0, last_column_index]
@@ -4370,19 +4434,19 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
         if change_range_radio_button == "spr-spr":
             import datetime
-            spring_months =[1,2,3,4,5,6,7,8,9,10,11,12]
-            #df1 = df1.apply(pd.to_datetime, unit='s')
+            spring_months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            # df1 = df1.apply(pd.to_datetime, unit='s')
             # Extract month from each datetime column
             spring_month_columns = []
             for column in df1.columns:
-                    dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
-                    month = dt_object.month
-                    if month in spring_months:
-                        spring_month_columns.append(column)
+                dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
+                month = dt_object.month
+                if month in spring_months:
+                    spring_month_columns.append(column)
 
-            if len(spring_month_columns)>=2:
+            if len(spring_month_columns) >= 2:
                 first_column_value = list(df1[spring_month_columns[-2]])[0]
-                last_column_value =list(df1[spring_month_columns[-1]])[0]
+                last_column_value = list(df1[spring_month_columns[-1]])[0]
                 df1["first"] = first_column_value
                 df1["last"] = last_column_value
                 df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
@@ -4390,8 +4454,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             else:
                 df1["difference"] = 0
                 df1 = df1[["difference"]]
-
-
 
         df1["Survey_Unit"] = group.name
         df1 = df1.reset_index()
@@ -4446,7 +4508,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     survey_points_change_values = gdf.loc[gdf['survey_unit'] == set_survey_unit].to_json()
 
     # set the selected survey unit classification to Selected Unit.
-    #gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
+    # gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
     updated_gdf = gdf.copy()
 
     # Extract the coordinates of the selected survey unit
@@ -4504,7 +4566,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         lon=selected_survey_point["long"],
         hovertext=selected_survey_point["sur_unit"],
 
-        hoverinfo="none", # turn off hover data
+        hoverinfo="none",  # turn off hover data
         marker=dict(
             color='#ffff05',
             size=selected_survey_point["sqrt_size"],
@@ -4543,13 +4605,11 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         base_sql_query += " AND ".join(conditions)
         sql_query = base_sql_query
 
-
     # query_profile_lines = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
     query_profile_lines = sql_query
 
-
     # ONE OFF LOGIC FOR PORL3 WHICH HAS NO ITERIMS
-    if set_survey_unit == "7dPORL3" or  set_survey_unit == "6aSU6-1":
+    if set_survey_unit == "7dPORL3" or set_survey_unit == "6aSU6-1":
         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
         query_profile_lines = sql_query
 
@@ -4598,8 +4658,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     else:
         lines_inside_box = []
 
-
-
     # Getting the colors change colors  mapped to each profile generated in the cpa table .py
     profile_colors_df = pd.DataFrame.from_dict(csa_profile_line_colors)
     profile_colors_df = profile_colors_df.rename(columns={'Profile': 'profile'})
@@ -4618,15 +4676,16 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     # Fill missing values with white
     line_data['Spring to Spring PCT Color'].fillna('white', inplace=True)
 
-
     try:
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile', how= 'left')
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile',how= 'left')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Spring to Spring % Change']], on='profile',
+                             how='left')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Spring % Change']], on='profile',
+                             how='left')
     except KeyError as ke:
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Autumn to Autumn % Change']], on='profile',how= 'left')
-        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Autumn % Change']], on='profile',how= 'left')
-
-
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Autumn to Autumn % Change']], on='profile',
+                             how='left')
+        line_data = pd.merge(line_data, profile_colors_df[['profile', 'Baseline to Autumn % Change']], on='profile',
+                             how='left')
 
     # adding each WKT string as trace to the fig as a trace
     line_traces = []
@@ -4678,8 +4737,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
             percent_change_color_row = row['Baseline to Spring PCT Color']
 
-
-
         if not strategy:
             print('missing')
 
@@ -4690,7 +4747,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         post_storm = 'None' if post_storm is None else post_storm
         strategy = 'None' if strategy is None else strategy
         survey_unit = 'None' if survey_unit is None else survey_unit
-        percent_change_row ='None' if percent_change_row is None else percent_change_row
+        percent_change_row = 'None' if percent_change_row is None else percent_change_row
 
         # Format the popup data
         custom_data = f"Profile Line ID: {profile_line_id}" \
@@ -4703,7 +4760,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         # Get the profile line value for this row
         profile_line_id = lines_gdf.iloc[i]["profname"]
 
-        border_trace =None
+        border_trace = None
         # Set the colors and width
         if current_selected_sur_and_prof is not None and current_selected_sur_and_prof.get('multi') == True:
             colour = "#e8d90c" if profile_line_id in lines_inside_box else "#246673"
@@ -4732,9 +4789,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 # generate labels list for text
                 text_list = []
                 text_list.append(profile_line_id)
-                for i in range(len(interpolated_longitudes)-1):
+                for i in range(len(interpolated_longitudes) - 1):
                     text_list.append(' ')
-
 
                 # Add the LineString trace to the a map
                 trace = px.line_mapbox(
@@ -4745,8 +4801,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                     line_group=[custom_data] * len(interpolated_longitudes),
                     text=text_list,
 
-
-
                 )
                 # controlling the color of the labels in for the lines, based on basemap selection
                 if basemap_selection == None:
@@ -4755,7 +4809,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                         textfont=dict(
                             color="red",  # Set text color to red
                             size=15,
-
 
                         ),
                         # Set background color with opacity
@@ -4778,9 +4831,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                         ),
                         # Set background color with opacity
                     )
-
-
-
 
                 trace.update_traces(line=dict(color=percent_change_color_row, width=width, ))
 
@@ -4835,17 +4885,12 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                         # Set background color with opacity
                     )
 
-
-
-
         # Format the label shown, must have the <extra></extra> to remove the xy coordinates being shown
         trace.update_traces(hovertemplate=f"<b>{custom_data}<b><extra></extra>"),
         trace.update_traces(hoverinfo='none')
 
-
-
         # Update the marker color
-        trace.update_traces(line=dict(color=colour, width=5,))
+        trace.update_traces(line=dict(color=colour, width=5, ))
 
         if border_trace:
             line_traces.append((border_trace))
@@ -4886,7 +4931,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     if current_map_position is None:
         current_map_position = DEFAULT_MAP_CENTER
     if current_map_zoom is None:
-        current_map_zoom =16
+        current_map_zoom = 16
 
     state_to_return = None
     if len(old_map_data.keys()) == 2:
@@ -4903,10 +4948,11 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             # If the distance is not over the threshold, keep the current center and zoom
             if current_map_position:
 
-                distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'], new_map_data['lon'])
+                distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'],
+                                     new_map_data['lon'])
                 distance_threshold = 1500
                 if distance > distance_threshold:
-                    current_center =new_map_data
+                    current_center = new_map_data
                     current_zoom = 13
                     state_to_return = new_map_data
                 else:
@@ -4930,11 +4976,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         "center": current_center,
         "zoom": current_zoom,
 
+    },  # height=
 
-        },#height=
+    ),
 
-      ),
-
-
-
-    return fig, lines_inside_box, {'is_loading': True} , state_to_return, survey_points_change_values
+    return fig, lines_inside_box, {'is_loading': True}, state_to_return, survey_points_change_values

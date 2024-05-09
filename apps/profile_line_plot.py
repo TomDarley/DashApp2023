@@ -11,9 +11,25 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 import time
 
-current_year = datetime.now().year
+
 def generate_color_gradient(start_color, end_color, steps):
-    """Funtion generates a list of hex of step length"""
+    """
+    Generate a list of hexadecimal colors representing a color gradient. Used to color the profile lines.
+
+    Parameters:
+        start_color (tuple): Tuple containing RGB values of the starting color.
+        end_color (tuple): Tuple containing RGB values of the ending color.
+        steps (int): Number of steps in the color gradient.
+
+    Returns:
+        list: A list of hexadecimal colors representing the color gradient.
+
+    Details:
+        This function generates a list of hexadecimal colors representing a color gradient
+        between the specified start and end colors. It calculates intermediate colors by
+        interpolating RGB values based on the number of steps provided. The result is returned
+        as a list of hexadecimal color codes.
+    """
 
     # Extract RGB components from the start and end colors
     start_R, start_G, start_B = start_color
@@ -40,7 +56,23 @@ def generate_color_gradient(start_color, end_color, steps):
 
 
 def generate_custom_colors(num_colors, dates):
-    """Function generates color ramp dynamically based on the number of lines that need to be plottted"""
+    """
+        Generate a list of custom colors based on the number of lines to be plotted.
+
+        Parameters:
+            num_colors (int): Number of colors required for plotting lines.
+            dates (list): List of dates used to generate the color ramp.
+
+        Returns:
+            list: A list of custom colors for plotting lines.
+
+        Details:
+            This function dynamically generates a list of custom colors for plotting lines based on the number
+            of lines that need to be plotted and the dates provided. It generates a color ramp between two
+            predefined colors (light blue to a lighter shade of blue) using the 'generate_color_gradient'
+            function and then selects a subset of colors evenly spaced across the ramp to ensure
+            color differentiation between lines.
+        """
 
     # Generate a list of color names
     start_color = (191, 0, 255)  # Light blue - RGB values
@@ -73,7 +105,6 @@ def generate_custom_colors(num_colors, dates):
 
 
 def establish_connection(retries=3, delay=5):
-
     """Function attempts to connect to the database. It will retry 3 times before giving up"""
 
     attempts = 0
@@ -105,8 +136,10 @@ def establish_connection(retries=3, delay=5):
 
 layout = html.Div(
     [
+        # store to save line chart to json, used to in the report generation
         dcc.Store(id="line_chart"),
 
+        # loading spinner, starts when chart is updating
         dcc.Loading(
             id="loading-chart",
             type="circle",
@@ -114,10 +147,12 @@ layout = html.Div(
 
                 dcc.Graph(
                     id="line_plot",
-                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale',], 'displaylogo': False},
+                    config={"responsive": True, 'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale', ],
+                            'displaylogo': False},
                 ),
             ], ),
 
+        # adding buttons for modals, full screen and information
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
             size="md",
@@ -135,6 +170,7 @@ layout = html.Div(
             style={"position": "absolute", "bottom": "1%", "right": "8px", "border-radius": "5px"},
         ),
 
+        # add checklist for showing profile envelope.
         dcc.Checklist(
             id='Range_plot',
             options=[
@@ -162,9 +198,10 @@ layout = html.Div(
             }
         ),
 
+        # defining the modals, information and full screen
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Profile Cross-Sectional Area Chart", style={"color":"blue"})),
+                dbc.ModalHeader(dbc.ModalTitle("Profile Cross-Sectional Area Chart", style={"color": "blue"})),
                 dbc.ModalBody(
                     [
                         html.P(
@@ -236,9 +273,31 @@ layout = html.Div(
     allow_duplicate=True,
 )
 def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_plot_value, selected_val_storage,
-                   survey_unit_card # used for local name
+                   survey_unit_card
                    ):
-    # convert to dict from list
+    """
+        Create a line plot visualization for the selected survey unit and profile.
+
+        Parameters:
+            selected_sur_unit (str): Selected survey unit.
+            selected_profile (str): Selected profile.
+            radio_selection_range_plot_value (str): Value indicating the selected range for plotting.
+            selected_val_storage (list or dict): Selected value storage data.
+            survey_unit_card (str): Used for local naming.
+
+        Returns:
+            None: If the master profile data has less than three columns, a warning is displayed and no plot is generated.
+            Otherwise, the function proceeds to create the line plot visualization.
+
+        Details:
+            This function generates a line plot visualization for the selected survey unit and profile.
+            It retrieves topographic and master profile data from the database and filters the master profile data
+            to ensure it has at least three columns (one column for profile names and two or more columns for profile data points).
+            If the master profile data does not meet this requirement, a warning is displayed, and no plot is generated.
+            Otherwise, the function proceeds to create the line plot using the retrieved data.
+        """
+
+    # convert to dict from list if a list
     if selected_val_storage:
         # convert to a dict if not:
         if isinstance(selected_val_storage, list):
@@ -256,23 +315,21 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
-    # get mp data as df
+    # get mp data as df from aws database
     mp_df = pd.read_sql_query(master_profile_query, conn)
-
     conn.close()
 
     # Drop/filter for any mp_df that has less than three columns. One col is the profile names, all others are profile
-    # data point.
+    # data points.
     mp_df = mp_df.loc[:, mp_df.notna().all()]
 
     # Check to see if the mp_df has more than one data point. If not show a warning and return a blank chart.
     if len(mp_df.columns) >= 3:
 
-        valid_master_profile_date = False # holds the is_open bool for warning message
+        valid_master_profile_date = False  # holds the is_open bool for warning message
 
-        # check if multi selection is enabled
+        # check if multi selection is enabled. Note this has now been disabled.
         if fixed_val_storage is not None and fixed_val_storage['multi'] == False:
-
 
             if selected_sur_unit is None or selected_profile is None:
                 raise PreventUpdate
@@ -312,8 +369,10 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             # isolate the min max chainage for profile
             min_chainage = master_profile_chainage[0]
             max_chainage = master_profile_chainage[-1]
-            min_chainage = float(min_chainage) -5
-            max_chainage = float(max_chainage)+5
+
+            # Determine min and max chainage for profile
+            min_chainage = float(min_chainage) - 5
+            max_chainage = float(max_chainage) + 5
 
             # locate the index position of max an min chainge
             topo_df = topo_df.reset_index()
@@ -323,7 +382,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             # Find the index position of the value closest to 10
             closest_max_chainage_index = (topo_df['chainage'] - max_chainage).abs().idxmin()
-            next_max_index = closest_max_chainage_index +1
+            next_max_index = closest_max_chainage_index + 1
             if next_max_index > max_index:
                 use_max_plus_1 = False
             else:
@@ -331,12 +390,13 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             # Find the index position of the value closest to 10
             closest_min_chainage_index = (topo_df['chainage'] - min_chainage).abs().idxmin()
-            next_min_index = closest_min_chainage_index +1
+            next_min_index = closest_min_chainage_index + 1
             if next_min_index < min_index:
                 use_min_plus_1 = False
             else:
                 use_min_plus_1 = True
 
+            # filter the topo df to the max/ min chainage
             if use_max_plus_1 and use_min_plus_1:
                 topo_df = topo_df.loc[(topo_df.index >= next_min_index) & (topo_df.index <= next_max_index)]
             elif not use_min_plus_1 and use_max_plus_1:
@@ -359,7 +419,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     custom_data=['date', 'chainage', 'elevation_od'],
 
                 )
-
 
                 # Changing the style of the three profiles initially loaded
                 profile_names = [fig.data[0].name, fig.data[-2].name, fig.data[-1].name]
@@ -389,14 +448,16 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
                     )
                 )
+
+                # Adding the Profile Envelope to the 2D chart, previously its own desperate chart id checked
                 if len(radio_selection_range_plot_value) >= 1:
-                    # Adding the Profile Envelope to the 2D chart, previously its own desperate chart
+
                     topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
 
                     min_chainage = master_profile_chainage[0]
                     max_chainage = master_profile_chainage[-1]
-                    min_chainage = float(min_chainage) -5
-                    max_chainage = float(max_chainage) +5
+                    min_chainage = float(min_chainage) - 5
+                    max_chainage = float(max_chainage) + 5
 
                     min_chainage = int(min_chainage)
                     max_chainage = int(max_chainage)
@@ -475,7 +536,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     ),  # Customize tick font size and family
                 )
 
-
                 # Update x-axis tick labels
                 fig.update_layout(
                     title={
@@ -510,9 +570,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             chart_data = None
             pass
 
-
-
-
             return fig, fig, chart_data, valid_master_profile_date
     else:
         valid_master_profile_date = True
@@ -523,7 +580,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         button_range_style = {"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"}
         month_year_dropdown_style = dict(display='none')
 
-        return fig, fig, chart_data,  month_year_dropdown_style, \
+        return fig, fig, chart_data, month_year_dropdown_style, \
             dash.no_update, dash.no_update, valid_master_profile_date
 
 

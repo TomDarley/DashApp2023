@@ -6,15 +6,18 @@ import plotly.express as px
 import plotly.graph_objs as go
 from io import StringIO
 
+"""App for the error bar graph. This includes the modals, and all logic to create it """
 
 layout = html.Div(
     [
         dcc.Store(id="error_chart"),
 
-
         dcc.Graph(id="error_plot",
-config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','autoscale'], 'displaylogo': False},
+                  config={"responsive": True,
+                          'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'],
+                          'displaylogo': False},
                   ),
+
         # adding info and max view buttons
         dbc.Button(
             [html.Span(className="bi bi-info-circle-fill")],
@@ -22,7 +25,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             id="error_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px", "border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -30,13 +33,13 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             id="error_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px", "border-radius": "5px"},
         ),
 
         # adding info and max view modals (the popups)
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Box Plot", style={"color":"blue"})),
+                dbc.ModalHeader(dbc.ModalTitle("Box Plot", style={"color": "blue"})),
                 dbc.ModalBody(
                     [
                         html.P(
@@ -65,7 +68,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
 
         dbc.Modal(
             [
-                #dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
+                # dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
                 dbc.ModalBody(
                     dcc.Graph(id="error_plot_model", style={"height": "90vh"})
                 ),  ## might not work
@@ -80,6 +83,7 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             fullscreen=True,
         ),
 
+        # Adding the dropdown for the selecting the latest year to show (red dot).
         dcc.Dropdown(
             options=[
 
@@ -94,15 +98,14 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
             multi=False,
             style={"border-radius": "10px",
                    "fontSize": "14px",
-                    "width": "120px",
-                    "height": "30px"}
+                   "width": "120px",
+                   "height": "30px"}
 
         ),
 
-
     ],
 
-    id= 'error_bar_plot_div'
+    id='error_bar_plot_div'
 )
 
 
@@ -118,12 +121,30 @@ config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','aut
     Input('survey_unit_card', 'children'),
     State('survey-line-dropdown', 'value')
 
-
 )
-def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_card, selected_profile):
-    ctx = dash.callback_context
-    ctx_id = dash.callback_context.triggered_id
+def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_card, selected_profile):
 
+    """
+        Callback function to update error plot, error plot model, error chart data, error bar dropdown options, and
+        error bar dropdown value based on various inputs.
+
+        Parameters:
+            cpa_df (JSON): Selected data from storage.
+            selected_survey_unit (str): Selected survey unit from dropdown.
+            drop_down_val (str): Selected value from error bar dropdown.
+            survey_unit_card (str): Children of survey unit card.
+            selected_profile (str): Value of survey line dropdown.
+
+        Returns:
+            tuple: A tuple containing:
+                - figure (plotly.graph_objs.Figure): Updated error plot.
+                - figure (plotly.graph_objs.Figure): Updated error plot model.
+                - dict: Updated error chart data.
+                - list: Updated error bar dropdown options.
+                - str: Updated error bar dropdown value.
+        """
+
+    ctx_id = dash.callback_context.triggered_id
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(cpa_df))
@@ -138,21 +159,28 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
     drop_down_dates = list(melted_df['Date'].unique())
 
     def make_options_list(date_list):
-        options= []
-        options.append({"label": 'Latest',"value": 'Latest'})
+
+        """
+            Create a list of options for a dropdown menu based on a list of dates.
+
+            Parameters:
+                date_list (list): A list of datetime objects representing dates.
+
+            Returns:
+                list: A list of dictionaries containing label-value pairs for dropdown options.
+                    Each dictionary represents an option with a label (date in '%Y-%m-%d' format) and a value (date object).
+            """
+
+        options = [{"label": 'Latest', "value": 'Latest'}]
 
         for date in date_list:
-            option_dict ={}
-            option_dict.update({ "label": date.strftime('%Y-%m-%d'),"value": date})
+            option_dict = {}
+            option_dict.update({"label": date.strftime('%Y-%m-%d'), "value": date})
             options.append(option_dict)
         return options
 
+    # create a list of drop down dates to populate the dropdown options
     drop_down_options = make_options_list(drop_down_dates)
-
-    # Calculate min and max values for each profile
-    min_values = melted_df.groupby("index")["Value"].min()
-    max_values = melted_df.groupby("index")["Value"].max()
-
 
     # Creating the box and whisker plot using Plotly Express
     fig = px.box(
@@ -162,15 +190,10 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
         title="",
         points=False,
         template="plotly",
-
-        # height=600,
     )
 
     # check if dropdown changed value if it has reset the selection to Latest
-
-
-
-    if drop_down_val == 'Latest' or drop_down_val is None or  ctx_id == 'survey-unit-dropdown':
+    if drop_down_val == 'Latest' or drop_down_val is None or ctx_id == 'survey-unit-dropdown':
         # Calculate the most recent value information
         set_dropdown_val = 'Latest'
         format_legend_title = 'Latest'
@@ -189,7 +212,6 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
 
     # Add a red scatter point for the most recent values
     for _, row in most_recent_info.iterrows():
-
         popup_text = f"Survey: {format_legend_title}"
         scatter_trace = go.Scatter(
             x=[row["Index"]],
@@ -198,22 +220,18 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
             text=popup_text,
             marker=dict(color="red", size=10),
             showlegend=False,
-            customdata=[[[row["Index"]],[round(row["Value"],2)]]],
+            customdata=[[[row["Index"]], [round(row["Value"], 2)]]],
         )
         fig.add_trace(scatter_trace)
 
     # Enforcing all traces to use the same x-axis
     fig.update_layout(xaxis=dict(categoryorder='array', categoryarray=melted_df['index'].unique()))
 
-
     # Format the label shown in the hover
     fig.update_traces(
         hovertemplate="<b>Profile ID:</b> %{customdata[0]}<br>" +
                       "<b>CPA:</b> %{customdata[1]}<extra></extra>"  # Include <extra></extra> to remove the legend
     )
-
-    f = fig.data
-
 
     # Create a custom legend entry with a dummy point and label
     dummy_legend_trace = go.Scatter(
@@ -262,20 +280,18 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val,survey_unit_ca
                 size=12, family="Helvetica"
             ),  # Customize font size and family for legend labels
         ),
+        # change tick font size
+        xaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
+        yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
+
+
         legend_traceorder="reversed",
         legend_title_text=f"",
     )
 
-    fig.update_layout(
-        xaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
-        yaxis=dict(tickfont=dict(size=15)),  # Adjust the size as needed
-    )
-
-
-    # Serialize the figure to JSON
+    # Serialize the figure to JSON & update the 'cpa' key in the store's data with the serialized figure.
+    # This is used to load into the report generation.
     serialized_fig = fig.to_json()
-
-    # Update the 'cpa' key in the store's data with the serialized figure
     chart_data = {"error_plot": serialized_fig}
 
     return fig, fig, chart_data, drop_down_options, set_dropdown_val

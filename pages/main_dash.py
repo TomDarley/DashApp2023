@@ -75,14 +75,11 @@ def establish_connection(retries=3, delay=5):
 
 # define the layout of the main page
 layout = html.Div(
-    [  # Add the image
-
-        dcc.Store(
-            id="generated_charts",
-            data={"cpa": None, "line_plot": None, "error_plot": None},
-        ),
-
+    [
+        # add download item, used for the report generation.
         dcc.Download(id="download"),
+
+        # row one contains everything other than the lineplot and errorbar plot csa table
         dbc.Row(
             [
                 dbc.Col(
@@ -789,6 +786,8 @@ layout = html.Div(
             ],
             align="start",
         ),
+
+        # row two contains  lineplot and errorbar plot
         dbc.Row(
             [
                 dbc.Col(
@@ -840,6 +839,8 @@ layout = html.Div(
 
             id='main_dash_error_bar_div'
         ),
+
+        # row three contains csa tables
         dbc.Row(
             [
                 dbc.Col(
@@ -869,6 +870,8 @@ layout = html.Div(
             ],
 
         ),
+
+        # define the information  modals for the overall and percent change
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Overall Trend",
@@ -876,8 +879,10 @@ layout = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """The overall trend is a calculated by first determining the slope of a linear regression line fitted to the CPA (combined profile area) data. The slope is then multiplied by 365 to convert it into an annual rate.""",
-                            style={"font-size": 20}, ),
+                            """The overall trend is a calculated by first determining the slope of a 
+                            linear regression line fitted to the CPA (combined profile area) data. The slope
+                             is then multiplied by 365 to convert it into an annual rate.""",
+                            style={"font-size": 20}),
 
                     ]
                 ),
@@ -925,15 +930,22 @@ layout = html.Div(
 
 
 @callback(
-
     Output("survey_unit_card", "children"),
-
     Input("survey-unit-dropdown", "value"),
     State("survey-unit-dropdown", "options"),
 
 )
 def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
-    """Callback populates the survey unit CPA card with the current selected survey unit"""
+    """
+     Callback function to populate the survey unit CPA card with the currently selected survey unit.
+
+     Parameters:
+         current_sur_unit (str): The value of the currently selected survey unit from the dropdown.
+         current_sur_unit_state (list): The options of the survey unit dropdown.
+
+     Returns:
+         str: The label corresponding to the selected survey unit to be displayed in the survey unit CPA card.
+     """
 
     if current_sur_unit:
         label = [
@@ -952,8 +964,18 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
 
 )
 def update_trend_card(trend):
-    """Callback grabs the trend data from the change rate store found in the scatter plot page.
-    Formats the output string"""
+    """
+    Callback function to grab the trend data from the change rate store found in the scatter plot page
+    and format the output string.
+
+    Parameters:
+        trend (str): The trend data obtained from the change rate store in the scatter plot page.
+
+    Returns:
+        html.Span or str: If trend data is available, returns a formatted string indicating whether
+        it represents an accretion rate or an erosion rate, along with the corresponding value.
+        If no trend data is available, returns the original trend string.
+    """
 
     if trend:
         if "Accretion Rate" in trend:
@@ -972,16 +994,25 @@ def update_trend_card(trend):
         return f"{trend}"
 
 
-## Add card for spr to spr percent change or baseline to baselinw percent change
-
 @callback(
     Output("trend_card1", "children"),
     Input("survey-points-change-values", 'data'),  #
     State('change_range_radio_button', 'value')
 )
 def update_percent_change_card(change_value, change_range_radio_button):
-    """Callback updates the percent change card, based on survey unit selected CPA change between either
-       the baseline to spr or spr to spr selection"""
+    """
+     Callback function to update the percent change card based on the survey unit selected
+     CPA change between either the baseline to spring or spring to spring selection.
+
+     Parameters:
+         change_value (str): JSON string containing the change values.
+         change_range_radio_button (str): The value of the change range radio button.
+
+     Returns:
+         html.Span or str: Depending on the classification of the change value and the selected range,
+         returns a formatted string indicating the percent change along with its classification color,
+         or returns a string indicating no change.
+     """
     # Load JSON into DataFrame
     with StringIO(change_value) as json_data:
         change_values = pd.read_json(json_data)
@@ -989,8 +1020,6 @@ def update_percent_change_card(change_value, change_range_radio_button):
     classification = list(change_values['features'])[0]
     classification_string = classification['properties']['classification']
     percent_change = round(classification['properties']['difference'], 2)
-
-    comment = None
 
     color_mapping = {
         'High Erosion': "#ff0000",
@@ -1003,7 +1032,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
         'Selected Unit': "#ffff05"
     }
     color_to_use = color_mapping[classification_string]
-    comment = "Error"
+
     if classification_string in ['High Erosion', 'Mild Erosion', 'Low Erosion']:
         value = percent_change
         if change_range_radio_button == 'base-spr':
@@ -1012,6 +1041,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
             comment = f"{value} %"
 
         return html.Span(f"{comment}", style={"color": color_to_use})
+
     elif classification_string in ['High Accretion', 'Mild Accretion', 'Low Accretion']:
         value = percent_change
         if change_range_radio_button == 'base-spr':
@@ -1020,13 +1050,9 @@ def update_percent_change_card(change_value, change_range_radio_button):
             comment = f"+ {value} %"
 
         return html.Span(f"{comment}", style={"color": color_to_use})
+
     elif classification_string == 'No Change':
         value = str(percent_change).strip("-")
-        if change_range_radio_button == 'base-spr':
-            comment = f"Baseline to Latest Spring  {value} %"
-        else:
-            comment = f"Spring to Latest Spring  {value} %"
-
         comment = f" +/- {value} %"
 
         return comment
@@ -1038,7 +1064,18 @@ def update_percent_change_card(change_value, change_range_radio_button):
     Input("lowest_recorded_year", "data"),
 )
 def update_lowest_cpa_card(lowest_data, lowest_year):
-    """Callback updates the lowest cpa card. It grabs the data from the stores in the scatter plot page"""
+
+    """
+        Callback function to update the lowest CPA card. Grabs the data from the stores in the scatter plot page.
+
+        Parameters:
+            lowest_data (str): The lowest recorded CPA value.
+            lowest_year (str): The year corresponding to the lowest recorded CPA value.
+
+        Returns:
+            html.Span or None: If both lowest_data and lowest_year are provided, returns a formatted string
+            indicating the lowest CPA value. Otherwise, returns None.
+        """
 
     if lowest_data and lowest_year:
         comment = f"{lowest_data} "
@@ -1051,7 +1088,17 @@ def update_lowest_cpa_card(lowest_data, lowest_year):
     Input("highest_recorded_year", "data"),
 )
 def update_highest_cpa_card(highest_data, highest_year):
-    """Callback updates the highest cpa card. It grabs the data from the stores in the scatter plot page"""
+    """
+       Callback function to update the highest CPA card. Grabs the data from the stores in the scatter plot page.
+
+       Parameters:
+           highest_data (str): The highest recorded CPA value.
+           highest_year (str): The year corresponding to the highest recorded CPA value.
+
+       Returns:
+           html.Span or None: If both highest_data and highest_year are provided, returns a formatted string
+           indicating the highest CPA value. Otherwise, returns None.
+       """
     if highest_data and highest_year:
         comment = f"{highest_data} "
         return html.Span(f"{comment}", style={"color": "green"})
@@ -1083,12 +1130,38 @@ def update_highest_cpa_card(highest_data, highest_year):
 
     prevent_initial_call=True,
 )
-def get_selected_charts(
+def generate_report(
         n_clicks, scatter_chart, error_chart, line_chart,
         sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,
-        spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure,
-):
-    """Function controls the logic behind which charts are to be downloaded using the download checklist"""
+        spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure):
+
+    """
+    Function auto generates the report for download. It is hooking into data stores populated throughout the app
+    and using report labs to build a pdf .
+
+    Parameters:
+        n_clicks (int): The number of times the download button has been clicked.
+        scatter_chart (dict): Data for scatter chart.
+        error_chart (dict): Data for error chart.
+        line_chart (dict): Data for line chart.
+        sur_unit_card (str): Content for the survey unit card.
+        current_survey_unit (str): The currently selected survey unit.
+        trend (dict): Content for the trend card.
+        highest_date (dict): The highest recorded year.
+        lowest_date (dict): The lowest recorded year.
+        highest_val (float): The highest recorded value.
+        lowest_val (float): The lowest recorded value.
+        spr_to_spr_table (list): Data for the spring-to-spring table. List of dicts.
+        spr_to_baseline_table (list): Data for the spring-to-baseline table. List of dicts.
+        csa_table_headers (dicts): Data for CSA table headers.
+        percent_change (str): Data for percent change.
+        selected_profile (str): The selected profile.
+        map_figure (dict): Figure data for the map.
+
+    Returns:
+        tuple: A tuple containing PDF data and loading state for the report generation.The pdf is sent to the dcc
+        download using send bytes, this triggers the download in the browser to fire.
+    """
 
     if n_clicks is None:
         raise PreventUpdate
@@ -1099,10 +1172,24 @@ def get_selected_charts(
 
         def to_pdf():
 
+            # create a buffer in memory to store data
             buffer = io.BytesIO()
+
+            # create a doc object using report labs default template
             doc = SimpleDocTemplate(buffer, pagesize=A4)
 
             def header(canvas, doc):
+                """
+                 Function to draw the header of the PDF document.
+
+                 Parameters:
+                     canvas (Canvas): The canvas object to draw on.
+                     doc (SimpleDocTemplate): The document object representing the PDF.
+
+                 Returns:
+                     None
+                 """
+
                 # Get the current date and time
                 current_datetime = datetime.now()
 
@@ -1144,11 +1231,18 @@ def get_selected_charts(
                 # Draw the image onto the canvas
                 canvas.drawInlineImage(image, logo_x, logo_y, width=logo_width, height=logo_height)
 
-            def addPageNumber(canvas, doc):
+            def add_page_number(canvas, doc):
 
                 """
-                Add the page number
-                """
+                    Function to add the page number to each page of the PDF document.
+
+                    Parameters:
+                        canvas (Canvas): The canvas object to draw on.
+                        doc (SimpleDocTemplate): The document object representing the PDF.
+
+                    Returns:
+                        None
+                    """
                 current_datetime = datetime.now()
 
                 # Convert the datetime object to a string
@@ -1164,8 +1258,15 @@ def get_selected_charts(
                     canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
                 canvas.drawRightString(200 * mm, 20 * mm, text)
 
-            #
             def create_paragraph_one():
+
+                """
+                    Function to create the first paragraph of the PDF document based on the proforma data of
+                    a survey unit. This data is retrieved from the dash aws database proforma table.
+
+                    Returns:
+                        str: The text of the first paragraph.
+                """
 
                 conn = establish_connection()
                 query = f"SELECT * FROM proformas WHERE survey_unit = '{current_survey_unit}'"
@@ -1177,8 +1278,15 @@ def get_selected_charts(
 
                 return proforma_text
 
-            #
             def create_paragraph_two():
+
+                """
+                    Function to create the second paragraph of the PDF document based on analysis of the
+                    Combined Profile Area (CPA).
+
+                    Returns:
+                        str: The text of the second paragraph.
+                """
 
                 # try statement when selecting Spring to Spring from map checkbox tend dict returns a list not a dict
                 try:
@@ -1209,6 +1317,13 @@ def get_selected_charts(
 
             def add_map_chart():
 
+                """
+                    Function to add a map chart to the PDF document.
+
+                    Returns:
+                        Image: ReportLab Image object containing the map chart.
+                """
+
                 # Serialize the figure to JSON
                 chart_width, chart_height = A4[1] - 400, A4[0] - 250
                 f = map_figure
@@ -1221,11 +1336,19 @@ def get_selected_charts(
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
-                return chart_flowable
+                return image
 
-            def add_CPA_chart():
+            def add_cpa_chart():
+
+                """
+                  Function to add a cpa chart to the PDF document.
+
+                  Returns:
+                       Image: ReportLab Image object containing the map chart.
+               """
+
                 chart_width, chart_height = A4[1] - 350, A4[0] - 250
 
                 cpa_figure_data = scatter_chart.get("cpa")
@@ -1261,7 +1384,8 @@ def get_selected_charts(
                     ),
                     title=''
                 )
-                #
+
+                # convert fig to image bytes
                 img_bytes = pio.to_image(cpa_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
@@ -1271,12 +1395,25 @@ def get_selected_charts(
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
+                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
-                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
-
-                return chart_flowable
+                return image
 
             def add_error_bar_plot():
+
+                """
+                    Generate a ReportLab Image object containing an error bar plot.
+
+                    This function creates an error bar plot using Plotly based on the provided error_figure_data.
+                    It updates the layout of the plot, including axis labels and title. Then, it converts the Plotly
+                    figure to a PNG image byte array using Plotly's to_image function. Next, it converts the PNG image
+                    byte array to a PIL image object, and then to a byte array again. Finally, it creates a ReportLab
+                    Image object from the byte array with the specified width and height.
+
+                    Returns:
+                        reportlab.platypus.Image: A ReportLab Image object containing the error bar plot.
+                    """
+
                 chart_width, chart_height = A4[1] - 340, A4[0] - 300
                 error_figure_data = error_chart.get("error_plot")
                 error_figure = go.Figure(json.loads(error_figure_data))
@@ -1305,15 +1442,24 @@ def get_selected_charts(
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
+                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
-                chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                return image
 
-                return chart_flowable
-
-            #
             def add_line_plot():
 
-                """Request to add a generator here that makes all the charts for a survey unit?"""
+                """
+                    Generate a ReportLab Image object containing a line plot.
+
+                    This function creates a line plot using Plotly based on the provided line_figure_data.
+                    It updates the layout  of the plot, including axis labels and title. Then, it converts the Plotly
+                    figure to a PNG image byte array using Plotly's to_image function. Next, it converts the PNG image
+                    byte array to a PIL image object, and then to a byte array again. Finally, it creates a ReportLab
+                    Image object from the byte array with the specified width and height.
+
+                    Returns:
+                        reportlab.platypus.Image: A ReportLab Image object containing the line plot.
+                """
 
                 chart_width, chart_height = A4[1] - 320, A4[0] - 280
                 line_figure_data = line_chart.get("line_plot")
@@ -1335,8 +1481,6 @@ def get_selected_charts(
                 )
                 # Show only the first, second, and last traces in the legend, this may cause a crash!!
                 for i, trace in enumerate(line_figure.data):
-                    t = len(line_figure.data)
-
                     if i not in [0, len(line_figure.data) - 6, len(line_figure.data) - 5, len(line_figure.data) - 4]:
                         trace.showlegend = False
 
@@ -1350,20 +1494,18 @@ def get_selected_charts(
 
                 # Create a ReportLab Image object
                 from reportlab.platypus import Image
-                chart_flowable1 = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
-                return chart_flowable1
+                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
+                return image
+
+            # setting up styles to be used in the report
             styles = getSampleStyleSheet()
             style = styles["Normal"]
             centered_style = styles['Title']
-
             header_style = ParagraphStyle(name='HeaderStyle', parent=style)
             header_style.fontName = 'Helvetica-Bold'
-
             wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, alignment=4)
-
-            # Define the paragraph style with italic
             italic_style = ParagraphStyle(
                 name='Italic',
                 fontName='Helvetica-Oblique',  # Use Helvetica-Oblique for italic style
@@ -1373,6 +1515,7 @@ def get_selected_charts(
                 alignment=1
             )
 
+            # spacers added space between lines
             spacer1 = Spacer(1, 20)
             spacer2 = Spacer(1, 10)
 
@@ -1380,18 +1523,21 @@ def get_selected_charts(
             highest_date_string = highest_date['props']['children'].split('-')[0]
             lowest_date_string = "2007"
 
+            # the captions used in the figures and tables
             figure_captions = [
                 f"Figure 1 - The Combined Profile Area (CPA) for survey unit {current_survey_unit}, including every spring (red), summer (yellow) and autumn (green) survey completed between {lowest_date_string} and {highest_date_string}.",
                 f"Figure 2 - Box Plot of the Cross Sectional area of each interim profile, comparing the current area of the profile (red dot), with the maximum and minimum values 2007 and {highest_date_string}",
                 f"Figure 3 - Cross Sectional area of interim profile {selected_profile},comparing the values recorded during each interim survey between 2007 and {highest_date_string}",
                 f"Table 1 - Cross Sectional are change in m2 and percentage comparing spring interim to spring interim ({csa_table_headers.get('spr_spr')}) and baseline to lastest spring interim 9{csa_table_headers.get('baseline_spr')}) "]
 
+            # creating report paragraph objects
             title_paragraph = Paragraph(f"<b>{current_survey_unit}-{sur_unit_card}</b>", centered_style)
             proforma_header = Paragraph("Background", header_style)
             proforma_paragraph = Paragraph(create_paragraph_one(), wrapped_style)
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
 
+            # changing the tables headings and data to exctract based on if autumns present (Scilly) issue.
             check_if_autumns_used = [d for d in spr_to_spr_table if 'Autumn' in str(d.keys())]
 
             if len(check_if_autumns_used) == 0:
@@ -1476,7 +1622,7 @@ def get_selected_charts(
                                 ('TEXTCOLOR', (col_index, row_index), (col_index, row_index), colors.white)
                             ]))
 
-            chart_flowable = add_CPA_chart()
+            chart_flowable_cpa = add_cpa_chart()
             cpa_chart_title = Paragraph(figure_captions[0], italic_style)
 
             # add map
@@ -1487,12 +1633,12 @@ def get_selected_charts(
 
             content_first_page = [title_paragraph, spacer1, proforma_header, spacer2, proforma_paragraph, spacer1,
                                   map_chart_flowable, spacer1, csa_table_caption, spacer2, table, PageBreak(),
-                                  state_header, spacer2, state_paragraph, spacer1, chart_flowable, spacer1,
+                                  state_header, spacer2, state_paragraph, spacer1, chart_flowable_cpa, spacer1,
                                   cpa_chart_title, PageBreak()]
 
             # Create a flowable object for the error bar chart and add title underneath
-            chart_flowable = add_error_bar_plot()
-            content_first_page.append(chart_flowable)
+            chart_flowable_error = add_error_bar_plot()
+            content_first_page.append(chart_flowable_error)
             content_first_page.append(spacer1)
             error_chart_title = Paragraph(figure_captions[1], italic_style)
             content_first_page.append(error_chart_title)
@@ -1506,20 +1652,22 @@ def get_selected_charts(
             # add new page
             content_first_page.append(PageBreak())
 
+            # building the doc from the content list
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (header(canvas, doc),
-                                                 addPageNumber(canvas, doc)),
-                onLaterPages=addPageNumber
+                                                 add_page_number(canvas, doc)),
+                onLaterPages=add_page_number
             )
 
+            # grab the first item in the buffer
             buffer.seek(0)
             return buffer.getvalue()
 
         pdf_bytes = to_pdf()
 
     return dcc.send_bytes(pdf_bytes, filename='test.pdf'), {'is_loading': True}
-    # return subplot, dcc.send_bytes(img_bytes, filename="SWCM_Chart_Selection.png")
+
 
 
 # MODALS
@@ -1529,6 +1677,24 @@ def get_selected_charts(
     [State("overall_trend_info_model", "is_open")],
 )
 def toggle_modal(n1, n2, is_open):
+
+    """
+       Toggle the state of the overall_trend_info modal based on click events.
+
+       This function toggles the state of the modal between open and closed based on click events.
+       It takes two input parameters: n1 and n2, which represent the number of clicks on the open and
+       close buttons respectively. The is_open parameter represents the current state of the modal.
+       If either n1 or n2 is truthy (indicating a click event), it returns the opposite of the current
+       state (toggling it). Otherwise, it returns the current state unchanged.
+
+       Parameters:
+           n1 (int or None): Number of clicks on the open button.
+           n2 (int or None): Number of clicks on the close button.
+           is_open (bool): Current state of the modal (True for open, False for closed).
+
+       Returns:
+           bool: Updated state of the modal after toggling.
+       """
     if n1 or n2:
         return not is_open
     return is_open
@@ -1540,6 +1706,25 @@ def toggle_modal(n1, n2, is_open):
     [State("percent_change_info_model", "is_open")],
 )
 def toggle_modal(n1, n2, is_open):
+    """
+           Toggle the state of the percent_change_info_model based on click events.
+
+           This function toggles the state of the modal between open and closed based on click events.
+           It takes two input parameters: n1 and n2, which represent the number of clicks on the open and
+           close buttons respectively. The is_open parameter represents the current state of the modal.
+           If either n1 or n2 is truthy (indicating a click event), it returns the opposite of the current
+           state (toggling it). Otherwise, it returns the current state unchanged.
+
+           Parameters:
+               n1 (int or None): Number of clicks on the open button.
+               n2 (int or None): Number of clicks on the close button.
+               is_open (bool): Current state of the modal (True for open, False for closed).
+
+           Returns:
+               bool: Updated state of the modal after toggling.
+    """
+
+
     if n1 or n2:
         return not is_open
     return is_open

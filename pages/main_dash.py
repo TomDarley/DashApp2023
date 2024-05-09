@@ -9,25 +9,20 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
 import pandas as pd
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Spacer
-from reportlab.lib.units import inch
 import io
 import plotly.io as pio
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import ParagraphStyle
 from sqlalchemy import create_engine
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
 from io import StringIO
-from reportlab.platypus import PageBreak
 import json
 from PIL import Image as PILImage
 from datetime import datetime
-from reportlab.platypus import Image
 from sqlalchemy.exc import OperationalError
 import time
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Spacer, Paragraph,SimpleDocTemplate, Table, TableStyle,PageBreak,Image
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 from reportlab.lib.units import mm
 
 

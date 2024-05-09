@@ -4,9 +4,46 @@ from datetime import datetime
 import dash_bootstrap_components as dbc
 from io import StringIO
 
+"""App for creating the CSA table. As well as making the table there is a section which creates a table saved to 
+   a store that is read by the map, to color the profile lines. It is convenient to do this from here as this 
+   is where the cpa for the profile lines is processed. """
+
 
 def handle_survey_dates(df):
-    """Function used to pick the correct dates to show in the CSA table"""
+    """
+        Function used to determine the appropriate survey dates to display in the CSA table. The isles of Scilly
+        cause a unique headache as they are surveyed in the Autumn. Therefore, logic is needed to switch the dates
+        to extract data from and change table column names etc.
+
+        Parameters:
+            df (DataFrame): A pandas DataFrame containing survey dates as column names.
+
+        Returns:
+            Tuple: A tuple containing information about the survey dates.
+                - is_scilly_unit (bool): True number of Autumns is > number of Other Seasons, True False otherwise.
+                - latest_survey (date): The date of the latest survey recorded in the dataset.
+                - first_survey (date): The date of the earliest survey recorded in the dataset.
+                - next_spr_or_baseline (date): The next spring or baseline survey date after removing autumn surveys.
+
+        Details:
+            This function processes survey dates to determine the appropriate dates to display in the Coastal
+            State Assessment (CSA) table. It evaluates whether the survey data pertains to the Scilly unit based
+            on the prevalence of autumn surveys. If the majority of surveys occur during autumn months, it considers
+            the data as being from a Scilly unit. Otherwise, it assumes data is from other units.
+
+            For non-Scilly units:
+            - It removes autumn surveys to prioritize spring or baseline surveys.
+            - It identifies the latest survey date, earliest survey date, and the next spring or baseline survey date
+              following the removal of autumn surveys.
+
+            For Scilly units:
+            - It identifies the next spring or baseline survey date without removing any autumn surveys.
+
+            If any errors occur during the processing, the function returns None for all outputs.
+
+        Note:
+            This function assumes the DataFrame columns contain datetime information, formatted as "%Y-%m-%d %H:%M:%S".
+        """
 
     # ranges used to decide the survey type
     spring_range = [1, 2, 3, 4]
@@ -14,8 +51,8 @@ def handle_survey_dates(df):
     autumn_range = [9, 10, 11, 12]
 
     all_dates = []
-    for x in df.columns:
-        to_date = datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S").date()
+    for date in df.columns:
+        to_date = datetime.strptime(str(date), "%Y-%m-%d %H:%M:%S").date()
         all_dates.append(to_date)
 
     latest_survey = max(all_dates)
@@ -34,10 +71,8 @@ def handle_survey_dates(df):
     if autumn_count > other_count:
         is_scilly_unit = True
 
-    #print(f"Is Scilly Unit: {is_scilly_unit}")
-    #print(f"First Survey: {first_survey}")
-
     if not is_scilly_unit:
+
         # Logic to check if the first survey is an Autumn if it is keep removing dates until the next date is not an autumn
         while latest_survey.month in autumn_range:
             try:
@@ -46,7 +81,6 @@ def handle_survey_dates(df):
             except Exception as e:
                 print(e)
 
-        #print(f"Latest Survey: {latest_survey}")
         all_dates_most_recent_removed = all_dates[:-1]
         next_spr_or_baseline = all_dates_most_recent_removed[-1]
 
@@ -56,7 +90,7 @@ def handle_survey_dates(df):
                 next_spr_or_baseline = all_dates_most_recent_removed[-1]
             except Exception as e:
                 print(e)
-        #print(f"Next Spring or Baseline: {next_spr_or_baseline}")
+
 
     elif is_scilly_unit:
         next_spr_or_baseline = all_dates[-2]
@@ -67,6 +101,8 @@ def handle_survey_dates(df):
 
     return is_scilly_unit, latest_survey, first_survey, next_spr_or_baseline,
 
+
+# This is style conditional passed to the dcc.table to style the colors of each cell.
 style_data_conditional = [
     {
         "if": {
@@ -524,6 +560,7 @@ style_data_conditional = [
 
 ]
 
+
 layout = html.Div(
     [dcc.Store(
             id="csa_header_store",
@@ -774,7 +811,6 @@ def make_csa_table(selected_csa_data):
         df_for_map['Baseline to Spring PCT Color'] = df_for_map['Baseline to Spring % Change'].apply(
             difference_values_to_color)
 
-    #df_for_map = df_for_map[['Profile', 'Spring to Spring Diff Color', 'Baseline to Spring Diff Color']]
     df_for_map = df_for_map.to_dict()
     #############################################################################################################
 
@@ -806,7 +842,6 @@ def make_csa_table(selected_csa_data):
             ]
         ]
 
-
     # convert to records format required by dash table
     spr_spr_df_to_records = spr_spr_df.to_dict("records")
     base_spr_df_to_records = base_spr_df.to_dict("records")
@@ -819,6 +854,7 @@ def make_csa_table(selected_csa_data):
     spr_spr_title = f"{next_spr_or_baseline} - {latest_survey}"
     base_spr_title = f"{first_survey} - {latest_survey}"
 
+    # This is passed/used in the report generation to get the dates used
     table_header_data = {'spr_spr':spr_spr_title, 'baseline_spr': base_spr_title}
 
     return (

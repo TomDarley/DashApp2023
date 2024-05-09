@@ -35,11 +35,15 @@ import time
 from reportlab.lib.units import mm
 import base64
 
+"""This is the main page, all other apps are added to this page, it contains all the placeholders for the main layout. 
+    This includes the the chart positions, the left hand side overview cards etc. This page also contains the report 
+    generation function. Note that each chart/table is a separate app see apps folder."""
 
+# generate the url for this page in the app
 dash.register_page(__name__, path="/main_dash")
 
-def establish_connection(retries=3, delay=5):
 
+def establish_connection(retries=3, delay=5):
     """Function attempts to connect to the database. It will retry 3 times before giving up"""
 
     attempts = 0
@@ -69,7 +73,6 @@ def establish_connection(retries=3, delay=5):
     return None  # Return None if all attempts fail
 
 
-
 # define the layout of the main page
 layout = html.Div(
     [  # Add the image
@@ -92,7 +95,6 @@ layout = html.Div(
                                         [
                                             html.Div("6aSU12", id='not-faded'),
 
-
                                         ]
                                     )
                                 ],
@@ -108,8 +110,6 @@ layout = html.Div(
                                                 id="drop_down_card-title",
 
                                             ),
-
-
 
                                             dcc.Dropdown(
                                                 options=[
@@ -205,8 +205,6 @@ layout = html.Div(
                                                         "label": "6cSU30-3  -  Mouthwell",
                                                         "value": "6cSU30-3",
                                                     },
-
-
 
                                                     {
                                                         "label": "6cSU30-4  -  Thurlestone",
@@ -315,11 +313,10 @@ layout = html.Div(
                                                         "label": "6eB3-2  -  Green Bay",
                                                         "value": "6eB3-2",
                                                     },
-{
+                                                    {
                                                         "label": "6eB3-3  -  Green Bay B",
                                                         "value": "6eB3-3",
                                                     },
-
 
                                                     {"label": "6eB4  -  Rushy Bay", "value": "6eB4"},
                                                     {"label": "6eM12  -  Old Town", "value": "6eM12"},
@@ -545,11 +542,11 @@ layout = html.Div(
 
                                             dcc.Dropdown(
                                                 options=[
-                                                          # Showing interims only!
-                                                         {'label': "6a01615", 'value': "6a01615"},
-                                                         {'label': "6a01618", 'value': "6a01618"},
-                                                         {'label': "6a01621", 'value': "6a01621"},
-                                                         {'label': "6a01624", 'value': "6a01624"}],
+                                                    # Showing interims only!
+                                                    {'label': "6a01615", 'value': "6a01615"},
+                                                    {'label': "6a01618", 'value': "6a01618"},
+                                                    {'label': "6a01621", 'value': "6a01621"},
+                                                    {'label': "6a01624", 'value': "6a01624"}],
                                                 value="6a01613",
                                                 id="survey-line-dropdown",
 
@@ -577,7 +574,6 @@ layout = html.Div(
 
                             ),
 
-
                             dbc.Card(
                                 [
                                     dbc.CardBody(
@@ -594,13 +590,14 @@ layout = html.Div(
                                             ),
                                             html.Div("----", id="trend_card", style={"color": 'black'}),
                                             dbc.Button(
-                                                        [html.Span(className="bi bi-info-circle-fill")],
-                                                        size="sm",
-                                                        id="overall_trend_open_info",
-                                                        n_clicks=0,
-                                                        className="mr-3",
-                                                        style={"position": "absolute", "top": "8px", "right": "8px", "border-radius": "5px"},
-                                                    ),
+                                                [html.Span(className="bi bi-info-circle-fill")],
+                                                size="sm",
+                                                id="overall_trend_open_info",
+                                                n_clicks=0,
+                                                className="mr-3",
+                                                style={"position": "absolute", "top": "8px", "right": "8px",
+                                                       "border-radius": "5px"},
+                                            ),
 
                                         ]
                                     )
@@ -624,13 +621,14 @@ layout = html.Div(
                                             ),
                                             html.Div("----", id="trend_card1"),
                                             dbc.Button(
-                                                        [html.Span(className="bi bi-info-circle-fill")],
-                                                        size="sm",
-                                                        id="percent_change_open_info",
-                                                        n_clicks=0,
-                                                        className="mr-3",
-                                                        style={"position": "absolute", "top": "8px", "right": "8px", "border-radius": "5px"},
-                                                    ),
+                                                [html.Span(className="bi bi-info-circle-fill")],
+                                                size="sm",
+                                                id="percent_change_open_info",
+                                                n_clicks=0,
+                                                className="mr-3",
+                                                style={"position": "absolute", "top": "8px", "right": "8px",
+                                                       "border-radius": "5px"},
+                                            ),
                                         ]
                                     )
                                 ], id='trend_card_div',
@@ -690,21 +688,20 @@ layout = html.Div(
                                                 },
                                             ),
 
+                                            dcc.Loading(
+                                                id='report_gen_loader',
+                                                children=[html.Div("", style={
+                                                    "backgroundColor": "rgba(0, 0, 0, 0)",
+                                                    'width': '10px',
+                                                    'height': '1px',
+                                                    "zIndex": -1
+                                                })],
+                                                style={'position': 'relative', 'margin-left': '20px'},
+                                                loading_state={'is_loading': True},
+                                                type="circle",
+                                            ),
 
-                            dcc.Loading(
-                                id='report_gen_loader',
-                                children=[html.Div("", style={
-                                    "backgroundColor": "rgba(0, 0, 0, 0)",
-                                    'width': '10px',
-                                    'height': '1px',
-                                    "zIndex": -1
-                                })],
-                                style={'position': 'relative','margin-left': '20px' },
-                                loading_state={'is_loading': True},
-                                type="circle",
-                            ),
-
-                                            #dcc.Checklist(
+                                            # dcc.Checklist(
                                             #    id="download-check-list",
                                             #    options=[
                                             #        {
@@ -725,18 +722,16 @@ layout = html.Div(
                                             #    style={"color": "#045F36", "font-weight": "bold", "font-size": "15px"},
                                             #    # inline=True,
 
-                                            #),
+                                            # ),
 
-
-
-                                        dbc.Button(
-                                            "Generate Report",
-                                            id="download-charts-button",
-                                            n_clicks=0,
-                                            size="sm",
-                                            style={"border-radius": "10px"},
-                                            className='mr-3',
-                                        ),
+                                            dbc.Button(
+                                                "Generate Report",
+                                                id="download-charts-button",
+                                                n_clicks=0,
+                                                size="sm",
+                                                style={"border-radius": "10px"},
+                                                className='mr-3',
+                                            ),
 
                                         ]
                                     )
@@ -761,10 +756,8 @@ layout = html.Div(
                 ),
                 dbc.Col(
 
-
                     html.Div(
                         [
-
 
                             map_box_3.layout,
 
@@ -816,19 +809,14 @@ layout = html.Div(
                             "Master Profile Data For This Profile Was Not Found, Please Try Another Profile!",
                             id="mp-alert",
                             is_open=False,
-                            #duration=4000,
+                            # duration=4000,
                             color="danger",
                             style={'position': 'absolute', 'top': '0', 'left': '0', 'right': '0', 'zIndex': 1000}
                         ),
 
                         profile_line_plot.layout,
 
-
-
-
-
-
-                             ],style={'position': 'relative'}),
+                    ], style={'position': 'relative'}),
 
                     xs={"size": 12, "offset": 0},
                     sm={"size": 12, "offset": 0},
@@ -967,9 +955,6 @@ def update_trend_card(trend):
     """Callback grabs the trend data from the change rate store found in the scatter plot page.
     Formats the output string"""
 
-
-
-
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
@@ -991,7 +976,7 @@ def update_trend_card(trend):
 
 @callback(
     Output("trend_card1", "children"),
-    Input("survey-points-change-values", 'data'),#
+    Input("survey-points-change-values", 'data'),  #
     State('change_range_radio_button', 'value')
 )
 def update_percent_change_card(change_value, change_range_radio_button):
@@ -1003,10 +988,9 @@ def update_percent_change_card(change_value, change_range_radio_button):
 
     classification = list(change_values['features'])[0]
     classification_string = classification['properties']['classification']
-    percent_change = round(classification['properties']['difference'],2)
+    percent_change = round(classification['properties']['difference'], 2)
 
     comment = None
-
 
     color_mapping = {
         'High Erosion': "#ff0000",
@@ -1020,7 +1004,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
     }
     color_to_use = color_mapping[classification_string]
     comment = "Error"
-    if classification_string in ['High Erosion','Mild Erosion','Low Erosion' ]:
+    if classification_string in ['High Erosion', 'Mild Erosion', 'Low Erosion']:
         value = percent_change
         if change_range_radio_button == 'base-spr':
             comment = f"{value} %"
@@ -1028,7 +1012,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
             comment = f"{value} %"
 
         return html.Span(f"{comment}", style={"color": color_to_use})
-    elif classification_string in ['High Accretion','Mild Accretion','Low Accretion' ]:
+    elif classification_string in ['High Accretion', 'Mild Accretion', 'Low Accretion']:
         value = percent_change
         if change_range_radio_button == 'base-spr':
             comment = f"+ {value} %"
@@ -1043,10 +1027,9 @@ def update_percent_change_card(change_value, change_range_radio_button):
         else:
             comment = f"Spring to Latest Spring  {value} %"
 
-        comment =  f" +/- {value} %"
+        comment = f" +/- {value} %"
 
         return comment
-
 
 
 @callback(
@@ -1074,18 +1057,12 @@ def update_highest_cpa_card(highest_data, highest_year):
         return html.Span(f"{comment}", style={"color": "green"})
 
 
-
-
-
-
-
-
 @callback(
 
     Output("download", "data"),
-    Output('report_gen_loader',"loading_state" ),
+    Output('report_gen_loader', "loading_state"),
     Input("download-charts-button", "n_clicks"),
-    #State("download-check-list", "value"),
+    # State("download-check-list", "value"),
     State("scatter_chart", "data"),
     State("error_chart", "data"),
     State("line_chart", "data"),
@@ -1099,18 +1076,17 @@ def update_highest_cpa_card(highest_data, highest_year):
 
     State("spr_to_spr_table", "data"),
     State("spr_to_baseline_table", "data"),
-    State('csa_header_store',"data"),
+    State('csa_header_store', "data"),
     State('percent_change', "data"),
     State('survey-line-dropdown', "value"),
     State('example-map', 'figure'),
-
-
 
     prevent_initial_call=True,
 )
 def get_selected_charts(
         n_clicks, scatter_chart, error_chart, line_chart,
-        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure,
+        sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,
+        spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure,
 ):
     """Function controls the logic behind which charts are to be downloaded using the download checklist"""
 
@@ -1120,7 +1096,6 @@ def get_selected_charts(
     if n_clicks is None:
         return dash.no_update
     else:
-
 
         def to_pdf():
 
@@ -1168,6 +1143,7 @@ def get_selected_charts(
 
                 # Draw the image onto the canvas
                 canvas.drawInlineImage(image, logo_x, logo_y, width=logo_width, height=logo_height)
+
             def addPageNumber(canvas, doc):
 
                 """
@@ -1182,14 +1158,13 @@ def get_selected_charts(
                 canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
 
-
                 page_num = canvas.getPageNumber()
                 text = f"Page {page_num}"
                 if page_num != 1:
                     canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
                 canvas.drawRightString(200 * mm, 20 * mm, text)
 
-#
+            #
             def create_paragraph_one():
 
                 conn = establish_connection()
@@ -1201,7 +1176,8 @@ def get_selected_charts(
                 conn.close()
 
                 return proforma_text
-#
+
+            #
             def create_paragraph_two():
 
                 # try statement when selecting Spring to Spring from map checkbox tend dict returns a list not a dict
@@ -1235,7 +1211,7 @@ def get_selected_charts(
 
                 # Serialize the figure to JSON
                 chart_width, chart_height = A4[1] - 400, A4[0] - 250
-                f= map_figure
+                f = map_figure
                 img_bytes = pio.to_image(f, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
@@ -1285,7 +1261,7 @@ def get_selected_charts(
                     ),
                     title=''
                 )
-#
+                #
                 img_bytes = pio.to_image(cpa_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
@@ -1333,7 +1309,8 @@ def get_selected_charts(
                 chart_flowable = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return chart_flowable
-#
+
+            #
             def add_line_plot():
 
                 """Request to add a generator here that makes all the charts for a survey unit?"""
@@ -1358,11 +1335,10 @@ def get_selected_charts(
                 )
                 # Show only the first, second, and last traces in the legend, this may cause a crash!!
                 for i, trace in enumerate(line_figure.data):
-                    t= len(line_figure.data)
+                    t = len(line_figure.data)
 
-                    if i not in [0, len(line_figure.data) - 6,len(line_figure.data) - 5,len(line_figure.data) - 4]:
+                    if i not in [0, len(line_figure.data) - 6, len(line_figure.data) - 5, len(line_figure.data) - 4]:
                         trace.showlegend = False
-
 
                 img_bytes = pio.to_image(line_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
@@ -1385,7 +1361,7 @@ def get_selected_charts(
             header_style = ParagraphStyle(name='HeaderStyle', parent=style)
             header_style.fontName = 'Helvetica-Bold'
 
-            wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style,  alignment=4)
+            wrapped_style = ParagraphStyle(name='WrappedStyle', parent=style, alignment=4)
 
             # Define the paragraph style with italic
             italic_style = ParagraphStyle(
@@ -1394,7 +1370,7 @@ def get_selected_charts(
                 fontSize=10,
                 textColor='grey',
                 italic=True,  # Set italic to True
-                alignment = 1
+                alignment=1
             )
 
             spacer1 = Spacer(1, 20)
@@ -1416,9 +1392,7 @@ def get_selected_charts(
             state_header = Paragraph("Survey Unit Analysis", header_style)
             state_paragraph = Paragraph(create_paragraph_two(), wrapped_style)
 
-            check_if_autumns_used =  [d for d in spr_to_spr_table if 'Autumn' in str(d.keys()) ]
-
-
+            check_if_autumns_used = [d for d in spr_to_spr_table if 'Autumn' in str(d.keys())]
 
             if len(check_if_autumns_used) == 0:
 
@@ -1432,7 +1406,8 @@ def get_selected_charts(
                     spring_percent_change = spring_row.get('Spring to Spring % Change', '')
                     baseline_diff = baseline_row.get('Baseline to Spring Diff (m2)', '')
                     baseline_percent_change = baseline_row.get('Baseline to Spring % Change', '')
-                    table_data.append([profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
+                    table_data.append(
+                        [profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
             else:
 
                 # CREATE THE CSA TABLE
@@ -1448,8 +1423,8 @@ def get_selected_charts(
                     table_data.append(
                         [profile, spring_diff, spring_percent_change, baseline_diff, baseline_percent_change])
 
-
-            spanned_row = ['', csa_table_headers.get('spr_spr'), csa_table_headers.get('spr_spr'), csa_table_headers.get('baseline_spr'), csa_table_headers.get('baseline_spr')]
+            spanned_row = ['', csa_table_headers.get('spr_spr'), csa_table_headers.get('spr_spr'),
+                           csa_table_headers.get('baseline_spr'), csa_table_headers.get('baseline_spr')]
             table_data.insert(0, spanned_row)
 
             # Define table style
@@ -1502,7 +1477,7 @@ def get_selected_charts(
                             ]))
 
             chart_flowable = add_CPA_chart()
-            cpa_chart_title  = Paragraph(figure_captions[0], italic_style)
+            cpa_chart_title = Paragraph(figure_captions[0], italic_style)
 
             # add map
             map_chart_flowable = add_map_chart()
@@ -1534,7 +1509,7 @@ def get_selected_charts(
             doc.build(
                 content_first_page,
                 onFirstPage=lambda canvas, doc: (header(canvas, doc),
-                addPageNumber(canvas, doc)),
+                                                 addPageNumber(canvas, doc)),
                 onLaterPages=addPageNumber
             )
 
@@ -1558,6 +1533,7 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
+
 @callback(
     Output("percent_change_info_model", "is_open"),
     [Input("percent_change_open_info", "n_clicks"), Input("percent_change_info_close", "n_clicks")],
@@ -1567,5 +1543,3 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
-
-

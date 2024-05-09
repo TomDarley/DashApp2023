@@ -802,11 +802,21 @@ def make_csa_table(selected_csa_data):
     #####################################################################################################
     # SAVING THE CSA TABLE TO STORE TO BE USED IN THE MAP TO STYLE THE LINES, NOTE THIS HAS NOTHING TO DO WITH
     # THE CPA TABLE. IT IS A CONVENIENT PLACE TO EXTRACT THE DATA NEEDED TO COLOR THE MAP LINES.
-
-    # Define the functions to map values to colors
     def difference_values_to_color(value):
-        # Define your logic to map values to colors here
-        # This is just a sample logic, replace it with your actual logic
+        """
+           Function to map difference values to colors.
+
+           Parameters:
+               value (float): The difference value to be mapped to a color.
+
+           Returns:
+               str: A hexadecimal color code or RGB color representation based on the input value.
+
+           Details:
+               This function defines a mapping from difference values to colors. It is used to assign colors
+               to cells in Coastal State Assessment (CSA) tables based on the magnitude of difference values.
+
+           """
         if value <= -30:
             return '#ff0000'  # Example color for values less than 20
         elif value >= -30 and value <=-15:
@@ -825,7 +835,8 @@ def make_csa_table(selected_csa_data):
         else:
             return 'black'  # Example color for values greater than or equal to 40
 
-    df_for_map  = df
+    # create a separate df for the map
+    df_for_map = df
 
     if is_scilly_unit:
         df_for_map['Spring to Spring PCT Color'] = df_for_map['Autumn to Autumn % Change'].apply(

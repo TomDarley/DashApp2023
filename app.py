@@ -2,8 +2,10 @@ from dash import Dash,html,dcc, Input,Output
 import dash
 import dash_bootstrap_components as dbc
 from apps import navigation
-# Import the main_dash layout
 
+
+"""Main App page, all pages inherit from this one. Here we define the footer and add the top nav bar here. 
+   We also add external stylesheets for bootstrap etc. We run the app from here. """
 
 # register the page with dash giving url path
 app = Dash(
@@ -16,8 +18,6 @@ app = Dash(
         dbc.icons.BOOTSTRAP,
 
     ],  # Set the default landing page URL with a trailing slash
-
-
 )
 
 # Footer content
@@ -48,8 +48,6 @@ footer = html.Div(
                     ],
                 ),
             ]
-
-
         )
 
 # Set the app layout with the navigation bar, the nav will be inherited by all pages
@@ -58,7 +56,6 @@ app.layout = html.Div(children =
                        navigation.navbar,
                        dash.page_container,
                       ],
-                      #'background': 'linear-gradient(to bottom right, #073b73,#7ebbfc)',
                       style ={'background-color': 'white'}
 
 )
@@ -66,13 +63,27 @@ app.layout = html.Div(children =
 # Append the footer to the main layout
 app.layout.children.append(footer)
 
-print("Running Dash App")
 
 @app.callback(
     Output('url', 'pathname'),
     [Input('url', 'pathname')]
 )
 def set_default_page(pathname):
+    """
+        Sets the default page to '/main_dash' if the current URL is None or '/'.
+
+        This callback function is triggered when there is a change in the URL pathname. It checks if
+        the pathname is None or '/' (root URL), indicating that the user is accessing the application
+        for the first time or has landed on the root URL. In such cases, it redirects the user to
+        '/main_dash'. Otherwise, it keeps the current URL pathname unchanged.
+
+        Parameters:
+            pathname (str): The current URL pathname.
+
+        Returns:
+            str: The updated URL pathname.
+        """
+
     if pathname is None or pathname == '/':
         return '/main_dash'
     return pathname

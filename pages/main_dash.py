@@ -1660,7 +1660,6 @@ def generate_report(
     return dcc.send_bytes(pdf_bytes, filename='test.pdf'), {'is_loading': True}
 
 
-
 # MODALS
 @callback(
     Output("overall_trend_info_model", "is_open"),

@@ -64,6 +64,9 @@ def get_data(target_survey_unit: str):
     return df
 
 
+def average(lst):
+    return sum(lst) / len(lst)
+
 layout = html.Div(
     [
         dcc.Store(
@@ -321,6 +324,8 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
     lowest_values = row_with_min_value[1]
     lowest_values = lowest_values.strftime('%Y-%m-%d')
 
+
+
     # Get highest recorded CPA
     highest = chart_ready_df["Sum"].idxmax()
     row_with_max_value = list(chart_ready_df.loc[highest])
@@ -406,19 +411,15 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
     # obtain the average area for all profiles for all years
     yearly_summed_area = list(df2["Sum"])
 
-    def average(lst):
-        return sum(lst) / len(lst)
-
+    # get an average
     average_area = average(yearly_summed_area)
-
-    # print(percentage)
 
     if accretion_levels <= 0:
         state = "Erosion Rate"
     else:
         state = "Accretion Rate"
 
-        ## calculate the erosion/accretion as a percentage of the average area
+    # calculate the erosion/accretion as a percentage of the average area
     percentage = abs(accretion_levels) / average_area * 100
     percentage = percentage.__round__(2)
     percentage = str(f"{percentage} %")
@@ -520,10 +521,9 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
     fig.update_traces(None),
     fig.update_traces(hoverinfo='none')
 
-    # Serialize the figure to JSON
+    # Serialize the figure to JSON, Update the 'cpa' key in the store's data with the serialized figure.
+    # Used in report generation.
     serialized_fig = fig.to_json()
-
-    # Update the 'cpa' key in the store's data with the serialized figure
     chart_data = {"cpa": serialized_fig}
 
     return (
@@ -539,7 +539,7 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
         percentage
     )
 
-
+# Updating the Modals
 @callback(
     Output("scatter_info_model", "is_open"),
     [Input("scatter_open_info", "n_clicks"), Input("scatter_info_close", "n_clicks")],

@@ -7,16 +7,13 @@ import matplotlib.dates as mdates
 import plotly.express as px
 import statsmodels.api as sm
 import plotly.graph_objs as go
-import base64
 from dash.exceptions import PreventUpdate
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 import time
 
-# delete this
-image_path = r"media/NERD.jpeg"
-with open(image_path, "rb") as image_file:
-    encoded_image = base64.b64encode(image_file.read()).decode()
+"""App for the scatter plot. This includes the modals, and all logic to create it"""
+
 
 def establish_connection(retries=3, delay=5):
     """Function attempts to connect to the database. It will retry 3 times before giving up"""
@@ -48,6 +45,25 @@ def establish_connection(retries=3, delay=5):
     return None  # Return None if all attempts fail
 
 
+def get_data(target_survey_unit: str):
+    """Establish database connection, make query and return df, both target profile and target date
+        are optional as make_csa_df and get_area functions require different queries.
+
+
+     Parameters:
+        target_survey_unit (str): The target survey unit for which data is retrieved.
+
+    Returns:
+        pandas.DataFrame: The DataFrame containing the data queried from the database.
+
+    """
+    conn = establish_connection()
+    # Import spatial data as GeoDataFrame
+    query = f"SELECT * FROM cpa_table WHERE survey_unit = '{target_survey_unit}'"
+    df = pd.read_sql_query(query, conn)
+    return df
+
+
 layout = html.Div(
     [
         dcc.Store(
@@ -69,12 +85,13 @@ layout = html.Div(
                     id="scatter_plot",
                     style={
                         "width": "100%",
-                        "height": "60vh", # this will make it bigger
+                        "height": "60vh",  # this will make it bigger
                     },
-                    config={"responsive": True,'modeBarButtonsToRemove': ['lasso2d', 'select2d','autoscale'], 'displaylogo': False},
+                    config={"responsive": True, 'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'],
+                            'displaylogo': False},
 
                 ),
-            ],id = 'scatter_plot_card',
+            ], id='scatter_plot_card',
 
         ),
         dbc.Button(
@@ -83,7 +100,7 @@ layout = html.Div(
             id="scatter_open_info",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "left": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "left": "8px", "border-radius": "5px"},
         ),
         dbc.Button(
             [html.Span(className="fa-solid fa-expand")],
@@ -91,15 +108,16 @@ layout = html.Div(
             id="scatter_open_full",
             n_clicks=0,
             className="mr-3",
-            style={"position": "absolute", "bottom": "1%", "right": "8px","border-radius": "5px"},
+            style={"position": "absolute", "bottom": "1%", "right": "8px", "border-radius": "5px"},
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area", style={"color":"blue"})),
+                dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area", style={"color": "blue"})),
                 dbc.ModalBody(
                     [
                         html.P(
-                            """This chart represents the combined profile area (CPA m²) trend in cross-sectional area (CSA m²).""",style={"font-size": 20},),
+                            """This chart represents the combined profile area (CPA m²) trend in cross-sectional area (CSA m²).""",
+                            style={"font-size": 20}, ),
                         html.P(
                             """ For every survey unit, profile areas (for the interim profiles from each survey) are combined for each interim and full survey to provide a single ‘beach area’, referred to as the Combined Profile Area (CPA).  This is used for linear trend analysis over a temporal scale.  Interim survey profiles from the spring surveys (green circles), autumn (blue diamonds) and full survey (pink squares) are used.""",
 
@@ -129,7 +147,7 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                #dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
+                # dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
                 dbc.ModalBody(
                     dcc.Graph(id="scatter_plot_model", style={"height": "100vh"})
                 ),  ## might not work
@@ -147,83 +165,85 @@ layout = html.Div(
             fullscreen=True,
         ),
     ],
-    id = 'scatter_plot_div',
+    id='scatter_plot_div',
 
 )
 
 
 @callback(
     (
-        Output("scatter_plot", "figure"),
-        Output("change_rate", "data"),
-        Output("selected-df-storage", "data"),
-        Output("scatter_plot_model", "figure"),
-        Output("lowest_recorded_value", "data"),
-        Output("lowest_recorded_year", "data"),
-        Output("highest_recorded_value", "data"),
-        Output("highest_recorded_year", "data"),
-        Output("scatter_chart", "data"),
-        Output("percent_change", "data"),
+            Output("scatter_plot", "figure"),
+            Output("change_rate", "data"),
+            Output("selected-df-storage", "data"),
+            Output("scatter_plot_model", "figure"),
+            Output("lowest_recorded_value", "data"),
+            Output("lowest_recorded_year", "data"),
+            Output("highest_recorded_value", "data"),
+            Output("highest_recorded_year", "data"),
+            Output("scatter_chart", "data"),
+            Output("percent_change", "data"),
 
-        Input("survey-unit-dropdown", "value"),
-        Input('survey_unit_card', 'children'),
+            Input("survey-unit-dropdown", "value"),
+            Input('survey_unit_card', 'children'),
     ),
     allow_duplicate=True,
 )
-def make_scatter_plot(selected_survey_unit,survey_unit_card):
+def make_scatter_plot(selected_survey_unit, survey_unit_card):
+    """
+       Generate scatter plot and associated data for a given survey unit.
 
+       Parameters:
+           selected_survey_unit (str): The selected survey unit.
+           survey_unit_card (str): The survey unit card.
+
+       Returns:
+           tuple: A tuple containing the following elements:
+               - Output("scatter_plot", "figure"): The Plotly figure object for the scatter plot.
+               - Output("change_rate", "data"): The change rate data.
+               - Output("selected-df-storage", "data"): The selected DataFrame storage data.
+               - Output("scatter_plot_model", "figure"): The Plotly figure object for the scatter plot model.
+               - Output("lowest_recorded_value", "data"): The lowest recorded value data.
+               - Output("lowest_recorded_year", "data"): The year of the lowest recorded value data.
+               - Output("highest_recorded_value", "data"): The highest recorded value data.
+               - Output("highest_recorded_year", "data"): The year of the highest recorded value data.
+               - Output("scatter_chart", "data"): The scatter chart data.
+               - Output("percent_change", "data"): The percentage change data.
+       """
+
+    # if no survey unit stop callback
     if selected_survey_unit is None:
         raise PreventUpdate
 
-    survey_unit = selected_survey_unit
-    # print(survey_unit)
-
-    def get_data(target_survey_unit: str):
-        """Establish database connection, make query and return df, both target profile and target date
-        are optional as make_csa_df and get_area functions require different queries"""
-
-        conn = establish_connection()
-
-        # Import spatial data as GeoDataFrame
-        query = f"SELECT * FROM cpa_table WHERE survey_unit = '{target_survey_unit}'"
-        df = pd.read_sql_query(query, conn)
-
-        return df
-
-        # load data directly from the DB
-
-    master_df = get_data(survey_unit)
-    master_df = master_df[["date", "profile", "area"]]
+    # load data from the cpa table in the aws database
+    master_df = get_data(selected_survey_unit)[["date", "profile", "area"]]
 
     # Pivot the data
     pivot_df = master_df.pivot(index="profile", columns="date", values="area")
 
-    # Add column with representing the sum of the total number of dates in df
-    pivot_df["countSurveyedDates"] = (len(list(pivot_df.columns)))
+    # Calculate the total number of dates surveyed and add it as a column
+    pivot_df["countSurveyedDates"] = len(pivot_df.columns)
 
-    # Add column representing the sum of the total number NaNs in each row
-    pivot_df.loc[:, "NaNCount"] = pivot_df.isnull().sum(axis=1)
+    # Calculate the number of NaNs in each row and add it as a column
+    pivot_df["NaNCount"] = pivot_df.isnull().sum(axis=1)
 
-    # Logic for determining if the number of NaNs is more than half the number of total number of dates surveyed
-    pivot_df.loc[:, "DropRow"] = pivot_df["NaNCount"] <= pivot_df["countSurveyedDates"] // 2
+    # Determine if the number of NaNs is more than half the total number of dates surveyed
+    pivot_df["DropRow"] = pivot_df["NaNCount"] <= pivot_df["countSurveyedDates"] // 2
 
-    # get the filtered for NaNs as new df for plotting
-    df1 = pivot_df.loc[pivot_df["DropRow"] == True]
+    # Filter rows where NaNs are less than or equal to half of the surveyed dates
+    df1 = pivot_df[pivot_df["DropRow"]]
 
-    # remove columns used in the calculations, leaving only data behind.
+    # Drop calculation columns, leaving only data behind
     df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates"], axis=1)
 
-    # new, methodology. We drop all dates where all the data is null. No longer use and average to fill them.
-    #df1 = df1.dropna(axis=1, how='all')
+    # New methodology: drop all columns where all the data is null, no longer using an average to fill them
+    # Old method: apply an average to fill NaN values
+    df1 = df1.dropna(axis=1, how="all").apply(lambda row: row.fillna(row.mean()), axis=1)
 
-    # old method of applying an average
-    df1 = df1.apply(lambda row: row.fillna(row.mean()), axis=1)
-
-    # Convert column names to datetime objects. need this so we can access the day().
+    # Convert column names to datetime objects
     df1.columns = pd.to_datetime(df1.columns)
 
-    # Set a threshold for the maximum difference in days to consider columns as close.
-    # Check with mark, if this is an issue with Sands, apparently it should already group the dates on export.
+    # Set a threshold for the maximum difference in days to consider columns as close. Grouping csvs
+    # in the data processing has made this redundant. Run anyway to be sure.
     max_days_diff = 7
 
     # find all columns that have a date that is theshold apart
@@ -236,7 +256,7 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
                 result.append((i, j))
 
     # Flatten the list of tuples into a single list
-    if len(result)>0:
+    if len(result) > 0:
         flattened_list = list(set([item for sublist in result for item in sublist]))
         flattened_list = sorted(flattened_list)
 
@@ -251,27 +271,24 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
                     blocks.append(current_block)
                     current_block = [numbers[i]]
 
-
             blocks.append(current_block)
 
             return [block for block in blocks]
 
-        consecutive_blocks  = find_consecutive_blocks(flattened_list)
+        consecutive_blocks = find_consecutive_blocks(flattened_list)
 
-        all_columns_to_drop  = []
+        all_columns_to_drop = []
 
         for i in consecutive_blocks:
-            df2 = df1.iloc[:,i]
+            df2 = df1.iloc[:, i]
 
-            df2.fillna(method ='ffill', axis=1, inplace =True)
+            df2.fillna(method='ffill', axis=1, inplace=True)
             # Get column indices with NaN values
             columns_with_na = df2.columns[df2.isna().any()].tolist()
             for col in columns_with_na:
                 all_columns_to_drop.append(col)
-            df2= df2.dropna(axis= 1)
+            df2 = df2.dropna(axis=1)
             # Drop columns with NaN values by index
-
-
 
             common_columns = df2.columns.intersection(df1.columns)
             # Replace columns in the longer DataFrame with corresponding columns from the shorter DataFrame
@@ -302,15 +319,14 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     row_with_min_value = list(chart_ready_df.loc[lowest])
     lowest_year = row_with_min_value[0]
     lowest_values = row_with_min_value[1]
-    lowest_values =  lowest_values.strftime('%Y-%m-%d')
-
+    lowest_values = lowest_values.strftime('%Y-%m-%d')
 
     # Get highest recorded CPA
     highest = chart_ready_df["Sum"].idxmax()
     row_with_max_value = list(chart_ready_df.loc[highest])
     highest_year = row_with_max_value[0]
     highest_values = row_with_max_value[1]
-    highest_values =  highest_values.strftime('%Y-%m-%d')
+    highest_values = highest_values.strftime('%Y-%m-%d')
 
     chart_ready_df["index1"] = pd.to_datetime(
         chart_ready_df["index1"], format="%Y-%m-%d"
@@ -354,7 +370,7 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     chart_ready_df["x"] = x_mdates
 
     # Define tick positions and tick labels
-    #x_min = min(x_axis)
+    # x_min = min(x_axis)
     x_min = "2007-01-01"
     x_max = max(x_axis)
     num_ticks = 100
@@ -381,13 +397,11 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
 
     # caluclate accreation levels
 
-
-
     # r squared value
     correlation_matrix = np.corrcoef(x_mdates, y_axis)
     correlation_xy = correlation_matrix[0, 1]
     r_squared = round((correlation_xy ** 2), 3)
-    trend_title  =f"Trend: R²{str(r_squared)}"
+    trend_title = f"Trend: R²{str(r_squared)}"
 
     # obtain the average area for all profiles for all years
     yearly_summed_area = list(df2["Sum"])
@@ -408,12 +422,6 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     percentage = abs(accretion_levels) / average_area * 100
     percentage = percentage.__round__(2)
     percentage = str(f"{percentage} %")
-
-
-
-
-
-
 
     # add the normal date format back to the dataframe to be used in the hover data
     chart_ready_df['date'] = normal_dates
@@ -437,12 +445,11 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
         template="plotly",
     )
 
-
     # Calculate the differences between consecutive x values
     chart_ready_df['date'] = pd.to_datetime(chart_ready_df['date'])
     x_diff = chart_ready_df['date'].diff()
 
-    #threshold = pd.Timedelta(24 * 30.5, 'days')
+    # threshold = pd.Timedelta(24 * 30.5, 'days')
     threshold = pd.Timedelta(100 * 30.5, 'days')
     # Identify large gaps (e.g., gaps larger than a threshold)
     large_gaps_indices = x_diff > threshold  # Adjust the threshold as needed
@@ -453,7 +460,6 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
 
     # Insert NaNs in the line data at large gaps
     chart_ready_df['Sum'] = np.where(chart_ready_df['large_gap'], np.nan, chart_ready_df['Sum'])
-
 
     # Format the label shown in the hover
     fig.update_traces(
@@ -487,7 +493,7 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
                 family="Helvetica",  # Set the font family
             ),
         ),
-        #legend_traceorder="reversed",
+        # legend_traceorder="reversed",
         legend_title_text=f"",
     )
 
@@ -503,11 +509,12 @@ def make_scatter_plot(selected_survey_unit,survey_unit_card):
     )
 
     # add linear regression line for whole sample
-    fig.add_traces(go.Scatter(x=x_mdates, y=regline, mode="lines", name=trend_title, line =dict(color='red', dash='dash' )))
-
+    fig.add_traces(
+        [go.Scatter(x=x_mdates, y=regline, mode="lines", name=trend_title, line=dict(color='red', dash='dash'))])
 
     fig.add_traces(
-        go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change", line=dict(color='grey', dash='dash')))
+        [go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change",
+                    line=dict(color='grey', dash='dash'))])
 
     # Format the trend line hover data to show nothing, the order of this call matters
     fig.update_traces(None),

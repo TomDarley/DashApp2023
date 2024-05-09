@@ -6,14 +6,10 @@ from apps import map_box_3
 from apps import profile_line_plot
 from apps import csa_table
 import dash_bootstrap_components as dbc
-
-import json
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
 import pandas as pd
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
-from reportlab.lib.pagesizes import A4, landscape, portrait
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Spacer
 from reportlab.lib.units import inch
@@ -33,7 +29,7 @@ from reportlab.platypus import Image
 from sqlalchemy.exc import OperationalError
 import time
 from reportlab.lib.units import mm
-import base64
+
 
 """This is the main page, all other apps are added to this page, it contains all the placeholders for the main layout. 
     This includes the the chart positions, the left hand side overview cards etc. This page also contains the report 

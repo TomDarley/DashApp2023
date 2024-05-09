@@ -6,7 +6,9 @@ from io import StringIO
 
 """App for creating the CSA table. As well as making the table there is a section which creates a table saved to 
    a store that is read by the map, to color the profile lines. It is convenient to do this from here as this 
-   is where the cpa for the profile lines is processed. """
+   is where the cpa for the profile lines is processed. 
+   
+   Note the CPA table layout is actually two tables, spr -spr and baseline-spring."""
 
 
 def handle_survey_dates(df):
@@ -562,10 +564,12 @@ style_data_conditional = [
 
 
 layout = html.Div(
-    [dcc.Store(
+    [   # store which holds the table header of the dates used, passed to the report generation
+        dcc.Store(
             id="csa_header_store",
             data={"spr_spr": None,"baseline_spr":None},
         ),
+        # store for the profile colors, passed to the map app to color each profile.
         dcc.Store(
             id="csa_profile_line_colors",
             data=None,
@@ -702,8 +706,6 @@ layout = html.Div(
 
                 ),
             ],
-
-
             id = 'csa_table_row',
 
 
@@ -728,6 +730,31 @@ layout = html.Div(
     ]
 )
 def make_csa_table(selected_csa_data):
+    """
+      Callback function to generate data and formatting for Coastal State Assessment (CSA) tables. Note that
+      the logic for abating the CSA data sent to the store is all controlled in the scatter app reducing repeat
+      logic for this app.
+
+      Parameters:
+          selected_csa_data (str): JSON string containing CSA data.
+
+      Returns:
+          Tuple: A tuple containing the data, columns, and other information for displaying CSA tables.
+              - spr_to_spr_table_data (list): Data for the "Spring to Spring" CSA table.
+              - spr_to_spr_table_columns (list): Columns for the "Spring to Spring" CSA table.
+              - spring_to_spring_header (str): Header text for the "Spring to Spring" CSA table.
+              - spr_to_baseline_table_data (list): Data for the "Spring to Baseline" CSA table.
+              - spr_to_baseline_table_columns (list): Columns for the "Spring to Baseline" CSA table.
+              - baseline_to_spring_header (str): Header text for the "Baseline to Spring" CSA table.
+              - csa_header_store_data (dict): Data for storing CSA table header information.
+              - csa_profile_line_colors (dict): Data for styling CSA profile lines on the map.
+
+      Details:
+          This callback function reads JSON data containing Coastal State Assessment (CSA) information,which comes
+          from a store created in the scatter plot app. It generates tables for displaying CSA data, and formats the
+          tables for presentation. It calculates differences and percentages for various survey intervals, determines
+          header text for the tables, and generates color data for styling CSA profile lines on the map.
+      """
 
     #  load in the csa table from the store, json to df
     df = pd.read_json(StringIO(selected_csa_data))

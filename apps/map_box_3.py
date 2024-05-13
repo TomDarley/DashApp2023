@@ -4552,7 +4552,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         zoom=25,
         size="sqrt_size",  # set the size based off sqrt column
         size_max=25,
+
     )
+
 
     # Format the label shown, must have the <extra></extra> to remove the color being shown
     updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "<b>%{customdata[2]}<br>"
@@ -4573,7 +4575,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             sizemode='area',
             sizeref=1.0 * max(updated_gdf["sqrt_size"]) / (25 ** 2),  # make larger
             sizemin=20,
-            opacity=1.0
+            opacity=1.0,
+
         ),
         mode='markers',
     )

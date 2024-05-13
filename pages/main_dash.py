@@ -20,10 +20,11 @@ from sqlalchemy.exc import OperationalError
 import time
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Spacer, Paragraph,SimpleDocTemplate, Table, TableStyle,PageBreak,Image
+from reportlab.platypus import Spacer, Paragraph,SimpleDocTemplate, Table, TableStyle,PageBreak, Image as PlatypusImage
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.units import mm
+from PIL import Image, ImageDraw, ImageFont
 
 
 """This is the main page, all other apps are added to this page, it contains all the placeholders for the main layout. 
@@ -1163,6 +1164,7 @@ def generate_report(
             # create a doc object using report labs default template
             doc = SimpleDocTemplate(buffer, pagesize=A4)
 
+
             def header(canvas, doc):
                 """
                  Function to draw the header of the PDF document.
@@ -1309,19 +1311,65 @@ def generate_report(
                         Image: ReportLab Image object containing the map chart.
                 """
 
+                # legend is now stored database side as apprunner does not support local dir calls
+                conn = establish_connection()
+                query = "SELECT image_data FROM images WHERE id = 2"
+                df = pd.read_sql_query(query, conn)
+                conn.close()
+
+                # Read the image data from the row
+                legend_data = df['image_data'][0]
+
+
+
                 # Serialize the figure to JSON
                 chart_width, chart_height = A4[1] - 400, A4[0] - 250
                 f = map_figure
-                img_bytes = pio.to_image(f, format='png')
-                img = PILImage.open(io.BytesIO(img_bytes))
+                map_bytes = pio.to_image(f, format='png')
+
+                # Open the image using PIL
+                legend_img = PILImage.open(io.BytesIO(legend_data))
+                map_img = PILImage.open(io.BytesIO(map_bytes))
+
+                # Convert both images to RGBA mode to ensure an alpha channel exists
+                map_img = map_img.convert("RGBA")
+                legend_img = legend_img.convert("RGBA")
+
+                legend_width = 250  # Adjust as needed
+                legend_height = 100 # Adjust as needed
+                legend_img = legend_img.resize((legend_width, legend_height))
+
+                # Calculate the position to place the legend on top of the map image
+                x_offset = 0  # Adjust as needed
+                y_offset = 0  # Adjust as needed
+
+                # Composite the legend image on top of the map image
+                map_img.paste(legend_img, (x_offset, y_offset), legend_img)
+
+                watermark_text = "          South West\n    Coastal Monitoring"
+                font = ImageFont.truetype("arial.ttf", 30)
+
+                # Create a blank image with an alpha channel
+                watermark_img = PILImage.new('RGBA', (map_img.width, map_img.height), (14, 14, 14, 0))
+                draw = ImageDraw.Draw(watermark_img)
+
+                draw.text((180, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+
+                # Rotate the watermark text
+                rotated_watermark_img = watermark_img.rotate(0, expand=True)
+
+
+                # Paste the rotated watermark onto the original image
+                map_img.paste(rotated_watermark_img, (10, 10), rotated_watermark_img)
+
 
                 # Convert PIL image to byte array
                 with io.BytesIO() as byte_io:
-                    img.save(byte_io, format='PNG')
+                    map_img.save(byte_io, format='PNG')
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                image = PlatypusImage(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return image
 
@@ -1374,13 +1422,28 @@ def generate_report(
                 img_bytes = pio.to_image(cpa_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
+                watermark_text = "          South West\n    Coastal Monitoring"
+                font = ImageFont.truetype("arial.ttf", 30)
+
+                # Create a blank image with an alpha channel
+                watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
+                draw = ImageDraw.Draw(watermark_img)
+
+                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+
+                # Rotate the watermark text
+                rotated_watermark_img = watermark_img.rotate(0, expand=True)
+
+                # Paste the rotated watermark onto the original image
+                img.paste(rotated_watermark_img, (10, 10), rotated_watermark_img)
+
                 # Convert PIL image to byte array
                 with io.BytesIO() as byte_io:
                     img.save(byte_io, format='PNG')
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                image = PlatypusImage(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return image
 
@@ -1421,13 +1484,28 @@ def generate_report(
                 img_bytes = pio.to_image(error_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
-                # Convert PIL image to byte array
+                watermark_text = "          South West\n    Coastal Monitoring"
+                font = ImageFont.truetype("arial.ttf", 30)
+
+                # Create a blank image with an alpha channel
+                watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
+                draw = ImageDraw.Draw(watermark_img)
+
+                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+
+                # Rotate the watermark text
+                rotated_watermark_img = watermark_img.rotate(0, expand=True)
+
+                # Paste the rotated watermark onto the original image
+                img.paste(rotated_watermark_img, (10, 10), rotated_watermark_img)
+
+                # Convert the modified PIL image back to byte array
                 with io.BytesIO() as byte_io:
                     img.save(byte_io, format='PNG')
                     img_byte_array = byte_io.getvalue()
 
                 # Create a ReportLab Image object
-                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                image = PlatypusImage(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return image
 
@@ -1472,6 +1550,22 @@ def generate_report(
                 img_bytes = pio.to_image(line_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
+                watermark_text = "          South West\n    Coastal Monitoring"
+                font = ImageFont.truetype("arial.ttf", 30)
+
+
+                # Create a blank image with an alpha channel
+                watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
+                draw = ImageDraw.Draw(watermark_img)
+
+                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+
+                # Rotate the watermark text
+                rotated_watermark_img = watermark_img.rotate(0, expand=True)
+
+                # Paste the rotated watermark onto the original image
+                img.paste(rotated_watermark_img, (10, 10), rotated_watermark_img)
+
                 # Convert PIL image to byte array
                 with io.BytesIO() as byte_io:
                     img.save(byte_io, format='PNG')
@@ -1480,7 +1574,7 @@ def generate_report(
                 # Create a ReportLab Image object
                 from reportlab.platypus import Image
 
-                image = Image(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
+                image = PlatypusImage(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
                 return image
 
@@ -1613,6 +1707,8 @@ def generate_report(
             # add map
             map_chart_flowable = add_map_chart()
 
+
+
             # add csa table caption
             csa_table_caption = Paragraph(figure_captions[3], italic_style)
 
@@ -1640,9 +1736,10 @@ def generate_report(
             # building the doc from the content list
             doc.build(
                 content_first_page,
-                onFirstPage=lambda canvas, doc: (header(canvas, doc),
+                onFirstPage=lambda canvas, doc:  (header(canvas, doc),
                                                  add_page_number(canvas, doc)),
-                onLaterPages=add_page_number
+                onLaterPages=lambda canvas, doc: (
+                                                 add_page_number(canvas, doc)),
             )
 
             # grab the first item in the buffer
@@ -1651,7 +1748,11 @@ def generate_report(
 
         pdf_bytes = to_pdf()
 
-    return dcc.send_bytes(pdf_bytes, filename='test.pdf'), {'is_loading': True}
+    current_datetime = datetime.now()
+    current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+
+    report_name  = f"SWCM_Generated_Report_{current_survey_unit}_{current_datetime_str}.pdf"
+    return dcc.send_bytes(pdf_bytes, filename=report_name), {'is_loading': True}
 
 
 # MODALS

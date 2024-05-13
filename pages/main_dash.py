@@ -678,13 +678,16 @@ layout = html.Div(
 
                                             dcc.Loading(
                                                 id='report_gen_loader',
-                                                children=[html.Div("", style={
-                                                    "backgroundColor": "rgba(0, 0, 0, 0)",
-                                                    'width': '10px',
-                                                    'height': '1px',
-                                                    "zIndex": -1
-                                                })],
-                                                style={'position': 'relative', 'margin-left': '20px'},
+                                                children=[dbc.Button(
+                                                    "Generate Report",
+                                                    id="download-charts-button",
+                                                    n_clicks=0,
+                                                    size="sm",
+                                                    style={"border-radius": "10px"},
+                                                    className='mr-3',
+                                                ),
+                                                ],
+                                                style={'display': 'flex', 'justify-content': 'right', },
                                                 loading_state={'is_loading': True},
                                                 type="circle",
                                             ),
@@ -712,16 +715,9 @@ layout = html.Div(
 
                                             # ),
 
-                                            dbc.Button(
-                                                "Generate Report",
-                                                id="download-charts-button",
-                                                n_clicks=0,
-                                                size="sm",
-                                                style={"border-radius": "10px"},
-                                                className='mr-3',
-                                            ),
 
-                                        ]
+
+                                        ],
                                     )
                                 ],
                                 style={
@@ -973,8 +969,6 @@ def update_trend_card(trend):
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
             return html.Span(f"{comment}", style={"color": 'green'})
-
-
 
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]

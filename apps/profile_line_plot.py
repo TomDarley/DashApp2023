@@ -5,7 +5,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
-from datetime import datetime
 import numpy as np
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
@@ -297,6 +296,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             Otherwise, the function proceeds to create the line plot using the retrieved data.
         """
 
+    start_time  = time.time()
+
     # convert to dict from list if a list
     if selected_val_storage:
         # convert to a dict if not:
@@ -308,6 +309,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         fixed_val_storage = None
 
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
+    data_grab_time = time.time()
+
     conn = establish_connection()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
@@ -315,6 +318,13 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
+
+    end_time = time.time()
+
+    elapsed_time = end_time - data_grab_time
+    print(f"Database grab time: {elapsed_time}")
+
+
     # get mp data as df from aws database
     mp_df = pd.read_sql_query(master_profile_query, conn)
     conn.close()
@@ -563,6 +573,11 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             month_year_dropdown_style = dict(display='none')
 
+            end_time = time.time()
+
+            elapsed_time = end_time - start_time
+            print(elapsed_time)
+
             return fig, fig, chart_data, valid_master_profile_date
         else:
             valid_master_profile_date = False
@@ -575,9 +590,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         valid_master_profile_date = True
         fig = px.line()
         chart_data = None
-        button_3d_style = {"position": "absolute", "top": "1%", "left": "60px", "border-radius": "5px"}
-        button_2d_style = {"position": "absolute", "top": "1%", "left": "8px", "border-radius": "5px"}
-        button_range_style = {"position": "absolute", "top": "1%", "left": "112px", "border-radius": "5px"}
         month_year_dropdown_style = dict(display='none')
 
         return fig, fig, chart_data, month_year_dropdown_style, \
@@ -609,3 +621,5 @@ def toggle_modal_chart(n1, n2, relayoutData):
     elif "close" in changed_id:
         return False, 0
     return False, 0
+
+

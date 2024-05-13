@@ -108,113 +108,113 @@ def handle_survey_dates(df):
 style_data_conditional = [
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} <= -30",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} <= -30",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= -30 && {Spring to Spring Diff (m2)} <= -15",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= -30 && {Spring to Spring Diff (m²)} <= -15",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= -15 && {Spring to Spring Diff (m2)} <= -5",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= -15 && {Spring to Spring Diff (m²)} <= -5",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "#ff9999",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= -5 && {Spring to Spring Diff (m2)} <= 5",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= -5 && {Spring to Spring Diff (m²)} <= 5",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "grey",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= 5 && {Spring to Spring Diff (m2)} <= 15",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= 5 && {Spring to Spring Diff (m²)} <= 15",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "#00ace6",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= 15 && {Spring to Spring Diff (m2)} <= 30",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= 15 && {Spring to Spring Diff (m²)} <= 30",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "rgb(0, 103, 230)",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Spring to Spring Diff (m2)} >= 30",
-            "column_id": "Spring to Spring Diff (m2)",
+            "filter_query": "{Spring to Spring Diff (m²)} >= 30",
+            "column_id": "Spring to Spring Diff (m²)",
         },
         "backgroundColor": "rgb(0, 57, 128)",
         "color": "white",
     },
-    ################################################################## Baseline to Spring Diff (m2)
+    ################################################################## Baseline to Spring Diff (m²)
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} <= -30",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} <= -30",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= -30 && {Baseline to Spring Diff (m2)} <= -15",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= -30 && {Baseline to Spring Diff (m²)} <= -15",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= -15 && {Baseline to Spring Diff (m2)} <= -5",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= -15 && {Baseline to Spring Diff (m²)} <= -5",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "#ff9999",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= -5 && {Baseline to Spring Diff (m2)} <= 5",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= -5 && {Baseline to Spring Diff (m²)} <= 5",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "grey",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= 5 && {Baseline to Spring Diff (m2)} <= 15",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= 5 && {Baseline to Spring Diff (m²)} <= 15",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "#00ace6",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= 15 && {Baseline to Spring Diff (m2)} <= 30",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= 15 && {Baseline to Spring Diff (m²)} <= 30",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "rgb(0, 103, 230)",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Spring Diff (m2)} >= 30",
-            "column_id": "Baseline to Spring Diff (m2)",
+            "filter_query": "{Baseline to Spring Diff (m²)} >= 30",
+            "column_id": "Baseline to Spring Diff (m²)",
         },
         "backgroundColor": "rgb(0, 57, 128)",
         "color": "white",
@@ -334,113 +334,113 @@ style_data_conditional = [
         "color": "white",
     },{
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} <= -30",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} <= -30",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= -30 && {Autumn to Autumn Diff (m2)} <= -15",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= -30 && {Autumn to Autumn Diff (m²)} <= -15",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= -15 && {Autumn to Autumn Diff (m2)} <= -5",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= -15 && {Autumn to Autumn Diff (m²)} <= -5",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff9999",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= -5 && {Autumn to Autumn Diff (m2)} <= 5",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= -5 && {Autumn to Autumn Diff (m²)} <= 5",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "grey",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= 5 && {Autumn to Autumn Diff (m2)} <= 15",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= 5 && {Autumn to Autumn Diff (m²)} <= 15",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "#00ace6",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= 15 && {Autumn to Autumn Diff (m2)} <= 30",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= 15 && {Autumn to Autumn Diff (m²)} <= 30",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "rgb(0, 103, 230)",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Autumn to Autumn Diff (m2)} >= 30",
-            "column_id": "Autumn to Autumn Diff (m2)",
+            "filter_query": "{Autumn to Autumn Diff (m²)} >= 30",
+            "column_id": "Autumn to Autumn Diff (m²)",
         },
         "backgroundColor": "rgb(0, 57, 128)",
         "color": "white",
     },
-    ################################################################## Baseline to Autumn Diff (m2)
+    ################################################################## Baseline to Autumn Diff (m²)
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} <= -30",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} <= -30",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff0000",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= -30 && {Baseline to Autumn Diff (m2)} <= -15",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= -30 && {Baseline to Autumn Diff (m²)} <= -15",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff6666",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= -15 && {Baseline to Autumn Diff (m2)} <= -5",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= -15 && {Baseline to Autumn Diff (m²)} <= -5",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "#ff9999",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= -5 && {Baseline to Autumn Diff (m2)} <= 5",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= -5 && {Baseline to Autumn Diff (m²)} <= 5",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "grey",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= 5 && {Baseline to Autumn Diff (m2)} <= 15",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= 5 && {Baseline to Autumn Diff (m²)} <= 15",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "#00ace6",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= 15 && {Baseline to Autumn Diff (m2)} <= 30",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= 15 && {Baseline to Autumn Diff (m²)} <= 30",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "rgb(0, 103, 230)",
         "color": "white",
     },
     {
         "if": {
-            "filter_query": "{Baseline to Autumn Diff (m2)} >= 30",
-            "column_id": "Baseline to Autumn Diff (m2)",
+            "filter_query": "{Baseline to Autumn Diff (m²)} >= 30",
+            "column_id": "Baseline to Autumn Diff (m²)",
         },
         "backgroundColor": "rgb(0, 57, 128)",
         "color": "white",
@@ -614,8 +614,8 @@ layout = html.Div(
                                                         "id": "Profile",
                                                     },
                                                     {
-                                                        "name": "Spring to Spring Diff (m2)",
-                                                        "id": "Spring to Spring Diff (m2)",
+                                                        "name": "Spring to Spring Diff (m²)",
+                                                        "id": "Spring to Spring Diff (m²)",
                                                     },
                                                     {
                                                         "name": "Spring to Spring % Change",
@@ -677,8 +677,8 @@ layout = html.Div(
                                                         "id": "Profile",
                                                     },
                                                     {
-                                                        "name": "Baseline to Spring Diff (m2)",
-                                                        "id": "Baseline to Spring Diff (m2)",
+                                                        "name": "Baseline to Spring Diff (m²)",
+                                                        "id": "Baseline to Spring Diff (m²)",
                                                     },
                                                     {
                                                         "name": "Baseline to Spring % Change",
@@ -856,7 +856,7 @@ def make_csa_table(selected_csa_data):
     if is_scilly_unit:
 
         spr_spr_df = df[
-            ["Profile", "Autumn to Autumn Diff (m2)", "Autumn to Autumn % Change"]
+            ["Profile", "Autumn to Autumn Diff (m²)", "Autumn to Autumn % Change"]
         ]
 
         base_spr_df = df[

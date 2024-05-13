@@ -296,7 +296,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             Otherwise, the function proceeds to create the line plot using the retrieved data.
         """
 
-    start_time  = time.time()
+
 
     # convert to dict from list if a list
     if selected_val_storage:
@@ -309,8 +309,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         fixed_val_storage = None
 
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
-    data_grab_time = time.time()
-
     conn = establish_connection()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
@@ -319,10 +317,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
 
-    end_time = time.time()
 
-    elapsed_time = end_time - data_grab_time
-    print(f"Database grab time: {elapsed_time}")
 
 
     # get mp data as df from aws database
@@ -573,10 +568,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
             month_year_dropdown_style = dict(display='none')
 
-            end_time = time.time()
-
-            elapsed_time = end_time - start_time
-            print(elapsed_time)
 
             return fig, fig, chart_data, valid_master_profile_date
         else:

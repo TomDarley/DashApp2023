@@ -3808,8 +3808,8 @@ layout = html.Div(
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
-                    {'label': '  Baseline to Spring PCT', 'value': 'base-spr'},
-                    {'label': '  Spring to Spring PCT', 'value': 'spr-spr'}
+                    {'label': '  Baseline to Spring (PC)', 'value': 'base-spr'},
+                    {'label': '  Spring to Spring (PC)', 'value': 'spr-spr'}
                 ],
                 value='base-spr',  # Default selected option
                 style={

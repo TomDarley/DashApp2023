@@ -770,14 +770,14 @@ def make_csa_table(selected_csa_data):
 
     # change the table names depending on the season being used
     if is_scilly_unit:
-        spr_dif_name = f"Autumn to Autumn Diff (m2)"
+        spr_dif_name = f"Autumn to Autumn Diff (m²)"
         spr_per_name = f"Autumn to Autumn % Change"
-        base_dif_name = f"Baseline to Autumn Diff (m2)"
+        base_dif_name = f"Baseline to Autumn Diff (m²)"
         base_per_name = f"Baseline to Autumn % Change"
     else:
-        spr_dif_name = f"Spring to Spring Diff (m2)"
+        spr_dif_name = f"Spring to Spring Diff (m²)"
         spr_per_name = f"Spring to Spring % Change"
-        base_dif_name = f"Baseline to Spring Diff (m2)"
+        base_dif_name = f"Baseline to Spring Diff (m²)"
         base_per_name = f"Baseline to Spring % Change"
 
     # calculate the change add as columns
@@ -862,20 +862,20 @@ def make_csa_table(selected_csa_data):
         base_spr_df = df[
             [
                 "Profile",
-                "Baseline to Autumn Diff (m2)",
+                "Baseline to Autumn Diff (m²)",
                 "Baseline to Autumn % Change",
             ]
         ]
 
     else:
         spr_spr_df = df[
-            ["Profile", "Spring to Spring Diff (m2)", "Spring to Spring % Change"]
+            ["Profile", "Spring to Spring Diff (m²)", "Spring to Spring % Change"]
         ]
 
         base_spr_df = df[
             [
                 "Profile",
-                "Baseline to Spring Diff (m2)",
+                "Baseline to Spring Diff (m²)",
                 "Baseline to Spring % Change",
             ]
         ]

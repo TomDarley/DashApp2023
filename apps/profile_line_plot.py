@@ -296,8 +296,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             Otherwise, the function proceeds to create the line plot using the retrieved data.
         """
 
-
-
     # convert to dict from list if a list
     if selected_val_storage:
         # convert to a dict if not:
@@ -316,9 +314,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
-
-
-
 
     # get mp data as df from aws database
     mp_df = pd.read_sql_query(master_profile_query, conn)
@@ -453,9 +448,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
                     )
                 )
-
-
-
 
                 # Adding the Profile Envelope to the 2D chart, previously its own desperate chart id checked
                 if len(radio_selection_range_plot_value) >= 1:

@@ -1158,6 +1158,12 @@ def generate_report(
 
         def to_pdf():
 
+            # Get the current date and time
+            current_datetime_report = datetime.now()
+
+            # Convert the datetime object to a string
+            current_datetime_str_report = current_datetime_report.strftime("%Y-%m-%d")
+
             # create a buffer in memory to store data
             buffer = io.BytesIO()
 
@@ -1177,12 +1183,6 @@ def generate_report(
                      None
                  """
 
-                # Get the current date and time
-                current_datetime = datetime.now()
-
-                # Convert the datetime object to a string
-                current_datetime_str = current_datetime.strftime("%Y-%m-%d")
-
                 canvas.saveState()
                 canvas.setFont("Helvetica", 10)
                 canvas.setFillColor(colors.grey)
@@ -1191,11 +1191,11 @@ def generate_report(
                 page_width, _ = A4
 
                 # Calculate the position for the text to be on the right-hand side
-                text_width = canvas.stringWidth(f"SWCM Generated Report {current_datetime_str}")
+                text_width = canvas.stringWidth(f"SWCM Generated Report {current_datetime_str_report}")
                 text_x = page_width - text_width - 40
 
                 # Draw the text on the right-hand side
-                canvas.drawString(text_x, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
+                canvas.drawString(text_x, A4[1] - 20, f"SWCM Generated Report {current_datetime_str_report}")
 
                 # Logo is now stored database side as apprunner does not support local dir calls
                 conn = establish_connection()
@@ -1230,10 +1230,6 @@ def generate_report(
                     Returns:
                         None
                     """
-                current_datetime = datetime.now()
-
-                # Convert the datetime object to a string
-                current_datetime_str = current_datetime.strftime("%Y-%m-%d")
 
                 canvas.saveState()
                 canvas.setFont("Helvetica", 10)
@@ -1242,7 +1238,7 @@ def generate_report(
                 page_num = canvas.getPageNumber()
                 text = f"Page {page_num}"
                 if page_num != 1:
-                    canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str}")
+                    canvas.drawString(40, A4[1] - 20, f"SWCM Generated Report {current_datetime_str_report}")
                 canvas.drawRightString(200 * mm, 20 * mm, text)
 
             def create_paragraph_one():
@@ -1710,8 +1706,6 @@ def generate_report(
 
             # add map
             map_chart_flowable = add_map_chart()
-
-
 
             # add csa table caption
             csa_table_caption = Paragraph(figure_captions[3], italic_style)

@@ -454,6 +454,9 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     )
                 )
 
+
+
+
                 # Adding the Profile Envelope to the 2D chart, previously its own desperate chart id checked
                 if len(radio_selection_range_plot_value) >= 1:
 
@@ -552,7 +555,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     },
                     title_font={"size": 15, "family": "Helvetica", "color": "blue"},
                     xaxis_title="Chainage (m)",
-                    yaxis_title="Elevation",
+                    yaxis_title="Elevation (m)",
                     legend_title="",
                     font=dict(size=12, color="blue", family="Helvetica"),
 

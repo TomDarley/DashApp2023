@@ -1320,8 +1320,6 @@ def generate_report(
                 # Read the image data from the row
                 legend_data = df['image_data'][0]
 
-
-
                 # Serialize the figure to JSON
                 chart_width, chart_height = A4[1] - 400, A4[0] - 250
                 f = map_figure
@@ -1330,11 +1328,11 @@ def generate_report(
                 # Open the image using PIL
                 legend_img = PILImage.open(io.BytesIO(legend_data))
                 map_img = PILImage.open(io.BytesIO(map_bytes))
-
-                # Convert both images to RGBA mode to ensure an alpha channel exists
+#
+                ## Convert both images to RGBA mode to ensure an alpha channel exists
                 map_img = map_img.convert("RGBA")
                 legend_img = legend_img.convert("RGBA")
-
+#
                 legend_width = 250  # Adjust as needed
                 legend_height = 100 # Adjust as needed
                 legend_img = legend_img.resize((legend_width, legend_height))
@@ -1346,22 +1344,24 @@ def generate_report(
                 # Composite the legend image on top of the map image
                 map_img.paste(legend_img, (x_offset, y_offset), legend_img)
 
+                # Making the text appear like its center aligned
                 watermark_text = "          South West\n    Coastal Monitoring"
-                font = ImageFont.truetype("arial.ttf", 30)
+
+                # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
+                font = ImageFont.truetype("media/arial.ttf", 50)
 
                 # Create a blank image with an alpha channel
                 watermark_img = PILImage.new('RGBA', (map_img.width, map_img.height), (14, 14, 14, 0))
                 draw = ImageDraw.Draw(watermark_img)
 
-                draw.text((180, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+                # alter the color and position of the watermark
+                draw.text((80, 180), watermark_text, fill=(14, 14, 14, 50), font=font)
 
                 # Rotate the watermark text
                 rotated_watermark_img = watermark_img.rotate(0, expand=True)
 
-
                 # Paste the rotated watermark onto the original image
                 map_img.paste(rotated_watermark_img, (10, 10), rotated_watermark_img)
-
 
                 # Convert PIL image to byte array
                 with io.BytesIO() as byte_io:
@@ -1423,13 +1423,16 @@ def generate_report(
                 img = PILImage.open(io.BytesIO(img_bytes))
 
                 watermark_text = "          South West\n    Coastal Monitoring"
-                font = ImageFont.truetype("arial.ttf", 30)
+
+                # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
+                font = ImageFont.truetype("media/arial.ttf", 40)
 
                 # Create a blank image with an alpha channel
                 watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
                 draw = ImageDraw.Draw(watermark_img)
 
-                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+                # alter the color and position of the watermark
+                draw.text((100, 180), watermark_text, fill=(14, 14, 14, 50), font=font)
 
                 # Rotate the watermark text
                 rotated_watermark_img = watermark_img.rotate(0, expand=True)
@@ -1485,13 +1488,16 @@ def generate_report(
                 img = PILImage.open(io.BytesIO(img_bytes))
 
                 watermark_text = "          South West\n    Coastal Monitoring"
-                font = ImageFont.truetype("arial.ttf", 30)
+
+                # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
+                font = ImageFont.truetype("media/arial.ttf", 40)
 
                 # Create a blank image with an alpha channel
                 watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
                 draw = ImageDraw.Draw(watermark_img)
 
-                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+                # alter the color and position of the watermark
+                draw.text((120, 180), watermark_text, fill=(14, 14, 14, 50), font=font)
 
                 # Rotate the watermark text
                 rotated_watermark_img = watermark_img.rotate(0, expand=True)
@@ -1551,14 +1557,15 @@ def generate_report(
                 img = PILImage.open(io.BytesIO(img_bytes))
 
                 watermark_text = "          South West\n    Coastal Monitoring"
-                font = ImageFont.truetype("arial.ttf", 30)
 
+                # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
+                font = ImageFont.truetype("media/arial.ttf", 40)
 
                 # Create a blank image with an alpha channel
                 watermark_img = PILImage.new('RGBA', (img.width, img.height), (14, 14, 14, 0))
                 draw = ImageDraw.Draw(watermark_img)
 
-                draw.text((150, 200), watermark_text, fill=(14, 14, 14, 50), font=font)
+                draw.text((100, 180), watermark_text, fill=(14, 14, 14, 50), font=font)
 
                 # Rotate the watermark text
                 rotated_watermark_img = watermark_img.rotate(0, expand=True)
@@ -1570,9 +1577,6 @@ def generate_report(
                 with io.BytesIO() as byte_io:
                     img.save(byte_io, format='PNG')
                     img_byte_array = byte_io.getvalue()
-
-                # Create a ReportLab Image object
-                from reportlab.platypus import Image
 
                 image = PlatypusImage(io.BytesIO(img_byte_array), width=chart_width, height=chart_height)
 
@@ -1749,7 +1753,7 @@ def generate_report(
         pdf_bytes = to_pdf()
 
     current_datetime = datetime.now()
-    current_datetime_str = current_datetime.strftime("%Y-%m-%d")
+    current_datetime_str = current_datetime.strftime("%Y%m%d")
 
     report_name  = f"SWCM_Generated_Report_{current_survey_unit}_{current_datetime_str}.pdf"
     return dcc.send_bytes(pdf_bytes, filename=report_name), {'is_loading': True}

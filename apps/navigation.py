@@ -3,6 +3,15 @@ from dash import Input, Output, State, html,dcc,callback
 
 PLOTLY_LOGO = "assets/Full-Logo (white sky).png"
 
+
+#loader_div_style = {
+#    'position': 'absolute',
+#    'top': '0',
+#    'left': '50%',
+#    'transform': 'translateX(-50%)',
+#    'zIndex': 9999
+#}
+
 navbar = dbc.Navbar(
     dbc.Container(
         [
@@ -17,17 +26,27 @@ navbar = dbc.Navbar(
                              'color': 'your-font-color',
                          })),
                         dbc.Col(
-                            dcc.Loading(
+                            html.Div(
+
+                                dcc.Loading(
                                 id='test_loader',
                                 children=[html.Div("", style={
                                     "backgroundColor": "rgba(0, 0, 0, 0)",
                                     'width': '10px',
                                     'height': '1px',
-                                    "zIndex": -1
+
+                                    "zIndex": 9999
                                 })],
-                                style={'position': 'fixed', 'margin-left': '50%'},
+                                style={'position': 'fixed','top': '0px', 'margin-left': '50%','transform': 'translateX(-50%)'},
                                 loading_state={'is_loading': True}
                             ),
+
+                            id= "loader_div",
+                            #style=loader_div_style
+
+                            ),
+
+
                         ),
                     ],
                     align="center",

@@ -14,6 +14,8 @@ from math import radians, sin, cos, sqrt, atan2
 import base64
 import datetime
 from dash import clientside_callback
+import dash_bootstrap_components as dbc
+
 
 from dash.exceptions import PreventUpdate
 
@@ -3735,27 +3737,67 @@ layout = html.Div(
         # store that holds the map data as json. Used in the report generation to add map.
         dcc.Store(id='map-json'),
 
+
+
+
         # div that holds the map
         html.Div(
 
             [
 
-                dcc.Graph(
-                    id="example-map",
-                    # Include your figure here
-                    figure=fig,
-                    config={'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False,
-                            'responsive': True},
-                    className="map",
-                    style={'position': 'relative', 'width': '100%', 'height': '60vh', }
 
-                ),
+                    dcc.Graph(
+                        id="example-map",
+                        # Include your figure here
+                        figure=fig,
+                        config={'modeBarButtonsToRemove': ['lasso2d', 'select2d'], 'displaylogo': False,
+                                'responsive': True},
+                        className="map",
+                        style={'position': 'relative', 'width': '100%', 'height': '60vh', }
+
+                    ),
+
+                    html.Div(
+
+                        dcc.Loading(
+
+
+                            id='test_loader2',
+                            type='circle',
+
+                            children=[html.Div("", style={
+                                "backgroundColor": "rgba(0, 0, 0, 0)",
+                                'width': '10px',
+                                'height': '10px',
+                                "zIndex": 9999
+                            })],
+                            style={'position': 'relative',},
+                            loading_state={'is_loading': True}
+                        ),
+
+                        id="loader_div3",
+                        style={
+                            'position': 'absolute',
+                            'top': '50%',
+                            'left': '50%',
+                            'width': '10px',
+                            'height': '10px',
+                            'zIndex': 9999,
+                            'transform': 'translate(-50%, -50%)',
+
+
+                        }
+
+                    ),
+
 
             ],
             style={'position': 'relative'}
         ),
 
         html.Div(children=[
+
+
 
             html.Div([
 
@@ -3858,6 +3900,7 @@ layout = html.Div(
     id="mapbox_div",
     style={'position': 'relative', 'width': '100%', 'height': '100%', }
 )
+
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -4318,9 +4361,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 @callback(
     Output("example-map", "figure"),
     Output('multi-select-lines', 'data'),  # holds if multi select the line ids
-    Output("test_loader", "loading_state"),
+    Output("test_loader", "loading_state"), # loading on page navbar
+    Output("test_loader2", "loading_state"), # loading in map div
+
     Output('map-state', 'data'),
     Output('survey-points-change-values', 'data'),
+
 
     Input("selected-value-storage", "data"),
     Input('map-state', "data"),
@@ -4992,11 +5038,15 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     ),
 
-
-
     end_time = time.time()
     # Calculate elapsed time
     elapsed_time = end_time - start_time
     print("Elapsed Time:", elapsed_time, "seconds")
 
-    return fig, lines_inside_box, {'is_loading': True}, state_to_return, survey_points_change_values
+    return fig, lines_inside_box, {'is_loading': True}, {'is_loading': True},state_to_return, survey_points_change_values
+
+
+
+
+
+

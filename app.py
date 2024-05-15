@@ -5,7 +5,9 @@ from apps import navigation
 
 
 """Main App page, all pages inherit from this one. Here we define the footer and add the top nav bar here. 
-   We also add external stylesheets for bootstrap etc. We run the app from here. """
+   We also add external stylesheets for bootstrap etc. We run the app from here. The app.layout line 64 
+   is a div with children including the header footer and dash.page_container. This container is where the pages are 
+   loaded in"""
 
 # register the page with dash giving url path
 app = Dash(
@@ -87,7 +89,6 @@ def set_default_page(pathname):
     if pathname is None or pathname == '/':
         return '/main_dash'
     return pathname
-
 
 
 if __name__ == "__main__":

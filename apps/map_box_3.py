@@ -12,6 +12,7 @@ from sqlalchemy.exc import OperationalError
 import time
 from math import radians, sin, cos, sqrt, atan2
 import base64
+import datetime
 from dash import clientside_callback
 
 from dash.exceptions import PreventUpdate
@@ -3897,6 +3898,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             - Click data from the 'example-map'.
     """
 
+
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
 
@@ -4038,6 +4040,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals
                                  },
+        end_time = time.time()
+
 
         return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update
 
@@ -4117,6 +4121,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'multi': False,
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals},
+
+
 
         return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals
 
@@ -4326,6 +4332,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 )
 def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors,
                change_range_radio_button, basemap_selection):
+
     """
        Update the map visualization based on user-selected options.
 
@@ -4353,6 +4360,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
            accordingly, highlighting the selected survey unit, zooming to it, rendering relevant profile lines,
            and styling the selected profile line to indicate it to the user.
        """
+
 
     # this is now redundant as multi select has been disabled
     if isinstance(current_selected_sur_and_prof, list):
@@ -4383,26 +4391,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     cpa_df = pd.read_sql_query(query, conn)
     cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
+
     def calculate_difference(group):
-
-        """
-            Calculate the difference in area values within each group.
-
-            Parameters:
-                group (DataFrame): A group of data containing survey dates, profile, and area values.
-                change_range_radio_button (str): The selected change range radio button value.
-
-            Returns:
-                DataFrame: A DataFrame containing the calculated differences in area values.
-
-            Details:
-                This function calculates the difference in area values within each group of data.
-                It takes into account the selected change range radio button value to determine the
-                calculation method. If "base-spr" is selected, it calculates the difference between
-                the first and last survey dates. If "spr-spr" is selected, it calculates the difference
-                between consecutive spring survey dates. The results are returned as a DataFrame with
-                the calculated differences and the survey unit as the index.
-        """
 
         master_df = group[["date", "profile", "area"]]
 
@@ -4421,7 +4411,9 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         df1 = df1.tail(1)
 
         # logic to calculate the difference based on change_range_radio_button selection
-        if change_range_radio_button == "base-spr":
+        if change_range_radio_button  == "base-spr":
+
+
             first_column_value = df1.iloc[0, 0]
             last_column_index = df1.shape[1] - 1
             last_column_value = df1.iloc[0, last_column_index]
@@ -4434,19 +4426,19 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
         if change_range_radio_button == "spr-spr":
             import datetime
-            spring_months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-            # df1 = df1.apply(pd.to_datetime, unit='s')
+            spring_months =[1,2,3,4,5,6]
+            #df1 = df1.apply(pd.to_datetime, unit='s')
             # Extract month from each datetime column
             spring_month_columns = []
             for column in df1.columns:
-                dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
-                month = dt_object.month
-                if month in spring_months:
-                    spring_month_columns.append(column)
+                    dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
+                    month = dt_object.month
+                    if month in spring_months:
+                        spring_month_columns.append(column)
 
-            if len(spring_month_columns) >= 2:
+            if len(spring_month_columns)>=2:
                 first_column_value = list(df1[spring_month_columns[-2]])[0]
-                last_column_value = list(df1[spring_month_columns[-1]])[0]
+                last_column_value =list(df1[spring_month_columns[-1]])[0]
                 df1["first"] = first_column_value
                 df1["last"] = last_column_value
                 df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
@@ -4455,15 +4447,30 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 df1["difference"] = 0
                 df1 = df1[["difference"]]
 
+
+
         df1["Survey_Unit"] = group.name
         df1 = df1.reset_index()
         df1 = df1.set_index("Survey_Unit")
 
         return df1
 
+
+
+
+    start_time = time.time()
     # Use groupby and apply the function to each group
     cpa_dfs = cpa_df.groupby("survey_unit").apply(calculate_difference).reset_index()
+    # End timing
+    end_time = time.time()
+
+    # Calculate elapsed time
+    elapsed_time = end_time - start_time
+    print("Elapsed Time cal diff:", elapsed_time, "seconds")
+
+
     cpa_dfs = cpa_dfs[['survey_unit', 'difference']]
+
 
     # set all na values, they shouldn't exist when all the correct data is loaded in
     data_check = cpa_dfs['difference'].isna().any()
@@ -4534,6 +4541,8 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         'High Accretion': "rgb(0, 57, 128)",
         'Selected Unit': "#ffff05"
     }
+
+
 
     # Make the map, added to fig object later
     updated_scatter_trace = px.scatter_mapbox(
@@ -4982,5 +4991,12 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     },  # height=
 
     ),
+
+
+
+    end_time = time.time()
+    # Calculate elapsed time
+    elapsed_time = end_time - start_time
+    print("Elapsed Time:", elapsed_time, "seconds")
 
     return fig, lines_inside_box, {'is_loading': True}, state_to_return, survey_points_change_values

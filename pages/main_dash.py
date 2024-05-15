@@ -1113,13 +1113,14 @@ def update_highest_cpa_card(highest_data, highest_year):
     State('percent_change', "data"),
     State('survey-line-dropdown', "value"),
     State('example-map', 'figure'),
+    State("Range_plot", "value"), # the checkbox value for line plot profile envelope
 
     prevent_initial_call=True,
 )
 def generate_report(
         n_clicks, scatter_chart, error_chart, line_chart,
         sur_unit_card, current_survey_unit, trend, highest_date, lowest_date, highest_val, lowest_val, spr_to_spr_table,
-        spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure):
+        spr_to_baseline_table, csa_table_headers, percent_change, selected_profile, map_figure, range_plot):
 
     """
     Function auto generates the report for download. It is hooking into data stores populated throughout the app
@@ -1544,10 +1545,18 @@ def generate_report(
                     ),
                     title=''
                 )
-                # Show only the first, second, and last traces in the legend, this may cause a crash!!
-                for i, trace in enumerate(line_figure.data):
-                    if i not in [0, len(line_figure.data) - 6, len(line_figure.data) - 5, len(line_figure.data) - 4]:
-                        trace.showlegend = False
+
+                # Show only the first, second, and last traces in the legend. The position of these changes if the
+                # profile envelope is turned on and off, we handle this here:
+                if range_plot == ['show_range']:
+                    for i, trace in enumerate(line_figure.data):
+                        if i not in [0, len(line_figure.data) - 6, len(line_figure.data) - 5, len(line_figure.data) - 4]:
+                            trace.showlegend = False
+                else:
+                    for i, trace in enumerate(line_figure.data):
+                        if i not in [0, len(line_figure.data) - 3, len(line_figure.data) - 2,
+                                     len(line_figure.data) - 1]:
+                            trace.showlegend = False
 
                 img_bytes = pio.to_image(line_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))

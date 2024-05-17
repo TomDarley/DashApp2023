@@ -1419,6 +1419,7 @@ def generate_report(
                 img_bytes = pio.to_image(cpa_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
+                # giving the illusion the text is center wrapped
                 watermark_text = "          South West\n    Coastal Monitoring"
 
                 # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
@@ -1484,6 +1485,7 @@ def generate_report(
                 img_bytes = pio.to_image(error_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
+                # giving the illusion the text is center wrapped
                 watermark_text = "          South West\n    Coastal Monitoring"
 
                 # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS
@@ -1550,7 +1552,10 @@ def generate_report(
                 # profile envelope is turned on and off, we handle this here:
                 if range_plot == ['show_range']:
                     for i, trace in enumerate(line_figure.data):
-                        if i not in [0, len(line_figure.data) - 6, len(line_figure.data) - 5, len(line_figure.data) - 4]:
+                        if i not in [0, len(line_figure.data) - 6,
+                                     len(line_figure.data) - 5,
+                                     len(line_figure.data) - 4,
+                                     len(line_figure.data) - 1]:  # the profile envelope trace position
                             trace.showlegend = False
                 else:
                     for i, trace in enumerate(line_figure.data):
@@ -1561,6 +1566,7 @@ def generate_report(
                 img_bytes = pio.to_image(line_figure, format='png')
                 img = PILImage.open(io.BytesIO(img_bytes))
 
+                # giving the illusion the text is center wrapped
                 watermark_text = "          South West\n    Coastal Monitoring"
 
                 # This font must be located in the app files for it to run on AWS grab it from C:/WINDOWS/FONTS

@@ -238,7 +238,10 @@ layout = html.Div(
             [
                 # dbc.ModalHeader(dbc.ModalTitle("Cross Sectional Line Plot")),
                 dbc.ModalBody(
-                    dcc.Graph(id="line_plot_model", style={"height": "100vh"})
+                    dcc.Graph(id="line_plot_model", style={"height": "100vh"},
+                              config={"responsive": True,
+                                      'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'],
+                                      'displaylogo': False},)
                 ),
                 dbc.ModalFooter(
                     dbc.Button(
@@ -454,6 +457,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
                     topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
 
+
+
                     min_chainage = master_profile_chainage[0]
                     max_chainage = master_profile_chainage[-1]
                     min_chainage = float(min_chainage) - 5
@@ -463,9 +468,9 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     max_chainage = int(max_chainage)
                     merge_df = pd.DataFrame()
 
-                    generated_chainage = list(range(min_chainage, max_chainage, 1))
+                    generated_chainage = np.arange(min_chainage, max_chainage + 0.25, 0.25).tolist()
                     merge_df['chainage'] = generated_chainage
-                    merge_df['chainage'] = merge_df['chainage'].astype(int)
+                    merge_df['chainage'] = merge_df['chainage']
 
                     survey_dfs = []  # Assuming this list is supposed to store the results of the merge
 
@@ -475,11 +480,12 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                         df_filter = topo_df.loc[topo_df['date'] == date].copy()
 
                         # Round the chainage values
-                        df_filter['chainage'] = df_filter['chainage'].round(0).astype(int)
+                        #df_filter['chainage'] = df_filter['chainage'].round(0).astype(int)
+                        df_filter['chainage'] = (df_filter['chainage'] * 4).round() / 4
 
-                        df_filter = df_filter[['chainage', 'elevation_od']]
+                        df_filter1 = df_filter[['chainage', 'elevation_od']].copy()
 
-                        survey_dfs.append(df_filter)  # Append the merged result to the list
+                        survey_dfs.append(df_filter1)  # Append the merged result to the list
 
                     count = 0
                     for df in survey_dfs:
@@ -488,9 +494,9 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                         merge_df = merge_df.rename(columns={"elevation_od": f"elevation_od_{count}"})
                         merge_df[f"elevation_od_{count}"] = merge_df[f"elevation_od_{count}"].interpolate(
                             method='linear',
-                            order=5,
+
                             limit_area='inside',
-                            limit=20)
+                            limit=1000)
                         count += 1
                     merge_df = merge_df.drop_duplicates(
                         subset=['chainage'])  # bug duplicates are being made for chainage!!!
@@ -503,6 +509,14 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     merge_df['Min Elevation'] = min_ele
                     merge_df = merge_df.reset_index()
 
+                    #merge_df.dropna(inplace=True)##
+
+
+
+                    #min_chainage1 = master_profile_chainage[0]
+
+
+
                     fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Mean Elevation'],
                                              line=dict(color='rgba(1,1,1,0.5)', dash='dash'), hoverinfo='x+y',
                                              # display only x and y values on hover
@@ -511,10 +525,10 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Min Elevation'],
                                              line=dict(color='rgba(0,0,0,0)'), hoverinfo='none', showlegend=False))
                     fig.add_trace(
-                        go.Scatter(x=merge_df['chainage'], y=merge_df['Max Elevation'], mode='none', fill='tonexty',
-                                   fillcolor='rgba(235, 164, 52, 0.5)', showlegend=False))
+                        go.Scatter(x=merge_df['chainage'], y=merge_df['Max Elevation'], mode='none', fill='tonextx',
+                                   fillcolor='rgba(235, 164, 52, 0.5)', showlegend=True, name='Profile Envelope' ))
 
-                    # Customize x and y axis fonts and sizes
+                # Customize x and y axis fonts and sizes
                 fig.update_xaxes(
                     title_text="Chainage (m)",
                     title_font=dict(

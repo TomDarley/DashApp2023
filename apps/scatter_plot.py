@@ -152,7 +152,11 @@ layout = html.Div(
             [
                 # dbc.ModalHeader(dbc.ModalTitle("Combined Profile Area")),
                 dbc.ModalBody(
-                    dcc.Graph(id="scatter_plot_model", style={"height": "100vh"})
+                    dcc.Graph(id="scatter_plot_model", style={"height": "100vh"},
+                              config={"responsive": True,
+                                      'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'],
+                                      'displaylogo': False},
+                              )
                 ),  ## might not work
                 dbc.ModalFooter(
                     dbc.Button(

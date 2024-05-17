@@ -70,7 +70,12 @@ layout = html.Div(
             [
                 # dbc.ModalHeader(dbc.ModalTitle("Box Plot")),
                 dbc.ModalBody(
-                    dcc.Graph(id="error_plot_model", style={"height": "90vh"})
+                    dcc.Graph(id="error_plot_model", style={"height": "90vh"},
+                              config={"responsive": True,
+                                      'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoscale'],
+                                      'displaylogo': False},
+                              ),
+
                 ),  ## might not work
                 dbc.ModalFooter(
                     dbc.Button(

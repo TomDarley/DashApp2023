@@ -177,24 +177,7 @@ layout = html.Div(
             ],
             value=['show_range'],  # Default selected option
             inline=True,
-            style={
-                'position': 'absolute',
-                'top': '10px',  # Adjust as needed
-                'left': '10px',  # Adjust as needed
-                'width': '120px',
-                'height': '25px',
-                'zIndex': 100,
-                'border-radius': 15,
 
-                # 'border': '1px solid grey',
-                'box-shadow': "5px 5px 5px lightblue",
-                'paddingTop': '5px',  # Adjust padding top
-                'paddingRight': '5px',  # Adjust padding right
-                'paddingBottom': '8px',  # Adjust padding bottom
-                'paddingLeft': '8px',  # Adjust padding left
-
-                'fontSize': 13
-            }
         ),
 
         # defining the modals, information and full screen
@@ -456,9 +439,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                 if len(radio_selection_range_plot_value) >= 1:
 
                     topo_df['date'] = pd.to_datetime(topo_df['date']).dt.strftime('%Y-%m-%d')
-
-
-
                     min_chainage = master_profile_chainage[0]
                     max_chainage = master_profile_chainage[-1]
                     min_chainage = float(min_chainage) - 5
@@ -509,13 +489,15 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     merge_df['Min Elevation'] = min_ele
                     merge_df = merge_df.reset_index()
 
+                    num_columns = merge_df.shape[1]
+
+                    # Drop rows where the number of NaNs is greater than the number of columns - 1
+                    merge_df = merge_df.loc[~merge_df['Max Elevation'].isna()]
+
                     #merge_df.dropna(inplace=True)##
+                    min_chainage1 = master_profile_chainage[0]
 
-
-
-                    #min_chainage1 = master_profile_chainage[0]
-
-
+                    merge_df = merge_df.loc[merge_df['chainage'] >= min_chainage1]
 
                     fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Mean Elevation'],
                                              line=dict(color='rgba(1,1,1,0.5)', dash='dash'), hoverinfo='x+y',
@@ -523,7 +505,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                                              hovertemplate='Mean Elevation: %{y}', showlegend=False))
 
                     fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Min Elevation'],
-                                             line=dict(color='rgba(0,0,0,0)'), hoverinfo='none', showlegend=False))
+                                             line=dict(color='rgba(0,0,0,0)', dash=None), hoverinfo='none', showlegend=False))
                     fig.add_trace(
                         go.Scatter(x=merge_df['chainage'], y=merge_df['Max Elevation'], mode='none', fill='tonextx',
                                    fillcolor='rgba(235, 164, 52, 0.5)', showlegend=True, name='Profile Envelope' ))

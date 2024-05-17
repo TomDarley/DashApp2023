@@ -21,6 +21,7 @@
         width: 300px;
         height: 60px;
         z-index: 100;
+
         border-radius: 10px;
         border-width: 10px;
         border-color: black;
@@ -45,6 +46,7 @@
 #mapbox_div  {
      height: 100%;
      margin:0px;
+
      border-radius: 10px;
      overflow: hidden;
      border: 2px solid #ccc;
@@ -59,9 +61,27 @@
      margin-top: 10px;
      height: 60vh;
      border-radius: 10px;
+     margin-right: 0px;
 
 
 }
+
+@media screen and (min-width: 0px) and (max-width:950px) {
+    #main_dash_map_div {
+         height: 100%;
+         margin-top: 10px;
+         height: 60vh;
+         border-radius: 10px;
+         margin-right: 35px;
+        /* Adjust font size for screens in this range */
+    }
+}
+
+
+
+
+
+
 
 @media screen and (min-width: 0px) and (max-width:950px) {
     #mapbox_div {

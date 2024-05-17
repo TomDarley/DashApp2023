@@ -1,0 +1,48 @@
+#legend {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 300px;
+    height: 120px;
+    z-index: 100;
+    border-radius: 10px;
+    border-color: black;
+    border: 1px solid grey;
+    box-shadow: 5px 5px 5px lightblue;
+}
+
+/* Media query for smaller screens (adjust max-width and font size as needed) */
+@media screen and (min-width: 950px) and (max-width: 2000px) {
+    #legend {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        width: 250px;
+        height: 100px;
+        z-index: 100;
+        border-radius: 10px;
+        border-color: black;
+        border: 1px solid grey;
+        box-shadow: 5px 5px 5px lightblue;
+
+        /* Adjust font size for smaller screens */
+    }
+}
+
+/* Media query for smaller screens (adjust max-width and font size as needed) */
+@media screen and (min-width: 0px) and (max-width: 950px) {
+    #legend {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        width: 200px;
+        height: 80px;
+        z-index: 100;
+        border-radius: 10px;
+        border-color: black;
+        border: 1px solid grey;
+        box-shadow: 5px 5px 5px lightblue;
+
+        /* Adjust font size for smaller screens */
+    }
+}

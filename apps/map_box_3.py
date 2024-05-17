@@ -3831,23 +3831,36 @@ layout = html.Div(
 
             # adding the map key image
             html.Img(
+                id = 'legend',
                 src=f"data:image/jpeg;base64,{encoded_image}",
-                style={
-                    'position': 'absolute',
-                    'bottom': 10,
-                    'left': 10,
-                    'width': '300px',
-                    'height': '120px',
-                    'zIndex': 100,
-                    'border-radius': 10,
-                    'border-weight': 10,
-                    "border-color": "black",
-                    'border': '1px solid grey',
-                    'box-shadow': "5px 5px 5px lightblue"
-                }
+
             ),
 
             # adding the radio buttons for changing comparison
+
+            dbc.Button(
+                [html.Span(className="bi bi-info-circle-fill")],
+                size="md",
+                id="map_open_info",
+                n_clicks=0,
+                className="mr-3",
+                style={
+                    'position': 'absolute',
+                    'bottom': '0px',  # Adjust as needed
+                    'right': '5px',  # Adjust as needed
+
+                    'zIndex': 100,
+                    'border-radius': 5,
+
+
+
+
+                    #'fontSize': 13
+                },
+            ),
+
+
+            # adding info button/modal for the map
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
@@ -3875,6 +3888,11 @@ layout = html.Div(
                 }
             ),
 
+
+
+
+
+
         ]),
 
         # store holds the current set map center, used to control the map reset and zooming logics
@@ -3893,6 +3911,46 @@ layout = html.Div(
         # holds the old and set survey point value.
         dcc.Store(id='survey-points-change-values', data=None),
 
+        # defining the information modal
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Map Box", style={"color": "blue"})),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """The Map Box can be used to select survey units and profile lines. On selection the dash will update the information displayed.
+                             The basemap can be changed using the dropdown. """,
+                            style={"font-size": 20}, ),
+                        html.P(
+                            """Using the check box the survey units color can show either percentage change from the baseline survey to the latest Spring survey or the latest Spring survey to the previous Spring survey.
+                                      The colors assigned representing percent change are shown in the key. The sizes are proportional to percent change and for each percent change range there are size ranges. Larger points represent higher percent change values.   """,
+
+                            style={"font-size": 20},
+                        ),
+
+                        html.P(
+                            """Profile lines are also colored depicting percent change. White lines are profiles that have insufficent data for percent change to be calculated. These are often profiles that have been added in recently 
+                            and do not have a larger enough data set. """,
+
+                            style={"font-size": 20},
+                        ),
+
+                    ]
+                ),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close",
+                        id="map_info_close",
+                        className="ms-auto",
+                        n_clicks=0,
+                    )
+                ),
+            ],
+            id="map_info_model",
+            is_open=False,
+            fullscreen=False,
+        ),
+
         # Update and track the current window.location object through the window.history state.
         #dcc.Location(id="url", refresh=False),  # Add a Location component
 
@@ -3900,7 +3958,6 @@ layout = html.Div(
     id="mapbox_div",
     style={'position': 'relative', 'width': '100%', 'height': '100%', }
 )
-
 
 
 @callback(Output('selected-value-storage', 'data'),
@@ -5046,7 +5103,15 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     return fig, lines_inside_box, {'is_loading': True}, {'is_loading': True},state_to_return, survey_points_change_values
 
 
-
+@callback(
+    Output("map_info_model", "is_open"),
+    [Input("map_open_info", "n_clicks"), Input("map_info_close", "n_clicks")],
+    [State("map_info_model", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
 
 
 

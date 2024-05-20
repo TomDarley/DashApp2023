@@ -1,3 +1,14 @@
+.custom-spinner .dash-spinner {
+    margin: auto;
+    width: 70px;
+    height: 70px;
+    text-align: center;
+    font-size: 50px;
+    margin-left: 1%;
+    position: relative;
+}
+
+
 #change_range_radio_button {
  position: absolute;
     top: 560px;

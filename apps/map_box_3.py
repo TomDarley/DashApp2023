@@ -3762,8 +3762,10 @@ layout = html.Div(
                         dcc.Loading(
 
 
+
                             id='test_loader2',
                             type='circle',
+                            className='custom-spinner',
 
                             children=[html.Div("", style={
                                 "backgroundColor": "rgba(0, 0, 0, 0)",
@@ -3771,7 +3773,7 @@ layout = html.Div(
                                 'height': '10px',
                                 "zIndex": 9999
                             })],
-                            style={'position': 'relative',},
+
                             loading_state={'is_loading': True}
                         ),
 

@@ -137,6 +137,8 @@ layout = html.Div(
     [
         # store to save line chart to json, used to in the report generation
         dcc.Store(id="line_chart"),
+        dbc.Alert(id='mp-alert', color="danger", is_open=False),
+        dbc.Alert(id='topo-data-alert', color="danger", is_open=False),
 
         # loading spinner, starts when chart is updating
         dcc.Loading(
@@ -246,6 +248,7 @@ layout = html.Div(
     Output("line_plot_model", "figure"),
     Output("line_chart", "data"),
     Output('mp-alert', 'is_open'),
+    Output('topo-data-alert', 'is_open'),
 
     Input("survey-unit-dropdown", "value"),
     Input("survey-line-dropdown", "value"),
@@ -292,10 +295,21 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     else:
         fixed_val_storage = None
 
+    topo_data_failed = False
+
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
     conn = establish_connection()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
+
+    if topo_df.empty:
+       topo_data_failed = True
+
+
+
+
+
+
 
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
@@ -310,7 +324,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     mp_df = mp_df.loc[:, mp_df.notna().all()]
 
     # Check to see if the mp_df has more than one data point. If not show a warning and return a blank chart.
-    if len(mp_df.columns) >= 3:
+    if len(mp_df.columns) >= 3 and topo_data_failed == False:
 
         valid_master_profile_date = False  # holds the is_open bool for warning message
 
@@ -497,7 +511,7 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                     #merge_df.dropna(inplace=True)##
                     min_chainage1 = master_profile_chainage[0]
 
-                    merge_df = merge_df.loc[merge_df['chainage'] >= min_chainage1]
+                    merge_df = merge_df.loc[merge_df['chainage'] >= min_chainage1-0.2]
 
                     fig.add_trace(go.Scatter(x=merge_df['chainage'], y=merge_df['Mean Elevation'],
                                              line=dict(color='rgba(1,1,1,0.5)', dash='dash'), hoverinfo='x+y',
@@ -560,22 +574,21 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             month_year_dropdown_style = dict(display='none')
 
 
-            return fig, fig, chart_data, valid_master_profile_date
+            return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
         else:
             valid_master_profile_date = False
             fig = px.line()
             chart_data = None
             pass
 
-            return fig, fig, chart_data, valid_master_profile_date
+            return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
     else:
         valid_master_profile_date = True
         fig = px.line()
         chart_data = None
         month_year_dropdown_style = dict(display='none')
 
-        return fig, fig, chart_data, month_year_dropdown_style, \
-            dash.no_update, dash.no_update, valid_master_profile_date
+        return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
 
 
 @callback(

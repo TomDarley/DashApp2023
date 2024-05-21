@@ -4777,7 +4777,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     marker_shapes = {
         "Wave Buoy": "star",
         "Tide Gauge": "triangle",
-        "Met Station": "square"
+        "Met Station": "circle-stroked"
     }
 
     marker_colors = {

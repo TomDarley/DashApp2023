@@ -136,9 +136,11 @@ def establish_connection(retries=3, delay=5):
 layout = html.Div(
     [
         # store to save line chart to json, used to in the report generation
-        dcc.Store(id="line_chart"),
-        dbc.Alert(id='mp-alert', color="danger", is_open=False),
-        dbc.Alert(id='topo-data-alert', color="danger", is_open=False),
+        dcc.Store(id="line_chart", ),
+
+        # Error Alerts for where data can not be retrieved from the database
+        dbc.Alert('No Master Profile Data Could be Found for the Selected Profile',id='mp-alert', color="danger", is_open=False, style= {'margin-top': '50px'}),
+        dbc.Alert('No Topo Data Could be Found for the Selected Profile',id='topo-data-alert', color="danger", is_open=False, style= {'margin-top': '50px'}),
 
         # loading spinner, starts when chart is updating
         dcc.Loading(
@@ -295,38 +297,41 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
     else:
         fixed_val_storage = None
 
-    topo_data_failed = False
+
 
     # Load topo  and master profile data from DB, do this first as missing profile data causes algorithms to fail.
     conn = establish_connection()
     topo_query = f"SELECT * FROM topo_data WHERE survey_unit = '{selected_sur_unit}' AND profile = '{selected_profile}'"  # Modify this query according to your table
     topo_df = pd.read_sql_query(topo_query, conn)
 
-    if topo_df.empty:
-       topo_data_failed = True
-
-
-
-
-
-
-
     master_profile_query = (
         f"SELECT * FROM new_master_profiles WHERE profile_id = '{selected_profile}'"
     )
+
 
     # get mp data as df from aws database
     mp_df = pd.read_sql_query(master_profile_query, conn)
     conn.close()
 
+
     # Drop/filter for any mp_df that has less than three columns. One col is the profile names, all others are profile
     # data points.
     mp_df = mp_df.loc[:, mp_df.notna().all()]
 
-    # Check to see if the mp_df has more than one data point. If not show a warning and return a blank chart.
-    if len(mp_df.columns) >= 3 and topo_data_failed == False:
+    if topo_df.empty:
+        topo_data_failed = True
+    else:
+        topo_data_failed = False
 
-        valid_master_profile_date = False  # holds the is_open bool for warning message
+    if len(mp_df.columns) >= 3:
+        valid_master_profile_data = False
+    else:
+        valid_master_profile_data = True
+
+    # Check to see if the mp_df has more than one data point. If not show a warning and return a blank chart.
+    if not valid_master_profile_data and not topo_data_failed:
+
+        valid_master_profile_data = False  # holds the is_open bool for warning message
 
         # check if multi selection is enabled. Note this has now been disabled.
         if fixed_val_storage is not None and fixed_val_storage['multi'] == False:
@@ -571,24 +576,25 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
             # Update the 'cpa' key in the store's data with the serialized figure
             chart_data = {"line_plot": serialized_fig}
 
-            month_year_dropdown_style = dict(display='none')
 
 
-            return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
+
+            return fig, fig, chart_data, valid_master_profile_data,topo_data_failed
         else:
-            valid_master_profile_date = False
+            valid_master_profile_data = False
             fig = px.line()
             chart_data = None
             pass
 
-            return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
+            return fig, fig, chart_data, valid_master_profile_data,topo_data_failed
     else:
-        valid_master_profile_date = True
+
+
         fig = px.line()
         chart_data = None
-        month_year_dropdown_style = dict(display='none')
 
-        return fig, fig, chart_data, valid_master_profile_date,topo_data_failed
+
+        return fig, fig, chart_data, valid_master_profile_data,topo_data_failed
 
 
 @callback(

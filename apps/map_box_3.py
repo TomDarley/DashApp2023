@@ -4447,10 +4447,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 # Extract the URL if a match is found
                 if match:
                     url = match.group(1)
-                    print(f'Extracted URL: {url}')
+                    #print(f'Extracted URL: {url}')
                     return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, {'url': url}
                 else:
-                    print('No URL found')
+                    #print('No URL found')
                     return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update,dash.no_update
 
 
@@ -4810,9 +4810,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             name=t  # Legend entry for each type
         )
         wave_buoy_traces.append(trace)
-
-
-
 
     # Logic to set the SQL query to account for user selected survey type
     # If one survey type is selected a str is returned not a list, check for this and convert to a list

@@ -4795,7 +4795,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             lat=df["lat"],
             lon=df["long"],
             hovertemplate=[
-                f'<b>{name}</b><br>Type: {typ}<br><a href="{url}" target="_blank">Click for Live Data</a><extra></extra>'
+                f'<b>{name}</b><br>Type: {typ}<br><a href="{url}" target="_blank">Live Data</a><extra></extra>'
                 for name, typ, url in zip(df["name"], df["type"], df["live_data"])
             ],
 

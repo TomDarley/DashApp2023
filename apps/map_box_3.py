@@ -15,12 +15,12 @@ import base64
 import datetime
 from dash import clientside_callback
 import dash_bootstrap_components as dbc
-
+import re
 
 from dash.exceptions import PreventUpdate
 
-MAPBOX_TOKEN = 'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
-
+#MAPBOX_TOKEN = 'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
+MAPBOX_TOKEN= 'pk.eyJ1IjoidGRhcmxleSIsImEiOiJjbHdnYzNjbnQwMnJ5MmtwYXJucW82dnZ4In0.Zavq_MaXoMZA3o86ENiUig'
 # holds every survey unit with every profile. This could/should be made from the db directly.
 unit_to_options = {
     "6aSU10": [
@@ -3649,12 +3649,19 @@ INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
 
 DEFAULT_MAP_CENTER = {"lat": 50.698646242436496, "lon": -4.096976854933279}
 
-# Define the basemap options
+# Define the basemap options, note only basic
+# streets
+# outdoors
+# light
+# dark
+# satellite
+# satellite-streets
+# work with symbols (for the wave buoys).
+
 BASEMAPS = [
-    {'label': 'OpenStreetMap', 'value': 'open-street-map'},
+    {'label': 'OpenStreetMap', 'value': 'streets'},
     {'label': 'Satellite', 'value': 'satellite-streets'},
 ]
-
 
 def haversine(lat1, lon1, lat2, lon2):
     """
@@ -3725,6 +3732,7 @@ def establish_connection(retries=3, delay=5):
 
 # empty fig object which becomes the map
 fig = go.Figure()
+fig.update_layout()
 
 # loading in the map key which is an image and converting it encoded image. Required to be used.
 image_path = r"media/Percent.jpg"
@@ -3737,7 +3745,13 @@ layout = html.Div(
         # store that holds the map data as json. Used in the report generation to add map.
         dcc.Store(id='map-json'),
 
+        # hidden-link-store {href:href} is set to wave buoy href when clicked, used in clientside callback to a new
+        # tab for the wave bouy data
+        dcc.Store(id='hidden-link-store'),
 
+        # Only here as the clientside callback requires at least one output. For all intents and purposes it is not used
+        # anywhere else.
+        dcc.Location(id='dummy-location'),
 
 
         # div that holds the map
@@ -3807,7 +3821,7 @@ layout = html.Div(
                 dcc.Dropdown(
                     id='basemap-dropdown',
                     options=BASEMAPS,
-                    value='open-street-map',  # Set the initial value
+                    value='streets',  # Set the initial value
                     style={'font-size': 13,
                            'position': 'relative',
                            'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
@@ -3962,12 +3976,32 @@ layout = html.Div(
 )
 
 
+# Client-side callback to open the URL. This is complicated, if a wave_buoy is clicked
+# update _output function will extract the url from it and save it to hidden-link-store.
+# If it contains data/href trigger window.open with the target of the href. Else we do nothing.
+clientside_callback(
+    """
+    function(data) {
+        if (data && data.url) {
+            window.open(data.url, '_blank');
+        }
+        return window.dash_clientside.no_update;;
+    }
+    """,
+    Output('dummy-location', 'pathname'),
+    Input('hidden-link-store', 'data')
+)
+
+
 @callback(Output('selected-value-storage', 'data'),
           Output("survey-line-dropdown", "options"),
           Output("survey-unit-dropdown", "value"),
           Output("survey-line-dropdown", "value"),
           Output("example-map", "clickData"),
           Output("survey-type-dropdown", "value"),
+
+          Output('hidden-link-store', 'data'),
+
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -3977,9 +4011,10 @@ layout = html.Div(
 
           Input("survey-type-dropdown", "value"),
 
+
           )
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals):
+                  selected_val_storage, survey_type_dropdown_vals, ):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4075,7 +4110,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE,
                                  'multi': False, 'box_selected_data': None, 'survey_type': 'Interim', },
 
-        return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim'
+        return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim', dash.no_update
 
     # survey_unit_dropdown was used set the survey unit, the profile line options and the first line option as the val:
     elif ctx.triggered_id == 'survey-unit-dropdown':
@@ -4145,7 +4180,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         end_time = time.time()
 
 
-        return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update
+        return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update, dash.no_update
 
     elif ctx.triggered_id == 'survey-line-dropdown':
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
@@ -4155,7 +4190,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals},
 
-        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
+        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update
 
     elif ctx.triggered_id == 'survey-type-dropdown':
 
@@ -4226,20 +4261,36 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
 
 
-        return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals
+        return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals, dash.no_update
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
 
         if click_data is not None:
 
-            # Line data has the key hovertext in the clickdata, points have customdata
-            if "Profile Line ID" in click_data['points'][0]['hovertext']:
-                line = True
-            else:
+            # Adding logic to determine if a wave_buoy data was selected
+            try:
+                if "Type" in click_data['points'][0]['hovertemplate']:
+                    wave_buoy_selected = True
+                else:
+                    wave_buoy_selected = False
+
+            except Exception:
+                wave_buoy_selected = False
+                pass
+
+
+            try:
+                # Line data has the key hovertext in the clickdata, points have customdata
+                if "Profile Line ID" in click_data['points'][0]['hovertext']:
+                    line = True
+                else:
+                    line = False
+            except Exception:
                 line = False
 
+
             # if the points (survey units) were clicked:
-            if not line:
+            if not line and not wave_buoy_selected:
 
                 clicked_survey_unit = click_data.get("points", [])[0].get("customdata")[0]
 
@@ -4310,10 +4361,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          , cal_profile_line_options)
 
                 return selected_value_result, cal_profile_line_options, clicked_survey_unit, \
-                    profile_line_value, None, dash.no_update
+                    profile_line_value, None, dash.no_update,dash.no_update
 
             # if the lines (profile lines) were clicked:
-            elif line:
+            elif line and not wave_buoy_selected:
                 clicked_profile_line = click_data.get("points", [])[0].get("hovertext").split('<br>')[0].split(':')[
                     1].replace(" ", "")
 
@@ -4381,7 +4432,27 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          'box_selected_data': None,
                                          'survey_type': survey_type_dropdown_vals}
 
-                return selected_value_result, cal_profile_line_options, dash.no_update, clicked_profile_line, None, dash.no_update
+                return selected_value_result, cal_profile_line_options, dash.no_update, clicked_profile_line, None, dash.no_update, dash.no_update
+
+
+            elif wave_buoy_selected:
+
+                link_to_wave_buy_data  = click_data.get("points", [])[0].get("hovertemplate")
+
+                pattern = r'href="(https?://[^"]+)"'
+
+                # Search for the pattern in the HTML string
+                match = re.search(pattern, link_to_wave_buy_data)
+
+                # Extract the URL if a match is found
+                if match:
+                    url = match.group(1)
+                    print(f'Extracted URL: {url}')
+                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, {'url': url}
+                else:
+                    print('No URL found')
+                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update,dash.no_update
+
 
         else:
 
@@ -4395,10 +4466,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                     'survey_type': survey_type_dropdown_vals
                 }
 
-                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
+                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update
 
             else:
-                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update
+                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update,dash.no_update
     else:
 
         if box_selected_data is not None and 'range' in box_selected_data.keys():
@@ -4414,7 +4485,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update
 
         else:
-            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update
+            return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None ,dash.no_update
 
 
 @callback(
@@ -4496,6 +4567,16 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     cpa_df = pd.read_sql_query(query, conn)
     cpa_df['date'] = pd.to_datetime(cpa_df['date'])
 
+    # Import point (wave_buoy) spatial data as GeoDataFrame
+    wave_buoy_query = "SELECT * FROM wave_buoys"  # Modify this query according to your table
+    wave_buoy_gdf = gpd.GeoDataFrame.from_postgis(wave_buoy_query, conn, geom_col="shape")
+
+    # change crs to supported crs
+    wave_buoy_gdf = wave_buoy_gdf.to_crs(epsg=4326)
+
+    # Create new columns for latitude and longitude
+    wave_buoy_gdf['long'] = wave_buoy_gdf.geometry.x
+    wave_buoy_gdf['lat'] = wave_buoy_gdf.geometry.y
 
     def calculate_difference(group):
 
@@ -4560,9 +4641,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
         return df1
 
-
-
-
     start_time = time.time()
     # Use groupby and apply the function to each group
     cpa_dfs = cpa_df.groupby("survey_unit").apply(calculate_difference).reset_index()
@@ -4573,9 +4651,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     elapsed_time = end_time - start_time
     print("Elapsed Time cal diff:", elapsed_time, "seconds")
 
-
     cpa_dfs = cpa_dfs[['survey_unit', 'difference']]
-
 
     # set all na values, they shouldn't exist when all the correct data is loaded in
     data_check = cpa_dfs['difference'].isna().any()
@@ -4694,6 +4770,49 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         ),
         mode='markers',
     )
+
+    # Adding wave buoy data to map
+
+    # Define marker shapes and colors based on type
+    marker_shapes = {
+        "Wave Buoy": "star",
+        "Tide Gauge": "triangle",
+        "Met Station": "square"
+    }
+
+    marker_colors = {
+        "Wave Buoy": "white",
+        "Tide Gauge": "white",
+        "Met Station": "white"
+    }
+
+    # Create Scattermapbox traces for each type for wave buoy data.
+    wave_buoy_traces = []
+    for t in wave_buoy_gdf["type"].unique():
+        df = wave_buoy_gdf[wave_buoy_gdf["type"] == t]
+
+        trace = go.Scattermapbox(
+            lat=df["lat"],
+            lon=df["long"],
+            hovertemplate=[
+                f'<b>{name}</b><br>Type: {typ}<br></b>Click for Live Data<br><a href="{url}" target="_blank">{url}</a><extra></extra>'
+                for name, typ, url in zip(df["name"], df["type"], df["live_data"])
+            ],
+
+
+            marker  =dict(
+                symbol=marker_shapes[t],
+                color=marker_colors[t],
+                size=20,
+                #opacity=1.0,
+            ),
+            mode='markers',
+            name=t  # Legend entry for each type
+        )
+        wave_buoy_traces.append(trace)
+
+
+
 
     # Logic to set the SQL query to account for user selected survey type
     # If one survey type is selected a str is returned not a list, check for this and convert to a list
@@ -4939,7 +5058,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                         ),
                         # Set background color with opacity
                     )
-                elif basemap_selection == 'open-street-map':
+                elif basemap_selection == 'streets':
                     trace.update_traces(
                         textposition="top center",  # Position text at the top center of the markers
                         textfont=dict(
@@ -4992,7 +5111,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                         ),
                         # Set background color with opacity
                     )
-                elif basemap_selection == 'open-street-map':
+                elif basemap_selection == 'streets':
                     trace.update_traces(
                         textposition="top center",  # Position text at the top center of the markers
                         textfont=dict(
@@ -5018,6 +5137,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     fig = go.Figure()  # Set the map center to the selected point)
     fig.add_trace(selected_survey_unit_trace)
     fig.add_traces(updated_scatter_trace.data)
+    fig.add_traces(wave_buoy_traces)
 
     # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
     for i in range(len(line_traces)):

@@ -17,10 +17,8 @@ from dash import clientside_callback
 import dash_bootstrap_components as dbc
 import re
 
-from dash.exceptions import PreventUpdate
-
-#MAPBOX_TOKEN = 'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
-MAPBOX_TOKEN= 'pk.eyJ1IjoidGRhcmxleSIsImEiOiJjbHdnYzNjbnQwMnJ5MmtwYXJucW82dnZ4In0.Zavq_MaXoMZA3o86ENiUig'
+MAPBOX_TOKEN = 'pk.eyJ1IjoidGRhcmxleTAxIiwiYSI6ImNsdXYzbmRkcTBlemQyanBqdWd5Y3ZsdnAifQ.-319Ui8Y2KVTnDlfGaPkwA'
+#MAPBOX_TOKEN= 'pk.eyJ1IjoidGRhcmxleSIsImEiOiJjbHdnYzNjbnQwMnJ5MmtwYXJucW82dnZ4In0.Zavq_MaXoMZA3o86ENiUig'
 # holds every survey unit with every profile. This could/should be made from the db directly.
 unit_to_options = {
     "6aSU10": [
@@ -3730,6 +3728,92 @@ def establish_connection(retries=3, delay=5):
     return None  # Return None if all attempts fail
 
 
+def handle_survey_dates(df):
+    """
+        Function used to determine the appropriate survey dates to display in the CSA table. The isles of Scilly
+        cause a unique headache as they are surveyed in the Autumn. Therefore, logic is needed to switch the dates
+        to extract data from and change table column names etc.
+
+        Parameters:
+            df (DataFrame): A pandas DataFrame containing survey dates as column names.
+
+        Returns:
+            Tuple: A tuple containing information about the survey dates.
+                - is_scilly_unit (bool): True number of Autumns is > number of Other Seasons, True False otherwise.
+                - latest_survey (date): The date of the latest survey recorded in the dataset.
+                - first_survey (date): The date of the earliest survey recorded in the dataset.
+                - next_spr_or_baseline (date): The next spring or baseline survey date after removing autumn surveys.
+
+        Details:
+            This function processes survey dates to determine the appropriate dates to display in the Coastal
+            State Assessment (CSA) table. It evaluates whether the survey data pertains to the Scilly unit based
+            on the prevalence of autumn surveys. If the majority of surveys occur during autumn months, it considers
+            the data as being from a Scilly unit. Otherwise, it assumes data is from other units.
+
+            For non-Scilly units:
+            - It removes autumn surveys to prioritize spring or baseline surveys.
+            - It identifies the latest survey date, earliest survey date, and the next spring or baseline survey date
+              following the removal of autumn surveys.
+
+            For Scilly units:
+            - It identifies the next spring or baseline survey date without removing any autumn surveys.
+
+            If any errors occur during the processing, the function returns None for all outputs.
+
+        Note:
+            This function assumes the DataFrame columns contain datetime information, formatted as "%Y-%m-%d %H:%M:%S".
+        """
+
+    # ranges used to decide the survey type
+    spring_range = [1, 2, 3, 4]
+    summer_range = [5, 6, 7, 8]
+    autumn_range = [9, 10, 11, 12]
+
+    all_dates = []
+    for date in df.columns:
+        to_date = datetime.datetime.strptime(str(date), "%Y-%m-%d %H:%M:%S").date()
+        all_dates.append(to_date)
+
+    latest_survey = max(all_dates)
+    first_survey = min(all_dates)
+
+    # Count autumn vs. other season surveys
+    autumn_count = sum(1 for date in all_dates if date.month in autumn_range)
+    other_count = len(all_dates) - autumn_count
+
+    is_scilly_unit = autumn_count > other_count
+
+    if not is_scilly_unit:
+
+        # Logic to check if the first survey is an Autumn if it is keep removing dates until the next date is not an autumn
+        while latest_survey.month in autumn_range:
+            try:
+                all_dates.remove(latest_survey)
+                latest_survey = max(all_dates)
+            except Exception as e:
+                print(e)
+
+        all_dates_most_recent_removed = all_dates[:-1]
+        next_spr_or_baseline = all_dates_most_recent_removed[-1]
+
+        while next_spr_or_baseline.month in autumn_range:
+            try:
+                all_dates_most_recent_removed.remove(next_spr_or_baseline)
+                next_spr_or_baseline = all_dates_most_recent_removed[-1]
+            except Exception as e:
+                print(e)
+
+
+    elif is_scilly_unit:
+        next_spr_or_baseline = all_dates[-2]
+
+    else:
+        print("Something has gone very wrong!")
+        return None, None, None, None
+
+    return is_scilly_unit, latest_survey, first_survey, next_spr_or_baseline,
+
+
 # empty fig object which becomes the map
 fig = go.Figure()
 fig.update_layout()
@@ -3752,6 +3836,10 @@ layout = html.Div(
         # Only here as the clientside callback requires at least one output. For all intents and purposes it is not used
         # anywhere else.
         dcc.Location(id='dummy-location'),
+
+        # Holds the processed points data along with classification as json
+        # We use this so once processed it can be called instead of running the processing each time.
+        dcc.Store(id = 'survey-points-gdf', data = None),
 
 
         # div that holds the map
@@ -4275,6 +4363,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                     wave_buoy_selected = False
 
             except Exception:
+                print(Exception)
                 wave_buoy_selected = False
                 pass
 
@@ -4286,6 +4375,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 else:
                     line = False
             except Exception:
+                print(Exception)
                 line = False
 
 
@@ -4496,6 +4586,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     Output('map-state', 'data'),
     Output('survey-points-change-values', 'data'),
+    Output('survey-points-gdf', 'data'),
 
 
     Input("selected-value-storage", "data"),
@@ -4504,10 +4595,12 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
     Input('csa_profile_line_colors', 'data'),  # this is the colors mapped to profile.
     Input('change_range_radio_button', 'value'),
     Input('basemap-dropdown', 'value'),
+    State('survey-points-gdf', 'data'),
+
     prevent_initial_call=False,
 )
 def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data, csa_profile_line_colors,
-               change_range_radio_button, basemap_selection):
+               change_range_radio_button, basemap_selection,survey_points_gdf ):
 
     """
        Update the map visualization based on user-selected options.
@@ -4550,23 +4643,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     # Get the proforma text from the database
     conn = establish_connection()
 
-    # Import point (survey unit) spatial data as GeoDataFrame
-    query = "SELECT * FROM new_survey_units"  # Modify this query according to your table
-    gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
-
-    # change crs to supported crs
-    gdf = gdf.to_crs(epsg=4326)
-
-    # Extract latitude and longitude from the geometry column
-    gdf["lat"] = gdf["wkb_geometry"].y
-    gdf["long"] = gdf["wkb_geometry"].x
-    gdf["size"] = 15
-
-    # extract cpa data from aws database, needed to color the survey units
-    query = f"SELECT * FROM cpa_table"
-    cpa_df = pd.read_sql_query(query, conn)
-    cpa_df['date'] = pd.to_datetime(cpa_df['date'])
-
     # Import point (wave_buoy) spatial data as GeoDataFrame
     wave_buoy_query = "SELECT * FROM wave_buoys"  # Modify this query according to your table
     wave_buoy_gdf = gpd.GeoDataFrame.from_postgis(wave_buoy_query, conn, geom_col="shape")
@@ -4578,126 +4654,172 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     wave_buoy_gdf['long'] = wave_buoy_gdf.geometry.x
     wave_buoy_gdf['lat'] = wave_buoy_gdf.geometry.y
 
-    def calculate_difference(group):
+    # hold id the processed point data has been saved as json to store, use this return no update if true
+    data_already_processed = False
 
-        master_df = group[["date", "profile", "area"]]
+    # If the change_range_radio_button was the trigger then data must be reprocessed
+    ctx = dash.callback_context
 
-        pivot_df = master_df.pivot(index="profile", columns="date", values="area")
-        pivot_df["Mean"] = pivot_df.mean(axis=1)
+    # if point_gdf processing has not been run and json held in store is None
+    if survey_points_gdf is None or ctx.triggered_id == 'change_range_radio_button':
+        data_already_processed = False
 
-        pivot_df["countSurveyedDates"] = (len(pivot_df.columns) - 1) / 2
-        pivot_df["NaNCount"] = pivot_df.isnull().sum(axis=1)
-        pivot_df["DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
+        # Import point (survey unit) spatial data as GeoDataFrame
+        query = "SELECT * FROM new_survey_units"  # Modify this query according to your table
+        gdf = gpd.GeoDataFrame.from_postgis(query, conn, geom_col="wkb_geometry")
 
-        df1 = pivot_df.loc[pivot_df["DropRow"] == True]
-        df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates", "Mean"], axis=1)
-        df1 = df1.T.fillna(df1.mean(axis=1)).T
+        # change crs to supported crs
+        gdf = gdf.to_crs(epsg=4326)
 
-        df1.loc["Sum"] = df1.sum()
-        df1 = df1.tail(1)
+        # Extract latitude and longitude from the geometry column
+        gdf["lat"] = gdf["wkb_geometry"].y
+        gdf["long"] = gdf["wkb_geometry"].x
+        gdf["size"] = 15
 
-        # logic to calculate the difference based on change_range_radio_button selection
-        if change_range_radio_button  == "base-spr":
+        # extract cpa data from aws database, needed to color the survey units
+        query = f"SELECT * FROM cpa_table"
+        cpa_df = pd.read_sql_query(query, conn)
+        cpa_df['date'] = pd.to_datetime(cpa_df['date'])
+
+        def calculate_difference(group):
+            """
+            Calculates the difference in area between the latest and earliest surveys for each group.
+
+            Parameters:
+            -----------
+            group : pandas.DataFrameGroupBy
+                A grouped DataFrame containing survey data for a particular group.
+
+            Returns:
+            --------
+            pandas.DataFrame
+                A DataFrame containing the calculated differences in area for each group.
+
+            Notes:
+            ------
+            The function expects the input DataFrame to have the following columns:
+                - 'date': Timestamp indicating the date of the survey.
+                - 'profile': Identifier for each survey profile.
+                - 'area': Area measurement corresponding to each survey profile.
+
+            The function calculates the difference in area between the latest and earliest surveys
+            for each group. If there's only one survey, it returns a DataFrame with 'difference'
+            set to 0 for that group.
+            """
+
+            master_df = group[["date", "profile", "area"]]
+
+            if len(master_df['date'].unique())>1:
+                pivot_df = master_df.pivot(index="profile", columns="date", values="area")
+                pivot_df["countSurveyedDates"] = (len(pivot_df.columns)) / 2
+                pivot_df["Mean"] = pivot_df.mean(axis=1)
+                pivot_df["NaNCount"] = pivot_df.isnull().sum(axis=1)
+                pivot_df["DropRow"] = pivot_df["countSurveyedDates"] > pivot_df["NaNCount"]
+
+                df1 = pivot_df.loc[pivot_df["DropRow"] == True]
+                df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates", "Mean"], axis=1)
+                df1 = df1.T.fillna(df1.mean(axis=1)).T
+
+                df1.loc["Sum"] = df1.sum()
+                df1 = df1.tail(1)
+
+                df1.columns = df1.columns.map(lambda x: x.strftime('%Y-%m-%d 00:00:00'))
+                is_scilly_unit, latest_survey, first_survey, next_spr_or_baseline = handle_survey_dates(df1)
+
+                latest_survey = latest_survey.strftime("%Y-%m-%d %H:%M:%S")
+                first_survey = first_survey.strftime("%Y-%m-%d %H:%M:%S")
+                next_spr_or_baseline = next_spr_or_baseline.strftime("%Y-%m-%d %H:%M:%S")
 
 
-            first_column_value = df1.iloc[0, 0]
-            last_column_index = df1.shape[1] - 1
-            last_column_value = df1.iloc[0, last_column_index]
+                if change_range_radio_button  == "base-spr":
+                    df1["first"] = df1[first_survey].iloc[0]
+                    df1["last"] = df1[latest_survey].iloc[0]
+                    df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
+                    df1 = df1[["difference"]]
 
-            df1["first"] = first_column_value
-            df1["last"] = last_column_value
+                if change_range_radio_button == "spr-spr":
+                    df1["first"] = df1[next_spr_or_baseline].iloc[0]
+                    df1["last"] = df1[latest_survey].iloc[0]
+                    df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
+                    df1 = df1[["difference"]]
 
-            df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
-            df1 = df1[["difference"]]
+                df1["Survey_Unit"] = group.name
+                df1 = df1.reset_index()
+                df1 = df1.set_index("Survey_Unit")
 
-        if change_range_radio_button == "spr-spr":
-            import datetime
-            spring_months =[1,2,3,4,5,6]
-            #df1 = df1.apply(pd.to_datetime, unit='s')
-            # Extract month from each datetime column
-            spring_month_columns = []
-            for column in df1.columns:
-                    dt_object = datetime.datetime.strptime(str(column), '%Y-%m-%d %H:%M:%S')
-                    month = dt_object.month
-                    if month in spring_months:
-                        spring_month_columns.append(column)
-
-            if len(spring_month_columns)>=2:
-                first_column_value = list(df1[spring_month_columns[-2]])[0]
-                last_column_value =list(df1[spring_month_columns[-1]])[0]
-                df1["first"] = first_column_value
-                df1["last"] = last_column_value
-                df1["difference"] = ((df1["last"] - df1["first"]) / df1["first"]) * 100
-                df1 = df1[["difference"]]
+                return df1
             else:
-                df1["difference"] = 0
-                df1 = df1[["difference"]]
+
+                df1 =  pd.DataFrame()
+                df1["Survey_Unit"] = group.name
+                df1 = df1.reset_index()
+                df1 = df1.set_index("Survey_Unit")
+                df1['profile'] = 'Sum'
+                df1['difference'] = 0
+                return df1
+
+        # Use groupby and apply the function to each group
+        cpa_dfs = cpa_df.groupby("survey_unit").apply(calculate_difference).reset_index()
+
+        cpa_dfs = cpa_dfs[['survey_unit', 'difference']]
+
+        # set all na values, they shouldn't exist when all the correct data is loaded in
+        data_check = cpa_dfs['difference'].isna().any()
+        if data_check:
+            print('error calculating difference')
+        all_cpa_dfs = cpa_dfs.fillna(0)
+
+        # Add a new column 'classification' based on multiple conditional statements based on pct change values
+        all_cpa_dfs['classification'] = 'Default Value'
+        all_cpa_dfs['classification'] = all_cpa_dfs['classification'].astype(str)
+
+        # Define the conditions and corresponding values for classification, using numpy for speed
+        conditions = [
+            (all_cpa_dfs['difference'] <= -30),
+            ((all_cpa_dfs['difference'] >= -30) & (all_cpa_dfs['difference'] <= -15)),
+            ((all_cpa_dfs['difference'] >= -15) & (all_cpa_dfs['difference'] <= -5)),
+            ((all_cpa_dfs['difference'] >= -5) & (all_cpa_dfs['difference'] <= 5)),
+            ((all_cpa_dfs['difference'] >= 5) & (all_cpa_dfs['difference'] <= 15)),
+            ((all_cpa_dfs['difference'] >= 15) & (all_cpa_dfs['difference'] <= 30)),
+            (all_cpa_dfs['difference'] > 30)
+        ]
+        values = [
+            'High Erosion',
+            'Mild Erosion',
+            'Low Erosion',
+            'No Change',
+            'Low Accretion',
+            'Mild Accretion',
+            'High Accretion'
+        ]
+
+        # Use numpy.select to assign values based on conditions
+        all_cpa_dfs['classification'] = np.select(conditions, values, default='Default Value')
+
+        all_cpa_dfs = all_cpa_dfs.reset_index()
+
+        # merge pivot cpa values table to the survey unit table
+        gdf = pd.merge(gdf, all_cpa_dfs[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
+                       right_on='survey_unit')
 
 
 
-        df1["Survey_Unit"] = group.name
-        df1 = df1.reset_index()
-        df1 = df1.set_index("Survey_Unit")
+        # Store selected survey unit percent change value as a df, use this in main dash page to display change rate.
+        survey_points_change_values = gdf.loc[gdf['survey_unit'] == set_survey_unit].to_json()
 
-        return df1
+        # set the selected survey unit classification to Selected Unit.
+        # gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
+        updated_gdf = gdf.copy()
 
-    start_time = time.time()
-    # Use groupby and apply the function to each group
-    cpa_dfs = cpa_df.groupby("survey_unit").apply(calculate_difference).reset_index()
-    # End timing
-    end_time = time.time()
+        # save gdf to store so it no longer has to process every time.
+        updated_gdf_to_json = updated_gdf.to_json()
 
-    # Calculate elapsed time
-    elapsed_time = end_time - start_time
-    print("Elapsed Time cal diff:", elapsed_time, "seconds")
-
-    cpa_dfs = cpa_dfs[['survey_unit', 'difference']]
-
-    # set all na values, they shouldn't exist when all the correct data is loaded in
-    data_check = cpa_dfs['difference'].isna().any()
-    if data_check:
-        print('error calculating difference')
-    all_cpa_dfs = cpa_dfs.fillna(0)
-
-    # Add a new column 'classification' based on multiple conditional statements based on pct change values
-    all_cpa_dfs['classification'] = 'Default Value'
-    all_cpa_dfs['classification'] = all_cpa_dfs['classification'].astype(str)
-
-    # Define the conditions and corresponding values for classification, using numpy for speed
-    conditions = [
-        (all_cpa_dfs['difference'] <= -30),
-        ((all_cpa_dfs['difference'] >= -30) & (all_cpa_dfs['difference'] <= -15)),
-        ((all_cpa_dfs['difference'] >= -15) & (all_cpa_dfs['difference'] <= -5)),
-        ((all_cpa_dfs['difference'] >= -5) & (all_cpa_dfs['difference'] <= 5)),
-        ((all_cpa_dfs['difference'] >= 5) & (all_cpa_dfs['difference'] <= 15)),
-        ((all_cpa_dfs['difference'] >= 15) & (all_cpa_dfs['difference'] <= 30)),
-        (all_cpa_dfs['difference'] > 30)
-    ]
-    values = [
-        'High Erosion',
-        'Mild Erosion',
-        'Low Erosion',
-        'No Change',
-        'Low Accretion',
-        'Mild Accretion',
-        'High Accretion'
-    ]
-
-    # Use numpy.select to assign values based on conditions
-    all_cpa_dfs['classification'] = np.select(conditions, values, default='Default Value')
-
-    all_cpa_dfs = all_cpa_dfs.reset_index()
-
-    # merge pivot cpa values table to the survey unit table
-    gdf = pd.merge(gdf, all_cpa_dfs[['survey_unit', 'classification', 'difference']], left_on='sur_unit',
-                   right_on='survey_unit')
-
-    # Store selected survey unit percent change value as a df, use this in main dash page to display change rate.
-    survey_points_change_values = gdf.loc[gdf['survey_unit'] == set_survey_unit].to_json()
-
-    # set the selected survey unit classification to Selected Unit.
-    # gdf.loc[gdf['survey_unit'] == set_survey_unit, 'classification'] = 'Selected Unit'
-    updated_gdf = gdf.copy()
+    else:
+        data_already_processed = True
+        # Load in the point gdf from the store if not None
+        updated_gdf = gpd.GeoDataFrame.from_file(survey_points_gdf)
+        # Store selected survey unit percent change value as a df, use this in main dash page to display change rate.
+        survey_points_change_values = updated_gdf.loc[updated_gdf['survey_unit'] == set_survey_unit].to_json()
 
     # Extract the coordinates of the selected survey unit
     selected_point = updated_gdf.loc[updated_gdf["sur_unit"] == set_survey_unit].iloc[0]
@@ -4745,7 +4867,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     )
 
-
     # Format the label shown, must have the <extra></extra> to remove the color being shown
     updated_scatter_trace.update_traces(hovertemplate="<b>%{customdata[0]}<br>" + "<b>%{customdata[2]}<br>"
                                                       + "%{customdata[1]}" + "<extra></extra>")
@@ -4775,16 +4896,17 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     # Define marker shapes and colors based on type
     marker_shapes = {
-        "Wave Buoy": "star",
+        "Wave Buoy": "circle",
         "Tide Gauge": "triangle",
-        "Met Station": "circle-stroked"
+        "Met Station": "circle"
     }
 
     marker_colors = {
-        "Wave Buoy": "white",
-        "Tide Gauge": "white",
-        "Met Station": "white"
+        "Wave Buoy": "#2fba2d",
+        "Tide Gauge": "#f569e9",
+        "Met Station": "blue"
     }
+
 
     # Create Scattermapbox traces for each type for wave buoy data.
     wave_buoy_traces = []
@@ -5131,10 +5253,13 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         line_traces.append(trace)
 
     # Here we add the point as traces to the fig. The selected survey unit trace is added below the main traces.
+        # Add custom SVG images to the map layout
+
     fig = go.Figure()  # Set the map center to the selected point)
     fig.add_trace(selected_survey_unit_trace)
     fig.add_traces(updated_scatter_trace.data)
     fig.add_traces(wave_buoy_traces)
+
 
     # fig.update_geos(center=dict(lat=center_lat, lon=center_lon))
     for i in range(len(line_traces)):
@@ -5203,6 +5328,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
         current_zoom = 6
         state_to_return = current_center
 
+
     # Update the map layout
     fig.update_layout(mapbox={
         'style': basemap_selection,
@@ -5214,12 +5340,27 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
     ),
 
-    end_time = time.time()
-    # Calculate elapsed time
-    elapsed_time = end_time - start_time
-    print("Elapsed Time:", elapsed_time, "seconds")
 
-    return fig, lines_inside_box, {'is_loading': True}, {'is_loading': True},state_to_return, survey_points_change_values
+
+
+    fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        showlegend=False,
+
+    )
+
+
+
+
+    if  data_already_processed:
+
+
+
+        return fig, lines_inside_box, {'is_loading': True}, {'is_loading': True},state_to_return, survey_points_change_values,dash.no_update
+    else:
+        return fig, lines_inside_box, {'is_loading': True}, {
+            'is_loading': True}, state_to_return, survey_points_change_values, updated_gdf_to_json
+
 
 
 @callback(

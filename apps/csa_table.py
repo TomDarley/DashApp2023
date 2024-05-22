@@ -60,18 +60,11 @@ def handle_survey_dates(df):
     latest_survey = max(all_dates)
     first_survey = min(all_dates)
 
-    # logic to work out if the data is from the Scilly
-    autumn_count = 0
-    other_count = 0
-    for date in all_dates:
-        if date.month in autumn_range:
-            autumn_count += 1
-        else:
-            other_count += 1
+    # Count autumn vs. other season surveys
+    autumn_count = sum(1 for date in all_dates if date.month in autumn_range)
+    other_count = len(all_dates) - autumn_count
 
-    is_scilly_unit = False
-    if autumn_count > other_count:
-        is_scilly_unit = True
+    is_scilly_unit = autumn_count > other_count
 
     if not is_scilly_unit:
 

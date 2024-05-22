@@ -221,6 +221,7 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
     if selected_survey_unit is None:
         raise PreventUpdate
 
+
     # load data from the cpa table in the aws database
     master_df = get_data(selected_survey_unit)[["date", "profile", "area"]]
 

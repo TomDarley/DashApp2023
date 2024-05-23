@@ -93,6 +93,7 @@
     background-color: white;
     border: 2px solid #ccc; /* Add border style */
     box-shadow: 5px 5px 5px lightblue;
+    font-family: 'Calibri', sans-serif;
 
 
     }
@@ -103,7 +104,7 @@
  position: absolute;
     top: 10px; /* Adjust as needed */
     left: 10px; /* Adjust as needed */
-    width: 120px;
+    width: 140px;
     height: 25px;
     z-index: 100;
     border-radius: 15px;
@@ -112,14 +113,18 @@
     padding-right: 5px; /* Adjust padding right */
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
-    font-size: 13px;
+    font-size: 15px;
+    font-family: 'Calibri', sans-serif;
+
+
 }
+
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
 @media screen and (min-width: 951px) and (max-width: 1400px) {
    #Range_plot{
     position: absolute;
-    top: 30px; /* Adjust as needed */
+    top: 35px; /* Adjust as needed */
     left: 10px; /* Adjust as needed */
     width: 120px;
     height: 25px;
@@ -131,6 +136,7 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
+    font-family: 'Calibri', sans-serif;
 }
 }
 
@@ -150,6 +156,8 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
+     font-family: 'Calibri', sans-serif;
+
 }
 
 }
@@ -168,6 +176,7 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
+     font-family: 'Calibri', sans-serif;
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
@@ -186,6 +195,7 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
+    font-family: 'Calibri', sans-serif;
 }
 }
 
@@ -193,7 +203,7 @@
 
 #error-bar-dropdown{
  position: absolute;
-    top: 30px; /* Adjust as needed */
+    top: 40px; /* Adjust as needed */
     left: 10px; /* Adjust as needed */
     width: 120px;
     height: 25px;
@@ -205,6 +215,7 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
+    font-family: 'Calibri', sans-serif;
 }
 
 }
@@ -238,6 +249,7 @@
         overflow: hidden;
         border: 2px solid #ccc; /* Add border style */
         box-shadow: 5px 5px 5px lightblue;
+
   
 }
 

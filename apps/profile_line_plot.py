@@ -177,10 +177,17 @@ layout = html.Div(
         dcc.Checklist(
             id='Range_plot',
             options=[
-                {"label": "  Profile Envelope", "value": "show_range"},
+                {"label": "Profile Envelope", "value": "show_range"},
             ],
             value=['show_range'],  # Default selected option
             inline=True,
+
+            inputStyle={
+                'marginRight': '5px',
+                 'buffer-bottom':'2px'# Add space between the checkbox and label
+            },
+
+
 
         ),
 
@@ -192,7 +199,7 @@ layout = html.Div(
                     [
                         html.P(
                             """This chart represents a cross-section of each beach profile, allowing for a visual comparison of beach change for a certain area across the length of the beach profile.""",
-                            style={"font-size": 20}, ),
+                            style={"font-size": 20, }, ),
                         html.P(
                             """Any number of surveys can be compared by toggling them on or off using the legend function on the right-hand side of the chart. Each profile is displayed against the master profile shown by the dashed red lines, which denotes the seaward boundary of mean low water springs (MLWS) and the landward boundary.""",
 
@@ -533,10 +540,10 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                 fig.update_xaxes(
                     title_text="Chainage (m)",
                     title_font=dict(
-                        size=15, family="Helvetica", color="blue"
+                        size=15, family="Calibri", color="blue"
                     ),  # Customize font size and family
                     tickfont=dict(
-                        size=15, family="Helvetica", color="blue"
+                        size=15, family="Calibri", color="blue"
                     ),  # Customize tick font size and family
                 )
 
@@ -544,10 +551,10 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                 fig.update_yaxes(
                     title_text="Elevation (m)",
                     title_font=dict(
-                        size=15, family="Helvetica", color="blue"
+                        size=15, family="Calibri", color="blue"
                     ),  # Customize font size and family
                     tickfont=dict(
-                        size=15, family="Helvetica", color="blue"
+                        size=15, family="Calibri", color="blue"
                     ),  # Customize tick font size and family
                 )
 
@@ -560,11 +567,11 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
                         "xanchor": "center",
                         "yanchor": "top",
                     },
-                    title_font={"size": 15, "family": "Helvetica", "color": "blue"},
+                    title_font={"size": 17, "family": "Calibri", "color": "blue"},
                     xaxis_title="Chainage (m)",
                     yaxis_title="Elevation (m)",
                     legend_title="",
-                    font=dict(size=12, color="blue", family="Helvetica"),
+                    font=dict(size=12, color="blue", family="Calibri"),
 
                     # legend_traceorder="reversed",
                     legend_title_text=f"",

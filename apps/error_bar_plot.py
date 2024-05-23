@@ -104,7 +104,9 @@ layout = html.Div(
             style={"border-radius": "10px",
                    "fontSize": "14px",
                    "width": "120px",
-                   "height": "30px"}
+                   "height": "30px",
+                   "font-family": "Calibri",
+                   }
 
         ),
 
@@ -257,19 +259,19 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font=dict(size=15, family="Helvetica"),
+        title_font=dict(size=17, family="Calibri"),
         title_x=0.5,
         yaxis_title={"text": "Cross Sectional Profile Area (m²)", "font": {"size": 15}},
         xaxis_title=None,
         legend_title="",
-        font=dict(size=15, color="blue", family="Helvetica"),
+        font=dict(size=15, color="blue", family="Calibri"),
         xaxis=dict(
             tickmode="array",
             tickangle=45,
             tickfont=dict(
                 size=12,  # Set the font size
                 color="blue",  # Set the font color
-                family="Helvetica",  # Set the font family
+                family="Calibri",  # Set the font family
             ),
         ),
     )
@@ -278,11 +280,11 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
     fig.update_layout(
         legend=dict(
             title_font=dict(
-                size=12, family="Helvetica"
+                size=12, family="Calibri"
             ),  # Customize font size and family
             title_text="",  # Remove legend title
             font=dict(
-                size=12, family="Helvetica"
+                size=12, family="Calibri"
             ),  # Customize font size and family for legend labels
         ),
         # change tick font size

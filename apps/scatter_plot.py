@@ -483,11 +483,11 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
             "xanchor": "center",
             "yanchor": "top",
         },
-        title_font={"size": 15, "family": "Helvetica", "color": "blue"},
+        title_font={"size": 17, "family": "Calibri", "color": "blue"},
         xaxis_title="",
         yaxis_title="Combined Profile Area (m²)",
         legend_title="",
-        font=dict(size=12, color="blue", family="Helvetica"),
+        font=dict(size=12, color="blue", family="Calibri"),
         xaxis=dict(
             tickmode="array",
             tickvals=tickvals,

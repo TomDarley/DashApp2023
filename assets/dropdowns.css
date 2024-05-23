@@ -5,7 +5,8 @@
     left: 10px;
     border-radius: 5px;
     border-radius: 10px;
-    box-shadow: 5px 5px 5px lightblue;}
+    box-shadow: 5px 5px 5px lightblue;
+    font-family: 'Calibri', sans-serif;}
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
 @media screen and (min-width: 0px) and (max-width:950px) {
@@ -17,6 +18,7 @@
         border-radius: 5px;
         border-radius: 10px;
         box-shadow: 5px 5px 5px lightblue;
+        font-family: 'Calibri', sans-serif;
 
 
         /* Adjust font size for smaller screens */

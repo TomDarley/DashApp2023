@@ -541,7 +541,8 @@ layout = html.Div(
                                                 style={
                                                     "color": "blue",
                                                     "margin-bottom": "5px",
-                                                    "font-weight": 'bold'
+                                                    "font-weight": 'bold',
+                                                     "font-family": "Calibri",
 
                                                 },
                                             ),
@@ -572,7 +573,8 @@ layout = html.Div(
                                                 style={
                                                     "color": "blue",
                                                     "margin-bottom": "5px",
-                                                    "font-weight": 'bold'
+                                                    "font-weight": 'bold',
+                                                    "font-family": "Calibri",
 
                                                 },
                                             ),
@@ -601,7 +603,8 @@ layout = html.Div(
                                                 style={
                                                     "color": "blue",
                                                     "margin-bottom": "5px",
-                                                    "font-weight": 'bold'
+                                                    "font-weight": 'bold',
+                                                    "font-family": "Calibri",
 
                                                 },
                                             ),
@@ -621,7 +624,8 @@ layout = html.Div(
                                                 style={
                                                     "color": "blue",
                                                     "margin-bottom": "5px",
-                                                    "font-weight": 'bold'
+                                                    "font-weight": 'bold',
+                                                    "font-family": "Calibri",
                                                 },
                                             ),
                                             html.Div("----", id="lowest_card"),
@@ -640,7 +644,8 @@ layout = html.Div(
                                                 style={
                                                     "color": "blue",
                                                     "margin-bottom": "10px",
-                                                    "font-weight": 'bold'
+                                                    "font-weight": 'bold',
+                                                    "font-family": "Calibri",
 
                                                 },
                                             ),

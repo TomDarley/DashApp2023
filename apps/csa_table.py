@@ -585,6 +585,7 @@ layout = html.Div(
                                                     "margin-bottom": "5px",
                                                     "text-align": "center",
                                                     "backgroundColor": "#0d4eb8",
+                                                    "font-family": "Calibri",
                                                 },
                                             ),
                                             dash_table.DataTable(
@@ -599,7 +600,8 @@ layout = html.Div(
                                                 style_header={
                                                     "backgroundColor": "#0d4eb8",
                                                     "color": "white",
-                                                    "font-size": 12,
+                                                    "font-size": 14,
+                                                    "font-family": "Calibri",
                                                 },
                                                 columns=[
                                                     {
@@ -616,7 +618,7 @@ layout = html.Div(
                                                     },
                                                 ],
                                                 style_data_conditional=style_data_conditional,
-                                                style_table={'overflowX': 'auto'},
+                                                style_table={'overflowX': 'auto',   "font-family": "Calibri",},
 
                                             ),
                                         ],
@@ -650,6 +652,9 @@ layout = html.Div(
                                                     "margin-bottom": "5px",
                                                     "text-align": "center",
                                                     "backgroundColor": "#0d4eb8",
+                                                     "font-family": "Calibri",
+
+
                                                 },
                                             ),
                                             dash_table.DataTable(
@@ -662,7 +667,8 @@ layout = html.Div(
                                                 style_header={
                                                     "backgroundColor": "#0d4eb8",
                                                     "color": "white",
-                                                    "font-size": 12,
+                                                     "font-size": 14,
+                                                    "font-family": "Calibri",
                                                 },
                                                 columns=[
                                                     {

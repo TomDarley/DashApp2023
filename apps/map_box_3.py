@@ -4709,7 +4709,6 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
             master_df = group[["date", "profile", "area"]]
 
-
             if len(master_df['date'].unique())>1:
                 pivot_df = master_df.pivot(index="profile", columns="date", values="area")
                 pivot_df["countSurveyedDates"] = (len(pivot_df.columns)) // 2
@@ -4717,13 +4716,10 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
                 pivot_df["NaNCount"] = pivot_df.isnull().sum(axis=1)
                 pivot_df["DropRow"] = pivot_df["countSurveyedDates"] >= pivot_df["NaNCount"]
 
-
                 df1 = pivot_df.loc[pivot_df["DropRow"] == True]
                 df1 = df1.drop(["NaNCount", "DropRow", "countSurveyedDates"], axis=1)
                 df1 = df1.apply(lambda row: row.fillna(row.mean()), axis=1)
-                #df1 = df1.T.fillna(df1.mean(axis=1)).T
 
-                #df1 = df1.transpose()
                 df1.loc["Sum"] = df1.sum()
                 df1 = df1.tail(1)
 

@@ -1586,11 +1586,13 @@ def generate_report(
             lowest_date_string = "2007"
 
             # the captions used in the figures and tables
+
+
             figure_captions = [
-                f"Figure 1 - The Combined Profile Area (CPA) for survey unit {current_survey_unit}, including every spring (red), summer (yellow) and autumn (green) survey completed between {lowest_date_string} and {highest_date_string}.",
-                f"Figure 2 - Box Plot of the Cross Sectional area of each interim profile, comparing the current area of the profile (red dot), with the maximum and minimum values 2007 and {highest_date_string}",
-                f"Figure 3 - Cross Sectional area of interim profile {selected_profile},comparing the values recorded during each interim survey between 2007 and {highest_date_string}",
-                f"Table 1 - Cross Sectional are change in m² and percentage comparing spring interim to spring interim ({csa_table_headers.get('spr_spr')}) and baseline to lastest spring interim 9{csa_table_headers.get('baseline_spr')}) "]
+                f"Figure 1 - The Combined Profile Area (CPA) for survey unit {current_survey_unit}, including every spring (red), summer (yellow) and autumn (green) survey completed between {csa_table_headers.get('baseline_spr')}.",
+                f"Figure 2 - Box Plot of the Cross Sectional area of each interim profile, comparing the current area of the profile (red dot), with the maximum and minimum values between {csa_table_headers.get('baseline_spr')}",
+                f"Figure 3 - Cross Sectional area of interim profile {selected_profile},comparing the values recorded during each interim survey between {csa_table_headers.get('baseline_spr')}",
+                f"Table 1 - Cross Sectional are change in m² and percentage comparing spring interim to spring interim ({csa_table_headers.get('spr_spr')}) and baseline to lastest spring interim ({csa_table_headers.get('baseline_spr')}) "]
 
             # creating report paragraph objects
             title_paragraph = Paragraph(f"<b>{current_survey_unit}-{sur_unit_card}</b>", centered_style)

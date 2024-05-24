@@ -3636,10 +3636,10 @@ unit_to_options = {
 }
 
 INITIAL_LOAD_SURVEY_UNIT = '6aSU12'
-INITIAL_LOAD_PROFILE_LINE = '6a01624'
+INITIAL_LOAD_PROFILE_LINE = '6a01615'
 
 # These are the interims for the INITIAL_LOAD_PROFILE_LINE
-INITIAL_LOAD_PROFILE_OPTIONS = [{'label': "6a01613", 'value': "6a01613"},
+INITIAL_LOAD_PROFILE_OPTIONS = [#{'label': "6a01613", 'value': "6a01613"},
                                 {'label': "6a01615", 'value': "6a01615"},
                                 {'label': "6a01618", 'value': "6a01618"},
                                 {'label': "6a01621", 'value': "6a01621"},
@@ -3940,8 +3940,8 @@ layout = html.Div(
 
             ),
 
-            # adding the radio buttons for changing comparison
 
+            # adding info button/modal for the map
             dbc.Button(
                 [html.Span(className="bi bi-info-circle-fill")],
                 size="md",
@@ -3963,8 +3963,7 @@ layout = html.Div(
                 },
             ),
 
-
-            # adding info button/modal for the map
+            # adding the radio buttons for changing comparison
             dcc.RadioItems(
                 id='change_range_radio_button',
                 options=[
@@ -3997,6 +3996,10 @@ layout = html.Div(
 
 
 
+
+
+
+
         ]),
 
         # store holds the current set map center, used to control the map reset and zooming logics
@@ -4005,7 +4008,7 @@ layout = html.Div(
         # store holds selected items in the map or dropdowns, used in the logic to update the app.
         dcc.Store(
             id="selected-value-storage",
-            data={"survey_unit": '6aSU12', "profile_line": '6a01613', 'multi': False, 'box_selected_data': None,
+            data={"survey_unit": '6aSU12', "profile_line": '6a01615', 'multi': False, 'box_selected_data': None,
                   'survey_type': 'Interim', },
         ),
 
@@ -4081,6 +4084,7 @@ clientside_callback(
 )
 
 
+
 @callback(Output('selected-value-storage', 'data'),
           Output("survey-line-dropdown", "options"),
           Output("survey-unit-dropdown", "value"),
@@ -4099,10 +4103,21 @@ clientside_callback(
 
           Input("survey-type-dropdown", "value"),
 
+          # added for line chart navigation over charts
+          Input("line_chart_navigate_right", 'n_clicks'),
+          Input("line_chart_navigate_left", 'n_clicks'),
+          State('survey-line-dropdown', 'options'),
+
+
 
           )
+
+
+
+
+
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals, ):
+                  selected_val_storage, survey_type_dropdown_vals, line_chart_navigate_right,line_chart_navigate_left,survey_line_dropdown_options):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4193,7 +4208,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     # handle if nothing selected, the initial load will run this block:
     if ctx_id not in ['example-map', 'survey-line-dropdown', 'survey-unit-dropdown',
-                      'survey-type-dropdown'] or ctx_id is None:
+                      'survey-type-dropdown','line_chart_navigate_right','line_chart_navigate_left'] or ctx_id is None:
 
         selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE,
                                  'multi': False, 'box_selected_data': None, 'survey_type': 'Interim', },
@@ -4560,6 +4575,96 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             else:
                 return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update,dash.no_update
+
+
+    elif ctx.triggered_id == 'line_chart_navigate_left':
+
+        number_of_options = range(len(survey_line_dropdown_options))
+
+        min_number = min(number_of_options)
+
+        max_number = max(number_of_options)
+
+        index = None
+
+        for i, item in enumerate(survey_line_dropdown_options):
+
+            if item['value'] == prof_line_dropdown_val:
+                index = i
+
+                break
+
+        if index is not None and index < max_number:
+
+            index = index + 1
+
+            new_profile_selected = survey_line_dropdown_options[index]['value']
+
+            selected_value_result = {
+
+                "survey_unit": sur_unit_dropdown_val,
+
+                "profile_line": new_profile_selected,
+
+                'multi': False,
+
+                'box_selected_data': None,
+
+                'survey_type': survey_type_dropdown_vals
+
+            }
+
+            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update
+
+        else:
+
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update
+
+
+    elif ctx.triggered_id == 'line_chart_navigate_right':
+
+        number_of_options = range(len(survey_line_dropdown_options))
+
+        min_number = min(number_of_options)
+
+        max_number = max(number_of_options)
+
+        index = None
+
+        for i, item in enumerate(survey_line_dropdown_options):
+
+            if item['value'] == prof_line_dropdown_val:
+                index = i
+
+                break
+
+        if index is not None and index > min_number:
+
+            index = index - 1
+
+            new_profile_selected = survey_line_dropdown_options[index]['value']
+
+            selected_value_result = {
+
+                "survey_unit": sur_unit_dropdown_val,
+
+                "profile_line": new_profile_selected,
+
+                'multi': False,
+
+                'box_selected_data': None,
+
+                'survey_type': survey_type_dropdown_vals
+
+            }
+
+            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update
+
+        else:
+
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update
+
+
     else:
 
         if box_selected_data is not None and 'range' in box_selected_data.keys():

@@ -191,6 +191,55 @@ layout = html.Div(
 
         ),
 
+        # adding buttons that allow quick left to right navigation of profile charts
+        # adding info button/modal for the map
+        dbc.Button(
+            [html.Span(className="bi bi-arrow-left-circle-fill")],
+            size="sm",
+            id="line_chart_navigate_left",
+            n_clicks=0,
+            className="mr-3",
+            style={
+                'position': 'absolute',
+                'bottom': '5px',  # Adjust as needed
+                'left': 'calc(10%)',  # Adjust as needed
+                'zIndex': 100,
+                'border-radius': 5,
+                "width": '80px',
+                "height": "30px",
+                "lineHeight": "25px",
+                "background-color": "lightblue",
+                "color": "black",
+                "transition": "transform 0.3s ease-in-out"
+
+
+                # 'fontSize': 13
+            },
+        ),
+
+        dbc.Button(
+            [html.Span(className="bi bi-arrow-right-circle-fill")],
+            size="sm",
+            id="line_chart_navigate_right",
+            n_clicks=0,
+            className="mr-3",
+            style={
+                'position': 'absolute',
+                'bottom': '5px',  # Adjust as needed
+                'left': 'calc(22%)',  # Adjust as needed
+                'zIndex': 100,
+                'border-radius': 5,
+                "width": '80px',
+                "height": "30px",
+                "lineHeight": "25px",
+                "background-color": "lightblue",
+                "color": "black",
+                "transition": "transform 0.3s ease-in-out"
+
+                # 'fontSize': 13
+            },
+        ),
+
         # defining the modals, information and full screen
         dbc.Modal(
             [
@@ -602,6 +651,8 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
 
 
         return fig, fig, chart_data, valid_master_profile_data,topo_data_failed
+
+
 
 
 @callback(

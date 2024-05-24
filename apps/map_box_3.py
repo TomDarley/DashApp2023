@@ -4233,7 +4233,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 sql_query = base_sql_query
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-            if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
+            if sur_unit_dropdown_val == "7dPORL3":
                 sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
 
             query_profile_lines = sql_query
@@ -4315,7 +4315,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 sql_query = base_sql_query
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-            if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
+            if sur_unit_dropdown_val == "7dPORL3":
                 sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
             query_profile_lines = sql_query
 
@@ -4416,7 +4416,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         sql_query = base_sql_query
 
                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-                    if clicked_survey_unit == "7dPORL3" or clicked_survey_unit == "6aSU6-1":
+                    if clicked_survey_unit == "7dPORL3":
                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}'"
 
                     query_profile_lines = sql_query
@@ -4492,7 +4492,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                         sql_query = base_sql_query
 
                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
-                    if sur_unit_dropdown_val == "7dPORL3" or sur_unit_dropdown_val == '6aSU6-1':
+                    if sur_unit_dropdown_val == "7dPORL3":
                         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
                     query_profile_lines = sql_query
 
@@ -4964,7 +4964,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     query_profile_lines = sql_query
 
     # ONE OFF LOGIC FOR PORL3 WHICH HAS NO ITERIMS
-    if set_survey_unit == "7dPORL3" or set_survey_unit == "6aSU6-1":
+    if set_survey_unit == "7dPORL3":
         sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{set_survey_unit}'"
         query_profile_lines = sql_query
 

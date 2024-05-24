@@ -202,7 +202,7 @@ layout = html.Div(
             style={
                 'position': 'absolute',
                 'bottom': '5px',  # Adjust as needed
-                'left': 'calc(10%)',  # Adjust as needed
+                'left': '60px',  # Adjust as needed
                 'zIndex': 100,
                 'border-radius': 5,
                 "width": '80px',
@@ -226,7 +226,7 @@ layout = html.Div(
             style={
                 'position': 'absolute',
                 'bottom': '5px',  # Adjust as needed
-                'left': 'calc(22%)',  # Adjust as needed
+                'left': '150px',  # Adjust as needed
                 'zIndex': 100,
                 'border-radius': 5,
                 "width": '80px',

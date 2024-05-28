@@ -4094,6 +4094,9 @@ clientside_callback(
 
           Output('hidden-link-store', 'data'),
 
+          Output('line_chart_navigate_left', 'style'), # if max next or back is met set grey
+          Output('line_chart_navigate_right', 'style'), # if max next or back is met set grey
+
 
           Input('example-map', 'clickData'),
           Input('example-map', 'selectedData'),
@@ -4108,6 +4111,9 @@ clientside_callback(
           Input("line_chart_navigate_left", 'n_clicks'),
           State('survey-line-dropdown', 'options'),
 
+          State('line_chart_navigate_left', 'style'),
+          State('line_chart_navigate_right', 'style')
+
 
 
           )
@@ -4117,7 +4123,7 @@ clientside_callback(
 
 
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals, line_chart_navigate_right,line_chart_navigate_left,survey_line_dropdown_options):
+                  selected_val_storage, survey_type_dropdown_vals, line_chart_navigate_right,line_chart_navigate_left,survey_line_dropdown_options,line_chart_navigate_left_style, line_chart_navigate_right_style):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4141,6 +4147,18 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     ctx = dash.callback_context
     ctx_id = dash.callback_context.triggered_id
+
+    next_button_default_style = line_chart_navigate_left_style.copy()
+    back_button_default_style = line_chart_navigate_right_style.copy()
+
+    next_button_default_style['background-color'] = '#367ff5'
+    back_button_default_style['background-color'] = 'grey'
+
+
+
+
+
+
 
     def get_box_selected_data():
 
@@ -4213,7 +4231,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         selected_value_result = {"survey_unit": INITIAL_LOAD_SURVEY_UNIT, "profile_line": INITIAL_LOAD_PROFILE_LINE,
                                  'multi': False, 'box_selected_data': None, 'survey_type': 'Interim', },
 
-        return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim', dash.no_update
+        return selected_value_result, INITIAL_LOAD_PROFILE_OPTIONS, INITIAL_LOAD_SURVEY_UNIT, INITIAL_LOAD_PROFILE_LINE, None, 'Interim', dash.no_update,next_button_default_style,back_button_default_style
 
     # survey_unit_dropdown was used set the survey unit, the profile line options and the first line option as the val:
     elif ctx.triggered_id == 'survey-unit-dropdown':
@@ -4283,7 +4301,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
         end_time = time.time()
 
 
-        return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update, dash.no_update
+        return selected_value_result, cal_profile_line_options, sur_unit_dropdown_val, profile_line_value, None, dash.no_update, dash.no_update,next_button_default_style,back_button_default_style
 
     elif ctx.triggered_id == 'survey-line-dropdown':
         # survey_line_dropdown used set ONLY the profile line, the options won't change so no update
@@ -4293,7 +4311,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                  'box_selected_data': None,
                                  'survey_type': survey_type_dropdown_vals},
 
-        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update
+        return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update,next_button_default_style,back_button_default_style
 
     elif ctx.triggered_id == 'survey-type-dropdown':
 
@@ -4364,7 +4382,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
 
 
-        return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals, dash.no_update
+        return selected_value_result, cal_profile_line_options, dash.no_update, profile_line_value, None, survey_type_dropdown_vals, dash.no_update,next_button_default_style,back_button_default_style
 
     elif ctx.triggered_id == 'example-map' and multi_same_check == True:
 
@@ -4466,7 +4484,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          , cal_profile_line_options)
 
                 return selected_value_result, cal_profile_line_options, clicked_survey_unit, \
-                    profile_line_value, None, dash.no_update,dash.no_update
+                    profile_line_value, None, dash.no_update,dash.no_update,next_button_default_style,back_button_default_style
 
             # if the lines (profile lines) were clicked:
             elif line and not wave_buoy_selected:
@@ -4537,7 +4555,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                                          'box_selected_data': None,
                                          'survey_type': survey_type_dropdown_vals}
 
-                return selected_value_result, cal_profile_line_options, dash.no_update, clicked_profile_line, None, dash.no_update, dash.no_update
+                return selected_value_result, cal_profile_line_options, dash.no_update, clicked_profile_line, None, dash.no_update, dash.no_update,next_button_default_style,back_button_default_style
 
 
             elif wave_buoy_selected:
@@ -4553,10 +4571,10 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 if match:
                     url = match.group(1)
                     #print(f'Extracted URL: {url}')
-                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, {'url': url}
+                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, {'url': url},next_button_default_style,back_button_default_style
                 else:
                     #print('No URL found')
-                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update,dash.no_update
+                    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update,dash.no_update,next_button_default_style,back_button_default_style
 
 
         else:
@@ -4571,13 +4589,17 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                     'survey_type': survey_type_dropdown_vals
                 }
 
-                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update
+                return selected_value_result, dash.no_update, dash.no_update, prof_line_dropdown_val, None, dash.no_update,dash.no_update,next_button_default_style,back_button_default_style
 
             else:
-                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update,dash.no_update
-
+                return dash.no_update, dash.no_update, sur_unit_dropdown_val, prof_line_dropdown_val, None, dash.no_update,dash.no_update,next_button_default_style,back_button_default_style
 
     elif ctx.triggered_id == 'line_chart_navigate_left':
+
+        new_style = line_chart_navigate_left_style.copy()
+
+        default_style = line_chart_navigate_right_style.copy()
+        default_style['background-color'] = '#367ff5'
 
         number_of_options = range(len(survey_line_dropdown_options))
 
@@ -4593,6 +4615,9 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 index = i
 
                 break
+
+        if index is not None and index == max_number:
+            new_style['background-color'] = 'grey'
 
         if index is not None and index < max_number:
 
@@ -4614,14 +4639,33 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             }
 
-            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update
+            if index == max_number:
+                new_style['background-color'] = 'grey'
+            else:
+                new_style['background-color'] = '#367ff5'
+
+
+
+
+
+
+
+
+
+
+            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update,new_style,default_style
 
         else:
 
-            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update,new_style,default_style
 
 
     elif ctx.triggered_id == 'line_chart_navigate_right':
+
+        new_style = line_chart_navigate_right_style.copy()
+
+        default_style = line_chart_navigate_left_style.copy()
+        default_style['background-color'] = '#367ff5'
 
         number_of_options = range(len(survey_line_dropdown_options))
 
@@ -4637,6 +4681,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 index = i
 
                 break
+        if index is not None and index == min_number:
+            new_style['background-color'] = 'grey'
 
         if index is not None and index > min_number:
 
@@ -4657,12 +4703,16 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
                 'survey_type': survey_type_dropdown_vals
 
             }
+            if index == min_number:
+                new_style['background-color'] = 'grey'
+            else:
+                new_style['background-color'] = '#367ff5'
 
-            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update
+            return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update,default_style,new_style
 
         else:
 
-            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, dash.no_update, dash.no_update,default_style,new_style
 
 
     else:

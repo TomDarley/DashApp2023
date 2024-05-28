@@ -194,9 +194,12 @@ layout = html.Div(
         # adding buttons that allow quick left to right navigation of profile charts
         # adding info button/modal for the map
         dbc.Button(
-            [html.Span(className="bi bi-arrow-left-circle-fill")],
+            html.Div([
+                html.Span(className="bi bi-arrow-left-circle-fill", style={'fontSize': '1.5em', 'marginRight': '5px'}),
+                html.Div("Back", style={'fontSize': '1em'})
+            ], style={'display': 'flex', 'alignItems': 'center'}),
             size="sm",
-            id="line_chart_navigate_left",
+            id="line_chart_navigate_right",
             n_clicks=0,
             className="mr-3",
             style={
@@ -207,9 +210,9 @@ layout = html.Div(
                 'border-radius': 5,
                 "width": '80px',
                 "height": "30px",
-                "lineHeight": "25px",
-                "background-color": "lightblue",
-                "color": "black",
+                "lineHeight": "10px",
+                "background-color": "grey",
+                "color": "white",
                 "transition": "transform 0.3s ease-in-out"
 
 
@@ -217,10 +220,12 @@ layout = html.Div(
             },
         ),
 
-        dbc.Button(
-            [html.Span(className="bi bi-arrow-right-circle-fill")],
+        dbc.Button(html.Div([
+                html.Span(className="bi bi-arrow-right-circle-fill", style={'fontSize': '1.5em', 'marginRight': '5px'}),
+                html.Div("Next", style={'fontSize': '1em'})
+            ], style={'display': 'flex', 'alignItems': 'center'}),
             size="sm",
-            id="line_chart_navigate_right",
+            id="line_chart_navigate_left",
             n_clicks=0,
             className="mr-3",
             style={
@@ -231,9 +236,9 @@ layout = html.Div(
                 'border-radius': 5,
                 "width": '80px',
                 "height": "30px",
-                "lineHeight": "25px",
-                "background-color": "lightblue",
-                "color": "black",
+                "lineHeight": "10px",
+                "background-color": "#367ff5",
+                "color": "white",
                 "transition": "transform 0.3s ease-in-out"
 
                 # 'fontSize': 13

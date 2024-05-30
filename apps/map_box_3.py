@@ -4624,15 +4624,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
             else:
                 new_style['background-color'] = '#367ff5'
 
-
-
-
-
-
-
-
-
-
             return selected_value_result, dash.no_update, dash.no_update, new_profile_selected, None, dash.no_update, dash.no_update,new_style,default_style
 
         else:
@@ -5039,7 +5030,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     marker_colors = {
         "Wave Buoy": "white",
         "Tide Gauge": "#f569e9",
-        "Met Station": "blue"
+        "Met Station": "#ff03f7"
     }
 
 

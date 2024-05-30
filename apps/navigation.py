@@ -60,7 +60,8 @@ navbar = dbc.Navbar(
                 dbc.Nav([
                     dbc.NavItem(dbc.NavLink("Home", href="https://southwest.coastalmonitoring.org")),
                     dbc.NavItem(dbc.NavLink("About", href="https://southwest.coastalmonitoring.org/about-us/")),
-                    dbc.NavItem(dbc.NavLink("Terms", href="https://southwest.coastalmonitoring.org/terms-and-conditions/"))],className="ms-auto"
+                    dbc.NavItem(dbc.NavLink("Terms", href="https://southwest.coastalmonitoring.org/terms-and-conditions/")),
+                    dbc.NavItem(dbc.NavLink("Feedback", href="https://forms.gle/2Td5xfEDfJHRGSX37"))],className="ms-auto"
                 ),
                 id="navbar-collapse",
                 is_open=False,

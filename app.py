@@ -44,6 +44,7 @@ footer = html.Div(
                                 html.Li(html.A("About", href="https://southwest.coastalmonitoring.org/about-us/")),
                                 html.Li(html.A("Terms", href="https://southwest.coastalmonitoring.org/terms-and-conditions/")),
                                 html.Li(html.A("Privacy Policy", href="https://southwest.coastalmonitoring.org/privacy-policy/")),
+                                html.Li(html.A("Feedback", href="https://forms.gle/2Td5xfEDfJHRGSX37"))
                             ],
                         ),
                         html.P("TDarley Applications © 2024", className="copyright"),

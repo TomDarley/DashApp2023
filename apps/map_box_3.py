@@ -3956,9 +3956,6 @@ layout = html.Div(
                     'zIndex': 100,
                     'border-radius': 5,
 
-
-
-
                     #'fontSize': 13
                 },
             ),
@@ -3990,15 +3987,6 @@ layout = html.Div(
                     'fontSize': 13
                 }
             ),
-
-
-
-
-
-
-
-
-
 
         ]),
 
@@ -4106,24 +4094,21 @@ clientside_callback(
 
           Input("survey-type-dropdown", "value"),
 
-          # added for line chart navigation over charts
+          # added for line chart navigation left and right
           Input("line_chart_navigate_right", 'n_clicks'),
           Input("line_chart_navigate_left", 'n_clicks'),
           State('survey-line-dropdown', 'options'),
 
+          # States of the navigation left and right on the profile chart, used to grey out the buttons
           State('line_chart_navigate_left', 'style'),
           State('line_chart_navigate_right', 'style')
 
-
-
           )
 
-
-
-
-
 def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, prof_line_dropdown_val: str,
-                  selected_val_storage, survey_type_dropdown_vals, line_chart_navigate_right,line_chart_navigate_left,survey_line_dropdown_options,line_chart_navigate_left_style, line_chart_navigate_right_style):
+                  selected_val_storage, survey_type_dropdown_vals,
+                  line_chart_navigate_right,line_chart_navigate_left,survey_line_dropdown_options,
+                  line_chart_navigate_left_style, line_chart_navigate_right_style):
     """
     Update the output based on user interactions. Main function that controls the logic of user inputs and how the
     app changes and updates charts.
@@ -4153,12 +4138,6 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
     next_button_default_style['background-color'] = '#367ff5'
     back_button_default_style['background-color'] = 'grey'
-
-
-
-
-
-
 
     def get_box_selected_data():
 
@@ -4267,7 +4246,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
             if sur_unit_dropdown_val == "7dPORL3":
-                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND baseline = 'YES'"
 
             query_profile_lines = sql_query
 
@@ -4349,7 +4328,8 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
             # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
             if sur_unit_dropdown_val == "7dPORL3":
-                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}'"
+                sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{sur_unit_dropdown_val}' AND baseline = 'YES'"
+
             query_profile_lines = sql_query
 
             conn = establish_connection()
@@ -4450,7 +4430,7 @@ def update_output(click_data, box_selected_data, sur_unit_dropdown_val: str, pro
 
                     # CUSTOM FILTER FOR SURVEY UNIT PORL3 NO INTERIMS
                     if clicked_survey_unit == "7dPORL3":
-                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}'"
+                        sql_query = f"SELECT * FROM sw_profiles WHERE surveyunit  = '{clicked_survey_unit}' AND baseline = 'YES'"
 
                     query_profile_lines = sql_query
 

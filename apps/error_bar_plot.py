@@ -89,6 +89,7 @@ layout = html.Div(
         ),
 
         # Adding the dropdown for the selecting the latest year to show (red dot).
+
         dcc.Dropdown(
             options=[
 
@@ -106,9 +107,13 @@ layout = html.Div(
                    "width": "120px",
                    "height": "30px",
                    "font-family": "Calibri",
+                   "option-height": '1px'
                    }
 
         ),
+
+
+
 
     ],
 

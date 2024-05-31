@@ -658,8 +658,6 @@ def make_line_plot(selected_sur_unit, selected_profile, radio_selection_range_pl
         return fig, fig, chart_data, valid_master_profile_data,topo_data_failed
 
 
-
-
 @callback(
     Output("line_info_model", "is_open"),
     [Input("line_open_info", "n_clicks"), Input("line_info_close", "n_clicks")],

@@ -156,78 +156,42 @@
     padding-bottom: 8px; /* Adjust padding bottom */
     padding-left: 8px; /* Adjust padding left */
     font-size: 13px;
-     font-family: 'Calibri', sans-serif;
-
-}
-
-}
-
-#error-bar-dropdown{
- position: absolute;
-    top: 10px; /* Adjust as needed */
-    left: 10px; /* Adjust as needed */
-    width: 120px;
-    height: 25px;
-    z-index: 100;
-    border-radius: 15px;
-    box-shadow: 5px 5px 5px lightblue;
-    padding-top: 5px; /* Adjust padding top */
-    padding-right: 5px; /* Adjust padding right */
-    padding-bottom: 8px; /* Adjust padding bottom */
-    padding-left: 8px; /* Adjust padding left */
-    font-size: 13px;
-     font-family: 'Calibri', sans-serif;
-}
-
-/* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 951px) and (max-width: 1400px) {
-   #error-bar-dropdown{
-    position: absolute;
-    top: 30px; /* Adjust as needed */
-    left: 10px; /* Adjust as needed */
-    width: 120px;
-    height: 20px;
-    z-index: 100;
-    border-radius: 15px;
-    box-shadow: 5px 5px 5px lightblue;
-    padding-top: 5px; /* Adjust padding top */
-    padding-right: 5px; /* Adjust padding right */
-    padding-bottom: 8px; /* Adjust padding bottom */
-    padding-left: 8px; /* Adjust padding left */
-    font-size: 13px;
     font-family: 'Calibri', sans-serif;
-}
+
 }
 
+}
+#error_bar_dropdown_holder-div {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 130px;
+    height: 35px;
+    z-index: 100; /* CSS uses 'z-index' instead of 'zIndex' */
+}
+
+@media screen and (min-width: 951px) and (max-width: 1400px) {
+    #error_bar_dropdown_holder-div {
+        position: absolute;
+        top: 35px;
+        left: 10px;
+        width: 130px;
+        height: 35px;
+        z-index: 100; /* CSS uses 'z-index' instead of 'zIndex' */
+    }
+}
 @media screen and (min-width: 0px) and (max-width:950px) {
 
-#error-bar-dropdown{
- position: absolute;
-    top: 40px; /* Adjust as needed */
-    left: 10px; /* Adjust as needed */
-    width: 120px;
-    height: 20px;
-    z-index: 100;
-    border-radius: 15px;
-    box-shadow: 5px 5px 5px lightblue;
-    padding-top: 5px; /* Adjust padding top */
-    padding-right: 5px; /* Adjust padding right */
-    padding-bottom: 8px; /* Adjust padding bottom */
-    padding-left: 8px; /* Adjust padding left */
-    font-size: 13px;
-    font-family: 'Calibri', sans-serif;
-}
+#error_bar_dropdown_holder-div {
+        position: absolute;
+        top: 35px;
+        right: 10px;
+        width: 130px;
+        height: 35px;
+        z-index: 100; /* CSS uses 'z-index' instead of 'zIndex' */
+    }
 
 }
-
-
-
-
-
-
-
-
-
 
 /* ERROR BAR PLOT CSS */
 

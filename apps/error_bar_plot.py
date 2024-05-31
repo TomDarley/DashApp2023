@@ -90,27 +90,36 @@ layout = html.Div(
 
         # Adding the dropdown for the selecting the latest year to show (red dot).
 
-        dcc.Dropdown(
-            options=[
+        html.Div(
+            id = "error_bar_dropdown_holder-div",
+            children=[
 
-                {
+            html.Div([
+
+                # adding the basemap selection dropdown
+                dcc.Dropdown(
+                    id='error-bar-dropdown',
+                    options={
                     "label": "Latest",
                     "value": "Latest",
                 },
+                    value='Latest',  # Set the initial value
 
-            ],
-            value="Latest",
-            id="error-bar-dropdown",
-            multi=False,
-            style={"border-radius": "10px",
-                   "fontSize": "14px",
-                   "width": "120px",
-                   "height": "30px",
-                   "font-family": "Calibri",
-                   "option-height": '1px'
-                   }
+                    placeholder='Select Date',
+                    clearable=False,
 
-        ),
+                style = {'font-size': 14,
+                         'position': 'relative',
+                         'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
+                         'width': '120px',
+                         'height': '25px',
+
+                         # Adjust padding left
+                         },
+
+                ),
+            ], ),]),
+
 
 
 
@@ -204,6 +213,17 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
         template="plotly",
     )
 
+    # Customizing box and whisker traces
+    fig.update_traces(
+        marker=dict(
+            color="#0d64de",  # Error bar color
+            size=10,  # Change marker size
+
+        )
+    )
+
+
+
     # check if dropdown changed value if it has reset the selection to Latest
     if drop_down_val == 'Latest' or drop_down_val is None or ctx_id == 'survey-unit-dropdown':
         # Calculate the most recent value information
@@ -230,7 +250,10 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
             y=[row["Value"]],
             mode="markers",
             text=popup_text,
-            marker=dict(color="red", size=10),
+            marker=dict(color="#03fc0f", size=10, line=dict(
+        color='black',  # Color of the border
+        width=1         # Width of the border
+    )),
             showlegend=False,
             customdata=[[[row["Index"]], [round(row["Value"], 2)]]],
         )
@@ -250,7 +273,11 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
         x=[None],
         y=[None],
         mode="markers",
-        marker=dict(color="red", size=8),
+        marker=dict(color="#03fc0f", size=8,
+                    line=dict(
+                        color='black',  # Color of the border
+                        width=1  # Width of the border
+                    )),
         name=str(format_legend_title),
     )
     fig.add_trace(dummy_legend_trace)
@@ -298,7 +325,8 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
 
 
         legend_traceorder="reversed",
-        legend_title_text=f"",
+        legend_title_text=f"Selected Survey",
+
     )
 
     # Serialize the figure to JSON & update the 'cpa' key in the store's data with the serialized figure.

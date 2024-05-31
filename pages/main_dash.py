@@ -608,7 +608,7 @@ layout = html.Div(
 
                                                 },
                                             ),
-                                            html.Div("----", id="highest_card"),
+                                            html.Div("----", id="highest_card", ),
                                         ]
                                     )
                                 ], id='highest_card_div'
@@ -886,8 +886,12 @@ layout = html.Div(
             is_open=False,
             fullscreen=False,
         ),
+
     ],
+
+
 )
+
 
 
 @callback(
@@ -918,13 +922,18 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
         return label
 
 
+# Callback to update the value of the trend card and apply animation
+
+
 @callback(
     Output("trend_card", "children"),
+    Output("trend_card", "className"),
 
     Input("change_rate", "data"),
+    State("trend_card", "className"),
 
 )
-def update_trend_card(trend):
+def update_trend_card(trend,classname):
     """
     Callback function to grab the trend data from the change rate store found in the scatter plot page
     and format the output string.
@@ -937,28 +946,35 @@ def update_trend_card(trend):
         it represents an accretion rate or an erosion rate, along with the corresponding value.
         If no trend data is available, returns the original trend string.
     """
+    animation = classname
+    if animation == "rotate-once":
+        animation = "rotate-once1"
+    else:
+        animation ="rotate-once"
 
     if trend:
         if "Accretion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Accreting {value}"
-            return html.Span(f"{comment}", style={"color": 'green'})
+            return html.Span(f"{comment}", style={"color": 'green'}), animation
 
         elif "Erosion Rate" in trend:
             value = trend.split(":")[-1]
             comment = f" Eroding {value}"
-            return html.Span(f"{comment}", style={"color": 'red'})
+            return html.Span(f"{comment}", style={"color": 'red'}), animation
 
     else:
-        return f"{trend}"
+        return f"{trend}", animation
 
 
 @callback(
     Output("trend_card1", "children"),
+    Output("trend_card1", "className"),
     Input("survey-points-change-values", 'data'),  #
-    State('change_range_radio_button', 'value')
+    State('change_range_radio_button', 'value'),
+    State("trend_card1", "className"),
 )
-def update_percent_change_card(change_value, change_range_radio_button):
+def update_percent_change_card(change_value, change_range_radio_button,classname):
     """
      Callback function to update the percent change card based on the survey unit selected
      CPA change between either the baseline to spring or spring to spring selection.
@@ -972,6 +988,14 @@ def update_percent_change_card(change_value, change_range_radio_button):
          returns a formatted string indicating the percent change along with its classification color,
          or returns a string indicating no change.
      """
+
+    animation = classname
+    if animation == "rotate-once":
+        animation = "rotate-once1"
+    else:
+        animation = "rotate-once"
+
+
     # Load JSON into DataFrame
     with StringIO(change_value) as json_data:
         change_values = pd.read_json(json_data)
@@ -999,7 +1023,7 @@ def update_percent_change_card(change_value, change_range_radio_button):
         else:
             comment = f"{value} %"
 
-        return html.Span(f"{comment}", style={"color": color_to_use})
+        return html.Span(f"{comment}", style={"color": color_to_use}), animation
 
     elif classification_string in ['High Accretion', 'Mild Accretion', 'Low Accretion']:
         value = percent_change
@@ -1008,21 +1032,23 @@ def update_percent_change_card(change_value, change_range_radio_button):
         else:
             comment = f"+ {value} %"
 
-        return html.Span(f"{comment}", style={"color": color_to_use})
+        return html.Span(f"{comment}", style={"color": color_to_use}), animation
 
     elif classification_string == 'No Change':
         value = str(percent_change).strip("-")
         comment = f" +/- {value} %"
 
-        return comment
+        return comment, animation
 
 
 @callback(
     Output("lowest_card", "children"),
+    Output("lowest_card", "className"),
     Input("lowest_recorded_value", "data"),
     Input("lowest_recorded_year", "data"),
+    State("lowest_card", "className"),
 )
-def update_lowest_cpa_card(lowest_data, lowest_year):
+def update_lowest_cpa_card(lowest_data, lowest_year, classname):
 
     """
         Callback function to update the lowest CPA card. Grabs the data from the stores in the scatter plot page.
@@ -1036,17 +1062,25 @@ def update_lowest_cpa_card(lowest_data, lowest_year):
             indicating the lowest CPA value. Otherwise, returns None.
         """
 
+    animation = classname
+    if animation == "rotate-once":
+        animation = "rotate-once1"
+    else:
+        animation = "rotate-once"
+
     if lowest_data and lowest_year:
         comment = f"{lowest_data} "
-        return html.Span(f"{comment}", style={"color": "red"})
+        return html.Span(f"{comment}", style={"color": "red"}), animation
 
 
 @callback(
     Output("highest_card", "children"),
+    Output("highest_card", "className"),
     Input("highest_recorded_value", "data"),
     Input("highest_recorded_year", "data"),
+    State("highest_card", "className"),
 )
-def update_highest_cpa_card(highest_data, highest_year):
+def update_highest_cpa_card(highest_data, highest_year, classname):
     """
        Callback function to update the highest CPA card. Grabs the data from the stores in the scatter plot page.
 
@@ -1058,9 +1092,16 @@ def update_highest_cpa_card(highest_data, highest_year):
            html.Span or None: If both highest_data and highest_year are provided, returns a formatted string
            indicating the highest CPA value. Otherwise, returns None.
        """
+
+    animation = classname
+    if animation == "rotate-once":
+        animation = "rotate-once1"
+    else:
+        animation = "rotate-once"
+
     if highest_data and highest_year:
         comment = f"{highest_data} "
-        return html.Span(f"{comment}", style={"color": "green"})
+        return html.Span(f"{comment}", style={"color": "green"}), animation
 
 
 @callback(

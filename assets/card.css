@@ -1,5 +1,6 @@
 /*All cards div css, this is the col that holds all the cards */
 
+
 #all_cards_div {
     max-height: 60vh;
 }
@@ -20,6 +21,7 @@
     text-align: left;
     font-weight: bold;
      font-family: 'Calibri', sans-serif;
+
 }
 
 #survey_unit_card {

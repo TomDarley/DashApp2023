@@ -892,15 +892,15 @@ layout = html.Div(
 
 )
 
-
-
 @callback(
     Output("survey_unit_card", "children"),
+    Output("survey_unit_card", "className"),
     Input("survey-unit-dropdown", "value"),
     State("survey-unit-dropdown", "options"),
+    State("survey_unit_card", "className"),
 
 )
-def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
+def update_survey_unit_card(current_sur_unit, current_sur_unit_state, classname):
     """
      Callback function to populate the survey unit CPA card with the currently selected survey unit.
 
@@ -912,6 +912,13 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
          str: The label corresponding to the selected survey unit to be displayed in the survey unit CPA card.
      """
 
+    animation = classname
+    if animation == "pulse":
+        animation = "pulse1"
+    else:
+        animation ="pulse"
+
+
     if current_sur_unit:
         label = [
             x["label"] for x in current_sur_unit_state if x["value"] == current_sur_unit
@@ -919,7 +926,7 @@ def update_survey_unit_card(current_sur_unit, current_sur_unit_state):
 
         label = label[0].split(" -")[1].strip()
 
-        return label
+        return label, animation
 
 
 # Callback to update the value of the trend card and apply animation
@@ -973,6 +980,7 @@ def update_trend_card(trend,classname):
     Input("survey-points-change-values", 'data'),  #
     State('change_range_radio_button', 'value'),
     State("trend_card1", "className"),
+
 )
 def update_percent_change_card(change_value, change_range_radio_button,classname):
     """

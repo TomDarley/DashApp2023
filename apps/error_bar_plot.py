@@ -250,7 +250,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
             y=[row["Value"]],
             mode="markers",
             text=popup_text,
-            marker=dict(color="#03fc0f", size=10, line=dict(
+            marker=dict(color="red", size=10, line=dict(
         color='black',  # Color of the border
         width=1         # Width of the border
     )),
@@ -273,7 +273,7 @@ def make_scatter_plot(cpa_df, selected_survey_unit, drop_down_val, survey_unit_c
         x=[None],
         y=[None],
         mode="markers",
-        marker=dict(color="#03fc0f", size=8,
+        marker=dict(color="red", size=8,
                     line=dict(
                         color='black',  # Color of the border
                         width=1  # Width of the border

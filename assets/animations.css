@@ -42,7 +42,7 @@
 }
 
 .rotate-once {
-  animation: rotateX 1s linear forwards;
+  animation: rotateX 0.5s linear forwards;
 }
 
 @keyframes rotateX1 {
@@ -55,5 +55,5 @@
 }
 
 .rotate-once1 {
-  animation: rotateX1 1s linear forwards;
+  animation: rotateX1 0.5s linear forwards;
 }

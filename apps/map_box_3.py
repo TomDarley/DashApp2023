@@ -5010,7 +5010,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
             color='#ffff05',
             size=selected_survey_point["sqrt_size"],
             sizemode='area',
-            sizeref=1.0 * max(updated_gdf["sqrt_size"]) / (25 ** 2),  # make larger
+            sizeref=1.5 * max(selected_survey_point["sqrt_size"]),  # make larger
             sizemin=20,
             opacity=0.5,
 

@@ -709,7 +709,7 @@ layout = html.Div(
                     lg={"size": 2, "offset": 0},
                     xl={"size": 2, "offset": 0},
                     xxl={"size": 2, "offset": 0},
-                    align="start",
+
 
                 ),
                 dbc.Col(
@@ -721,6 +721,7 @@ layout = html.Div(
 
                         ],
                         id="main_dash_map_div",
+
 
                     ),
                     xs={"size": 12, "offset": 0},
@@ -734,6 +735,7 @@ layout = html.Div(
                     html.Div(
 
                         scatter_plot.layout,
+
                     ),
                     id='main_dash_scatter_div',
 

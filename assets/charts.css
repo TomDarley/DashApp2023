@@ -1,18 +1,11 @@
 
-
-
-
 /* SCATTER PLOT CSS */
 
 /* Main Dash page div that holds the scatter plot */
 #main_dash_scatter_div {
     height: 100%;
     border-radius: 10px;
-    overflow: hidden;
-
-
 }
-
 /* card holding the scatter plot*/
 #scatter_plot_card {
     border-radius: 10px;
@@ -24,7 +17,8 @@
     margin-top:10px;
     position: relative;
     height: 100%;
-    margin-right: 20px;
+    width:98%;
+
     border: 2px solid #ccc;
     border-radius: 10px;
     overflow: hidden;/* Add border style */
@@ -33,7 +27,6 @@
 
 
    }
-
 
 /* dcc.Graph the scatter plot*/
 #scatter_plot {
@@ -46,6 +39,7 @@
     #scatter_plot_div {
         position: relative;
         height: 100%;
+        width: 96%;
         border-radius: 10px;
         overflow: hidden;
         margin-top: 20px;

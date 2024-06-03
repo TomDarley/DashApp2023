@@ -3950,8 +3950,8 @@ layout = html.Div(
                 className="mr-3",
                 style={
                     'position': 'absolute',
-                    'bottom': '0px',  # Adjust as needed
-                    'right': '5px',  # Adjust as needed
+                    'bottom': '5px',  # Adjust as needed
+                    'right': '8px',  # Adjust as needed
 
                     'zIndex': 100,
                     'border-radius': 5,

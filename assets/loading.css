@@ -1,6 +1,6 @@
 #loader_div {
     position: absolute;
-    top: 0;
+    top: 30px;
     left: 50%;
     transform: translateX(-50%);
     zIndex: 9999;
@@ -8,11 +8,11 @@
 
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
-@media screen and (min-width: 0px) and (max-width:950px) {
+@media screen and (min-width: 430px) and (max-width:950px) {
    #loader_div {
         position: absolute;
-        top: 0;
-        left: 70%;
+        top: 30px;
+        left: 50%;
         transform: translateX(-50%);
         zIndex: 9999;
 
@@ -20,3 +20,18 @@
     }
 
     }
+@media screen and (min-width: 0px) and (max-width:430px) {
+   #loader_div {
+        position: absolute;
+        top: 30px;
+        left: 73%;
+
+        zIndex: 1000;
+
+        /* Adjust font size for smaller screens */
+    }
+
+    }
+
+
+

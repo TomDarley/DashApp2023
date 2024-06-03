@@ -37,7 +37,7 @@ navbar = dbc.Navbar(
 
                                     "zIndex": 9999
                                 })],
-                                style={'position': 'fixed','top': '0px', 'margin-left': '50%','transform': 'translateX(-50%)'},
+
                                 loading_state={'is_loading': True}
                             ),
 

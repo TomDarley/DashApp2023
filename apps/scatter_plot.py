@@ -171,6 +171,10 @@ layout = html.Div(
             is_open=False,
             fullscreen=True,
         ),
+
+
+
+
     ],
     id='scatter_plot_div',
 
@@ -441,7 +445,7 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
     # Create the scatter plot using Plotly Express
     fig = px.scatter(
         chart_ready_df,
-        x="x",
+        x="date",
         y="Sum",
         color="season",
         symbol="season",
@@ -474,6 +478,7 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
 
     )
 
+
     # Update x-axis tick labels
     fig.update_layout(
         title={
@@ -489,9 +494,9 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
         legend_title="",
         font=dict(size=12, color="blue", family="Calibri"),
         xaxis=dict(
-            tickmode="array",
-            tickvals=tickvals,
-            ticktext=ticktext,
+
+
+
             tickangle=45,
             tickfont=dict(
                 size=12,  # Set the font size
@@ -499,6 +504,7 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
                 family="Helvetica",  # Set the font family
             ),
         ),
+
         # legend_traceorder="reversed",
         legend_title_text=f"",
     )
@@ -516,10 +522,10 @@ def make_scatter_plot(selected_survey_unit, survey_unit_card):
 
     # add linear regression line for whole sample
     fig.add_traces(
-        [go.Scatter(x=x_mdates, y=regline, mode="lines", name=trend_title, line=dict(color='red', dash='dash'))])
+        [go.Scatter(x=chart_ready_df['date'], y=regline, mode="lines", name=trend_title, line=dict(color='red', dash='dash'))])
 
     fig.add_traces(
-        [go.Scatter(x=chart_ready_df['x'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change",
+        [go.Scatter(x=chart_ready_df['date'], y=chart_ready_df['Sum'], mode="lines", name="CPA Change",
                     line=dict(color='grey', dash='dash'))])
 
     # Format the trend line hover data to show nothing, the order of this call matters

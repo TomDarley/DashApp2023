@@ -19,7 +19,7 @@
     border-radius: 10px;
     border-width: 10px;
     border-color: black;
-    box-shadow: 5px 5px 5px lightblue;
+    box-shadow: 2px 2px 2px lightblue;
     background-color: white;
 }
 
@@ -36,7 +36,7 @@
         border-radius: 10px;
         border-width: 10px;
         border-color: black;
-        box-shadow: 5px 5px 5px lightblue;
+        box-shadow: 2px 2px 2px lightblue;
         background-color: white; Corrected the property name to 'padding-top' */
         /* Adjust font size for screens in this range */
     }

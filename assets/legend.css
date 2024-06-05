@@ -8,7 +8,7 @@
     border-radius: 10px;
     border-color: black;
     border: 1px solid grey;
-    box-shadow: 5px 5px 5px lightblue;
+    box-shadow: 2px 2px 2px lightblue;
 }
 
 /* Media query for smaller screens (adjust max-width and font size as needed) */
@@ -23,7 +23,7 @@
         border-radius: 10px;
         border-color: black;
         border: 1px solid grey;
-        box-shadow: 5px 5px 5px lightblue;
+        box-shadow: 2px 2px 2px lightblue;
 
         /* Adjust font size for smaller screens */
     }
@@ -41,7 +41,7 @@
         border-radius: 10px;
         border-color: black;
         border: 1px solid grey;
-        box-shadow: 5px 5px 5px lightblue;
+        box-shadow: 2px 2px 2px lightblue;
 
         /* Adjust font size for smaller screens */
     }

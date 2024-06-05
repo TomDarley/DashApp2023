@@ -3912,7 +3912,7 @@ layout = html.Div(
                     value='streets',  # Set the initial value
                     style={'font-size': 13,
                            'position': 'relative',
-                           'border-radius': '10px', 'box-shadow': "5px 5px 5px lightblue",
+                           'border-radius': '10px', 'box-shadow': "2px 2px 2px lightblue",
                            'width': '170px',
                            'height': '30px',
 
@@ -3978,7 +3978,7 @@ layout = html.Div(
                     'border-radius': 15,
 
                     # 'border': '1px solid grey',
-                    'box-shadow': "5px 5px 5px lightblue",
+                    'box-shadow': "2px 2px 2px lightblue",
                     'paddingTop': '5px',  # Adjust padding top
                     'paddingRight': '5px',  # Adjust padding right
                     'paddingBottom': '8px',  # Adjust padding bottom
@@ -5418,10 +5418,10 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
     if current_map_zoom is None:
         current_map_zoom = 16
 
-    state_to_return = None
+    distance_threshold = 1500  # Increase/Decrease to tune map zoom pan response.
+
     if len(old_map_data.keys()) == 2:
         distance = haversine(old_map_data['lat'], old_map_data['lon'], new_map_data['lat'], new_map_data['lon'])
-        distance_threshold = 1500
 
         if distance > distance_threshold:
             # If the distance is over the threshold, update the center and set the zoom
@@ -5435,7 +5435,7 @@ def update_map(current_selected_sur_and_prof: dict, map_state, map_relayout_data
 
                 distance = haversine(current_map_position['lat'], current_map_position['lon'], new_map_data['lat'],
                                      new_map_data['lon'])
-                distance_threshold = 1500
+
                 if distance > distance_threshold:
                     current_center = new_map_data
                     current_zoom = 13

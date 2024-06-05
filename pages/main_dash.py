@@ -864,12 +864,12 @@ layout = html.Div(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Percent Change (PCT)",
+                dbc.ModalHeader(dbc.ModalTitle("Percent Change (PC)",
                                                style={"color": "blue"})),
                 dbc.ModalBody(
                     [
                         html.P(
-                            """Percentage change is determined by computing the absolute value of the difference between the total value of the first available CPA (Combined Profile Area) date and dividing it by the value of the most recent CPA date. This result is then multiplied by 100 to represent it as a percentage. When the maps PCT checkbox is activated, this calculation is adjusted to compare the most recent Spring CPA date value with the previous Spring CPA value.
+                            """Percentage change is determined by computing the absolute value of the difference between the total value of the first available CPA (Combined Profile Area) date and dividing it by the value of the most recent CPA date. This result is then multiplied by 100 to represent it as a percentage. When the maps percent change checkbox is activated, this calculation is adjusted to compare the most recent Spring CPA date value with the previous Spring CPA value.
                            """,
                             style={"font-size": 20}, ),
 
